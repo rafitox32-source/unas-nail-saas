@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+:root {
+  --color-fondo: #fbf7f4;
+  --color-superficie: #ffffff;
+  --color-borde: #eaddd7;
+  --color-texto-primario: #362a27;
+  /* Oscurecidos contra la versión original para cumplir WCAG AA (4.5:1) como
+     texto y como botón sólido con texto blanco — ver auditoría con axe-core
+     en CLAUDE.md. Los tonos "-suave" quedan igual, son solo decorativos. */
+  --color-texto-secundario: #7a6a63;
+  --color-rosado: #935060;
+  --color-rosado-suave: #f1dcda;
+  --color-dorado: #735426;
+  --color-dorado-suave: #e8d9c3;
+  --color-nude: #e4c9b6;
+  --color-exito: #4f6b49;
+  --color-exito-suave: #e7eee4;
+  --color-alerta: #9b4a2a;
+  --color-alerta-suave: #f5e4da;
+}
+
+@theme inline {
+  --color-fondo: var(--color-fondo);
+  --color-superficie: var(--color-superficie);
+  --color-borde: var(--color-borde);
+  --color-texto-primario: var(--color-texto-primario);
+  --color-texto-secundario: var(--color-texto-secundario);
+  --color-rosado: var(--color-rosado);
+  --color-rosado-suave: var(--color-rosado-suave);
+  --color-dorado: var(--color-dorado);
+  --color-dorado-suave: var(--color-dorado-suave);
+  --color-nude: var(--color-nude);
+  --color-exito: var(--color-exito);
+  --color-exito-suave: var(--color-exito-suave);
+  --color-alerta: var(--color-alerta);
+  --color-alerta-suave: var(--color-alerta-suave);
+  --font-titulo: var(--font-playfair);
+  --font-cuerpo: var(--font-poppins);
+}
+
+body {
+  background: var(--color-fondo);
+  color: var(--color-texto-primario);
+  font-family: var(--font-cuerpo);
+}
+
+/* Safari de iOS hace zoom automático al enfocar un input con font-size
+   menor a 16px. Nuestros inputs heredan text-sm (14px) del <label> que los
+   envuelve, así que se fija acá el mínimo sin tocar el tamaño visual del
+   texto de las etiquetas. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* Animaciones reutilizables (modales, listas, badges de estado). Respetan
+   prefers-reduced-motion apagándose del todo para quien lo pida. */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes subir-y-aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes escalar-y-aparecer {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animar-fondo-modal {
+  animation: aparecer 0.2s ease-out;
+}
+
+.animar-hoja-modal {
+  animation: subir-y-aparecer 0.25s ease-out;
+}
+
+.animar-tarjeta-modal {
+  animation: escalar-y-aparecer 0.2s ease-out;
+}
+
+.animar-aparecer {
+  animation: aparecer 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animar-fondo-modal,
+  .animar-hoja-modal,
+  .animar-tarjeta-modal,
+  .animar-aparecer {
+    animation: none;
+  }
+}

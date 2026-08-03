@@ -1,0 +1,58 @@
+<!-- @dsCard group="Fundamentos" -->
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Tipografía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-fondo: #FBF7F4;
+    --color-texto-primario: #362A27;
+    --color-texto-secundario: #8C7871;
+    --color-borde: #EADDD7;
+    --fuente-titulo: 'Playfair Display', Georgia, serif;
+    --fuente-cuerpo: 'Poppins', 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px;
+    background: var(--color-fondo);
+    color: var(--color-texto-primario);
+    font-family: var(--fuente-cuerpo);
+  }
+  .fila {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-borde);
+  }
+  .fila:last-child { border-bottom: none; }
+  .etiqueta {
+    width: 130px;
+    flex-shrink: 0;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-texto-secundario);
+  }
+  .titulo-1 { font-family: var(--fuente-titulo); font-weight: 600; font-size: 42px; margin: 0; }
+  .titulo-2 { font-family: var(--fuente-titulo); font-weight: 600; font-size: 30px; margin: 0; }
+  .titulo-3 { font-family: var(--fuente-titulo); font-weight: 500; font-size: 22px; margin: 0; }
+  .cuerpo { font-family: var(--fuente-cuerpo); font-weight: 400; font-size: 16px; line-height: 1.6; margin: 0; }
+  .cuerpo-chico { font-family: var(--fuente-cuerpo); font-weight: 400; font-size: 13px; color: var(--color-texto-secundario); margin: 0; }
+  .boton-texto { font-family: var(--fuente-cuerpo); font-weight: 500; font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; margin: 0; }
+</style>
+</head>
+<body>
+  <div class="fila"><div class="etiqueta">Título 1</div><p class="titulo-1">Uñas con carácter</p></div>
+  <div class="fila"><div class="etiqueta">Título 2</div><p class="titulo-2">Nuestros servicios</p></div>
+  <div class="fila"><div class="etiqueta">Título 3</div><p class="titulo-3">Reserva tu cita</p></div>
+  <div class="fila"><div class="etiqueta">Cuerpo</div><p class="cuerpo">Manicure semipermanente con diseño personalizado. Incluye limado, cutícula y esmaltado de larga duración.</p></div>
+  <div class="fila"><div class="etiqueta">Cuerpo chico</div><p class="cuerpo-chico">Duración estimada: 60 minutos · Seña requerida: $500</p></div>
+  <div class="fila"><div class="etiqueta">Botón</div><p class="boton-texto">Apartar cita</p></div>
+</body>
+</html>

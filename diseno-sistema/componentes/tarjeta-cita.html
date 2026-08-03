@@ -1,0 +1,86 @@
+<!-- @dsCard group="Componentes" -->
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Tarjeta de cita / apartado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-fondo: #FBF7F4;
+    --color-superficie: #FFFFFF;
+    --color-borde: #EADDD7;
+    --color-texto-primario: #362A27;
+    --color-texto-secundario: #8C7871;
+    --color-rosado: #D9A6A6;
+    --color-exito: #7C9473;
+    --color-exito-suave: #E7EEE4;
+    --color-alerta: #C97B5A;
+    --color-alerta-suave: #F5E4DA;
+    --fuente-titulo: 'Playfair Display', Georgia, serif;
+    --fuente-cuerpo: 'Poppins', 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px;
+    background: var(--color-fondo);
+    font-family: var(--fuente-cuerpo);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 420px;
+  }
+  .tarjeta-cita {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-left: 4px solid var(--color-rosado);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: 0 6px 18px rgba(54,42,39,0.05);
+  }
+  .encabezado { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .clienta { font-family: var(--fuente-titulo); font-size: 17px; font-weight: 600; margin: 0; }
+  .servicio { font-size: 13px; color: var(--color-texto-secundario); margin: 2px 0 0; }
+  .insignia-estado { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .estado-confirmada { background: var(--color-exito-suave); color: var(--color-exito); }
+  .estado-pendiente { background: var(--color-alerta-suave); color: var(--color-alerta); }
+  .estado-completada { background: #EAE2F5; color: #7A5CA8; }
+  .fila-detalle { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-top: 1px dashed var(--color-borde); }
+  .fila-detalle:first-of-type { border-top: none; margin-top: 6px; }
+  .fila-detalle .etiqueta { color: var(--color-texto-secundario); }
+  .fila-detalle .valor { font-weight: 500; }
+  .valor-restante { color: var(--color-alerta); font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="tarjeta-cita">
+    <div class="encabezado">
+      <div>
+        <p class="clienta">Camila Rodríguez</p>
+        <p class="servicio">Semipermanente + Diseño</p>
+      </div>
+      <span class="insignia-estado estado-confirmada">Confirmada</span>
+    </div>
+    <div class="fila-detalle"><span class="etiqueta">Fecha</span><span class="valor">Vie 8 ago · 15:30</span></div>
+    <div class="fila-detalle"><span class="etiqueta">Total</span><span class="valor">$3.200</span></div>
+    <div class="fila-detalle"><span class="etiqueta">Seña pagada</span><span class="valor">$500</span></div>
+    <div class="fila-detalle"><span class="etiqueta">Resta al llegar</span><span class="valor valor-restante">$2.700</span></div>
+  </div>
+
+  <div class="tarjeta-cita">
+    <div class="encabezado">
+      <div>
+        <p class="clienta">Valentina Suárez</p>
+        <p class="servicio">Esculpidas Soft Gel</p>
+      </div>
+      <span class="insignia-estado estado-pendiente">Pendiente de seña</span>
+    </div>
+    <div class="fila-detalle"><span class="etiqueta">Fecha</span><span class="valor">Sáb 9 ago · 10:00</span></div>
+    <div class="fila-detalle"><span class="etiqueta">Total</span><span class="valor">$4.800</span></div>
+    <div class="fila-detalle"><span class="etiqueta">Seña pagada</span><span class="valor">$0</span></div>
+    <div class="fila-detalle"><span class="etiqueta">Resta al llegar</span><span class="valor valor-restante">$4.800</span></div>
+  </div>
+</body>
+</html>

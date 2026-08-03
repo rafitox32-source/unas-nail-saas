@@ -1,0 +1,67 @@
+<!-- @dsCard group="Fundamentos" -->
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Paleta de color</title>
+<style>
+  :root {
+    --color-fondo: #FBF7F4;
+    --color-superficie: #FFFFFF;
+    --color-borde: #EADDD7;
+    --color-texto-primario: #362A27;
+    --color-texto-secundario: #8C7871;
+    --color-rosado: #D9A6A6;
+    --color-rosado-suave: #F1DCDA;
+    --color-dorado: #B8935A;
+    --color-dorado-suave: #E8D9C3;
+    --color-nude: #E4C9B6;
+    --color-exito: #7C9473;
+    --color-alerta: #C97B5A;
+    --fuente-cuerpo: 'Poppins', 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px;
+    background: var(--color-fondo);
+    font-family: var(--fuente-cuerpo);
+    color: var(--color-texto-primario);
+  }
+  h1 { font-size: 20px; margin: 0 0 24px; letter-spacing: 0.02em; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+  .swatch {
+    border-radius: 14px;
+    border: 1px solid var(--color-borde);
+    overflow: hidden;
+    background: var(--color-superficie);
+    box-shadow: 0 4px 14px rgba(54,42,39,0.05);
+  }
+  .swatch .muestra { height: 88px; }
+  .swatch .info { padding: 10px 12px; }
+  .swatch .nombre { font-size: 13px; font-weight: 600; }
+  .swatch .hex { font-size: 12px; color: var(--color-texto-secundario); font-family: monospace; }
+</style>
+</head>
+<body>
+  <h1>Paleta — Nail Artist SaaS</h1>
+  <div class="grid">
+    <div class="swatch"><div class="muestra" style="background:var(--color-fondo)"></div><div class="info"><div class="nombre">Fondo</div><div class="hex">#FBF7F4</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-superficie); border-bottom:1px solid var(--color-borde)"></div><div class="info"><div class="nombre">Superficie</div><div class="hex">#FFFFFF</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-rosado)"></div><div class="info"><div class="nombre">Rosado empolvado</div><div class="hex">#D9A6A6</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-rosado-suave)"></div><div class="info"><div class="nombre">Rosado suave</div><div class="hex">#F1DCDA</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-dorado)"></div><div class="info"><div class="nombre">Dorado sutil</div><div class="hex">#B8935A</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-dorado-suave)"></div><div class="info"><div class="nombre">Dorado suave</div><div class="hex">#E8D9C3</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-nude)"></div><div class="info"><div class="nombre">Nude</div><div class="hex">#E4C9B6</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-texto-primario)"></div><div class="info"><div class="nombre">Texto primario</div><div class="hex">#362A27</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-texto-secundario)"></div><div class="info"><div class="nombre">Texto secundario</div><div class="hex">#8C7871</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-exito)"></div><div class="info"><div class="nombre">Éxito (confirmada)</div><div class="hex">#7C9473</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-alerta)"></div><div class="info"><div class="nombre">Alerta (pendiente/stock)</div><div class="hex">#C97B5A</div></div></div>
+    <div class="swatch"><div class="muestra" style="background:var(--color-borde)"></div><div class="info"><div class="nombre">Borde</div><div class="hex">#EADDD7</div></div></div>
+  </div>
+</body>
+</html>

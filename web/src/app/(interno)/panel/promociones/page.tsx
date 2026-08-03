@@ -1,0 +1,42 @@
+import { crearClienteServidor } from "@/lib/supabase/servidor";
+import { GestionPromociones } from "@/components/interno/gestion-promociones";
+import { ConfiguracionLealtad } from "@/components/interno/configuracion-lealtad";
+import type { PromocionAdmin, ProgramaLealtad } from "@/lib/tipos";
+
+export default async function PaginaPromociones() {
+  const supabase = await crearClienteServidor();
+  const {
+    data: { user: usuario },
+  } = await supabase.auth.getUser();
+
+  const { data: promociones } = await supabase
+    .from("promociones")
+    .select(
+      "id, codigo, descripcion, tipo_descuento, valor_descuento, fecha_inicio, fecha_expiracion, usos_maximos, usos_actuales, activo",
+    )
+    .eq("id_manicurista", usuario!.id)
+    .order("creado_en", { ascending: false })
+    .returns<PromocionAdmin[]>();
+
+  const { data: lealtad } = await supabase
+    .from("usuarios_manicuristas")
+    .select("lealtad_activo, lealtad_visitas_objetivo, lealtad_premio_descripcion")
+    .eq("id", usuario!.id)
+    .maybeSingle<ProgramaLealtad>();
+
+  return (
+    <main className="mx-auto max-w-2xl flex-1 px-6 py-10">
+      <GestionPromociones idManicurista={usuario!.id} promocionesIniciales={promociones ?? []} />
+      <ConfiguracionLealtad
+        idManicurista={usuario!.id}
+        configuracionInicial={
+          lealtad ?? {
+            lealtad_activo: false,
+            lealtad_visitas_objetivo: null,
+            lealtad_premio_descripcion: null,
+          }
+        }
+      />
+    </main>
+  );
+}

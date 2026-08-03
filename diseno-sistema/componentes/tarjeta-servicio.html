@@ -1,0 +1,105 @@
+<!-- @dsCard group="Componentes" -->
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Tarjeta de servicio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-fondo: #FBF7F4;
+    --color-superficie: #FFFFFF;
+    --color-borde: #EADDD7;
+    --color-texto-primario: #362A27;
+    --color-texto-secundario: #8C7871;
+    --color-rosado: #D9A6A6;
+    --color-dorado: #B8935A;
+    --color-dorado-suave: #F3E9D8;
+    --fuente-titulo: 'Playfair Display', Georgia, serif;
+    --fuente-cuerpo: 'Poppins', 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px;
+    background: var(--color-fondo);
+    font-family: var(--fuente-cuerpo);
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .tarjeta-servicio {
+    width: 280px;
+    background: var(--color-superficie);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--color-borde);
+    box-shadow: 0 10px 30px rgba(54,42,39,0.06);
+  }
+  .imagen {
+    height: 180px;
+    background: linear-gradient(135deg, #EFD9D3, #E4C9B6);
+    position: relative;
+  }
+  .insignia-sena {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.92);
+    color: var(--color-texto-primario);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 999px;
+  }
+  .contenido { padding: 18px 20px 20px; }
+  .nombre-servicio { font-family: var(--fuente-titulo); font-size: 19px; font-weight: 600; margin: 0 0 6px; color: var(--color-texto-primario); }
+  .descripcion { font-size: 13px; color: var(--color-texto-secundario); line-height: 1.5; margin: 0 0 14px; }
+  .meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .precio { font-size: 20px; font-weight: 600; color: var(--color-texto-primario); }
+  .duracion { font-size: 12px; color: var(--color-texto-secundario); }
+  .boton-reservar {
+    width: 100%;
+    background: var(--color-rosado);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 12px;
+    font-family: var(--fuente-cuerpo);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <div class="tarjeta-servicio">
+    <div class="imagen"><span class="insignia-sena">Seña $500</span></div>
+    <div class="contenido">
+      <h3 class="nombre-servicio">Semipermanente + Diseño</h3>
+      <p class="descripcion">Limado, cutícula, esmaltado semipermanente y diseño personalizado a mano alzada.</p>
+      <div class="meta">
+        <span class="precio">$3.200</span>
+        <span class="duracion">60 min</span>
+      </div>
+      <button class="boton-reservar">Reservar</button>
+    </div>
+  </div>
+
+  <div class="tarjeta-servicio">
+    <div class="imagen" style="background: linear-gradient(135deg, #F3E9D8, #D9A6A6);"><span class="insignia-sena">Seña $300</span></div>
+    <div class="contenido">
+      <h3 class="nombre-servicio">Esculpidas Soft Gel</h3>
+      <p class="descripcion">Extensión en gel, forma a elección y esmaltado de larga duración.</p>
+      <div class="meta">
+        <span class="precio">$4.800</span>
+        <span class="duracion">90 min</span>
+      </div>
+      <button class="boton-reservar">Reservar</button>
+    </div>
+  </div>
+</body>
+</html>

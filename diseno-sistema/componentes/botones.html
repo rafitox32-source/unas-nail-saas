@@ -1,0 +1,66 @@
+<!-- @dsCard group="Componentes" -->
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Botones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-fondo: #FBF7F4;
+    --color-rosado: #D9A6A6;
+    --color-rosado-suave: #F1DCDA;
+    --color-dorado: #B8935A;
+    --color-texto-primario: #362A27;
+    --color-superficie: #FFFFFF;
+    --color-borde: #EADDD7;
+    --fuente-cuerpo: 'Poppins', 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px;
+    background: var(--color-fondo);
+    font-family: var(--fuente-cuerpo);
+  }
+  .fila { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+  .etiqueta { width: 110px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #8C7871; }
+  button {
+    font-family: var(--fuente-cuerpo);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 13px 26px;
+    border-radius: 999px;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  button:hover { transform: translateY(-1px); }
+
+  .btn-primario { background: var(--color-rosado); color: #fff; box-shadow: 0 6px 16px rgba(217,166,166,0.4); }
+  .btn-primario:hover { box-shadow: 0 8px 20px rgba(217,166,166,0.55); }
+
+  .btn-secundario { background: var(--color-superficie); color: var(--color-texto-primario); border: 1.5px solid var(--color-rosado); }
+  .btn-secundario:hover { background: var(--color-rosado-suave); }
+
+  .btn-dorado { background: var(--color-dorado); color: #fff; box-shadow: 0 6px 16px rgba(184,147,90,0.35); }
+
+  .btn-fantasma { background: transparent; color: var(--color-texto-primario); border: 1px solid var(--color-borde); }
+  .btn-fantasma:hover { background: var(--color-superficie); }
+
+  .btn-texto { background: transparent; color: var(--color-rosado); padding: 8px 4px; font-weight: 600; }
+  .btn-texto:hover { text-decoration: underline; }
+
+  button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+</style>
+</head>
+<body>
+  <div class="fila"><div class="etiqueta">Primario</div><button class="btn-primario">Apartar cita</button><button class="btn-primario" disabled>Apartar cita</button></div>
+  <div class="fila"><div class="etiqueta">Secundario</div><button class="btn-secundario">Ver disponibilidad</button></div>
+  <div class="fila"><div class="etiqueta">Dorado / CTA</div><button class="btn-dorado">Confirmar seña</button></div>
+  <div class="fila"><div class="etiqueta">Fantasma</div><button class="btn-fantasma">Cancelar</button></div>
+  <div class="fila"><div class="etiqueta">Texto</div><button class="btn-texto">Ver todos los servicios →</button></div>
+</body>
+</html>
