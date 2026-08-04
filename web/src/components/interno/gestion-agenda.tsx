@@ -13,9 +13,11 @@ import {
   MessageCircle,
   CalendarX,
   Loader2,
+  Download,
 } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { formateadorPrecio } from "@/lib/formato";
+import { descargarCSV } from "@/lib/csv";
 import type { CitaAgenda, EstadoCita } from "@/lib/tipos";
 
 const formateadorFecha = new Intl.DateTimeFormat("es-AR", {
@@ -83,9 +85,36 @@ export function GestionAgenda({ citasIniciales }: { citasIniciales: CitaAgenda[]
     setActualizando(null);
   }
 
+  function exportar() {
+    descargarCSV(
+      "agenda.csv",
+      ["Clienta", "Teléfono", "Servicio", "Fecha y hora", "Estado", "Total", "Pagado"],
+      citas.map((c) => [
+        c.clientas?.nombre_completo ?? "",
+        c.clientas?.telefono ?? "",
+        c.servicios?.nombre ?? "",
+        new Date(c.fecha_hora_inicio).toLocaleString("es-AR"),
+        ETIQUETA_ESTADO[c.estado_cita],
+        c.monto_total,
+        c.monto_seña_pagado,
+      ]),
+    );
+  }
+
   return (
     <div>
-      <h1 className="font-titulo text-2xl font-semibold text-texto-primario">Agenda</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="font-titulo text-2xl font-semibold text-texto-primario">Agenda</h1>
+        <button
+          type="button"
+          onClick={exportar}
+          disabled={citas.length === 0}
+          aria-label="Exportar agenda a CSV"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-borde text-texto-secundario transition-colors hover:border-rosado hover:text-rosado disabled:opacity-40"
+        >
+          <Download className="h-4 w-4" />
+        </button>
+      </div>
 
       <div className="mt-6 flex flex-col gap-3">
         {citas.length === 0 && (

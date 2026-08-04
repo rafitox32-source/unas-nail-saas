@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Users, ChevronRight, Plus, Loader2 } from "lucide-react";
+import { Search, Users, ChevronRight, Plus, Loader2, Download } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { formateadorPrecio } from "@/lib/formato";
+import { descargarCSV } from "@/lib/csv";
 import type { ClientaAdmin } from "@/lib/tipos";
 
 export function ListaClientas({
@@ -60,17 +61,44 @@ export function ListaClientas({
     }
   }
 
+  function exportar() {
+    descargarCSV(
+      "clientas.csv",
+      ["Nombre", "Teléfono", "Email", "Alergias", "Notas internas", "LTV", "Visitas completadas"],
+      clientas.map((c) => [
+        c.nombre_completo,
+        c.telefono,
+        c.email,
+        c.alergias,
+        c.notas_internas,
+        c.valor_vida_cliente,
+        c.visitas_completadas,
+      ]),
+    );
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-titulo text-2xl font-semibold text-texto-primario">Clientas</h1>
-        <button
-          type="button"
-          onClick={() => setFormularioAbierto((v) => !v)}
-          className="flex shrink-0 items-center gap-1.5 rounded-full bg-rosado px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5"
-        >
-          <Plus className="h-4 w-4" /> Agregar
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={exportar}
+            disabled={clientas.length === 0}
+            aria-label="Exportar clientas a CSV"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-borde text-texto-secundario transition-colors hover:border-rosado hover:text-rosado disabled:opacity-40"
+          >
+            <Download className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setFormularioAbierto((v) => !v)}
+            className="flex shrink-0 items-center gap-1.5 rounded-full bg-rosado px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5"
+          >
+            <Plus className="h-4 w-4" /> Agregar
+          </button>
+        </div>
       </div>
 
       {formularioAbierto && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, User, Phone, Tag, Loader2, CheckCircle2, MessageCircle, Clock } from "lucide-react";
+import { X, User, Phone, Tag, Loader2, CheckCircle2, MessageCircle, Clock, Info } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { CampoConIcono } from "@/components/campo-con-icono";
 import { CalendarioDisponibilidad } from "@/components/publico/calendario-disponibilidad";
@@ -14,12 +14,14 @@ export function ModalReserva({
   idManicurista,
   nombreNegocio,
   urlWhatsapp,
+  politicaCancelacion,
   alCerrar,
 }: {
   servicio: Servicio;
   idManicurista: string;
   nombreNegocio: string;
   urlWhatsapp: string | null;
+  politicaCancelacion: string | null;
   alCerrar: () => void;
 }) {
   const [nombre, setNombre] = useState("");
@@ -305,6 +307,13 @@ export function ModalReserva({
               {!validandoPromo && promoInvalida && (
                 <p className="animar-aparecer text-xs text-alerta">
                   Ese código no es válido o ya venció.
+                </p>
+              )}
+
+              {politicaCancelacion && (
+                <p className="flex items-start gap-1.5 rounded-xl bg-dorado-suave px-3 py-2.5 text-xs text-texto-primario">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-dorado" />
+                  {politicaCancelacion}
                 </p>
               )}
 

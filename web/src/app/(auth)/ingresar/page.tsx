@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AtSign, Lock, Loader2, Sparkles } from "lucide-react";
+import { AtSign, Lock, Loader2, Sparkles, MessageCircle } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { emailInternoDesdeUsuario } from "@/lib/autenticacion";
+import { urlWhatsappSoporte } from "@/lib/soporte";
 import { CampoConIcono } from "@/components/campo-con-icono";
 
 function traducirError(mensaje: string) {
@@ -75,6 +76,20 @@ export default function PaginaIngresar() {
               className="bg-superficie"
             />
           </label>
+
+          <a
+            href={urlWhatsappSoporte(
+              usuario
+                ? `Hola! Olvidé mi contraseña. Mi usuario es "${usuario}".`
+                : "Hola! Olvidé mi contraseña.",
+            )}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1 self-start text-xs font-semibold text-texto-secundario transition-colors hover:text-rosado"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            ¿Olvidaste tu contraseña? Escribinos por WhatsApp
+          </a>
 
           {error && <p className="animar-aparecer text-sm text-alerta">{error}</p>}
 

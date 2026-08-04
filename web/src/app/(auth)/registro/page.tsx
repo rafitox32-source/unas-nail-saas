@@ -275,6 +275,18 @@ export default function PaginaRegistro() {
             {enviando ? "Creando cuenta…" : "Crear cuenta"}
           </button>
 
+          <p className="text-center text-xs text-texto-secundario">
+            Al crear tu cuenta aceptás nuestros{" "}
+            <a href="/terminos" target="_blank" className="font-semibold text-rosado hover:underline">
+              Términos
+            </a>{" "}
+            y nuestra{" "}
+            <a href="/privacidad" target="_blank" className="font-semibold text-rosado hover:underline">
+              Política de privacidad
+            </a>
+            .
+          </p>
+
           <p className="text-center text-sm text-texto-secundario">
             ¿Ya tenés cuenta?{" "}
             <a href="/ingresar" className="font-semibold text-rosado hover:underline">

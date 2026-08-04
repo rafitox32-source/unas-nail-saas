@@ -12,7 +12,7 @@ async function obtenerManicurista(slug: string) {
   const { data: manicurista } = await supabase
     .from("usuarios_manicuristas")
     .select(
-      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar",
+      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion",
     )
     .eq("slug_publico", slug)
     .maybeSingle<Manicurista>();
@@ -122,6 +122,7 @@ export default async function PaginaManicurista({
           idManicurista={manicurista.id}
           nombreNegocio={manicurista.nombre_negocio}
           urlWhatsapp={enlaceWhatsapp}
+          politicaCancelacion={manicurista.politica_cancelacion}
         />
 
         {/* Galería */}
@@ -182,6 +183,15 @@ export default async function PaginaManicurista({
             Escribinos por WhatsApp →
           </a>
         )}
+        <p className="mt-6 flex items-center justify-center gap-3 text-xs text-texto-secundario">
+          <a href="/terminos" className="hover:text-rosado hover:underline">
+            Términos
+          </a>
+          <span>·</span>
+          <a href="/privacidad" className="hover:text-rosado hover:underline">
+            Privacidad
+          </a>
+        </p>
       </footer>
     </div>
   );

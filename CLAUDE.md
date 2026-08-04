@@ -211,6 +211,35 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       la app (Playfair Display + Poppins) — hay que esperar
       `document.fonts.ready` antes de dibujar o el canvas cae a una
       fuente genérica del sistema.
+- [x] **Fase 1 de auditoría premium** — 5 mejoras chicas sin bloqueos,
+      todas probadas de punta a punta:
+      - **Recuperar contraseña**: no hay flujo self-service (no hay email
+        real, ver trampa #23) — en vez de eso, un link "¿Olvidaste tu
+        contraseña?" en `/ingresar` que abre WhatsApp al número de soporte
+        (`src/lib/soporte.ts`, `WHATSAPP_SOPORTE`) con el usuario ya
+        completado en el mensaje. El dueño resetea la contraseña a mano
+        desde el dashboard de Supabase mientras el volumen sea bajo — el
+        propio dueño pidió esta versión simple en vez de un flujo con
+        clave `service_role`, que hubiera requerido manejar un secreto
+        nuevo sin necesidad real todavía.
+      - **Anti-spam en reservas**: `crear_apartado` rechaza el 4to intento
+        de un mismo teléfono en 10 minutos ("Estás haciendo muchas
+        reservas seguidas..."). Probado con 4 llamadas directas al RPC:
+        las primeras 3 pasan, la 4ta se bloquea.
+      - **Páginas legales**: `/terminos` y `/privacidad`, contenido real
+        (no lorem ipsum) escrito para esta plataforma específica —
+        aclaran que no se procesan pagos online y que cada negocio es
+        responsable de su propio contenido. Linkeadas en el footer de
+        cada carta pública y en el registro ("al crear tu cuenta
+        aceptás..."). **No reemplazan una revisión legal real** — son un
+        punto de partida razonable, no diseñadas por un abogado.
+      - **Política de cancelación**: campo de texto libre opcional
+        (`usuarios_manicuristas.politica_cancelacion`), editable en "Mi
+        negocio", se muestra en el modal de reserva antes de confirmar.
+      - **Exportar datos**: botón de descarga CSV en `/panel/clientas` y
+        `/panel/agenda` (`src/lib/csv.ts`, sin librería nueva — separador
+        `;` porque Excel en español lo autodetecta mejor que `,`, y BOM
+        UTF-8 para que no rompan tildes/ñ al abrir el archivo).
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -707,5 +736,14 @@ cd "web" && vercel --prod
   - `src/components/interno/generador-estados.tsx` — canvas + QR para
     estados de WhatsApp/redes, ver Progreso. Dependencia `qrcode` (+
     `@types/qrcode`) nueva en `package.json`.
+  - `src/lib/soporte.ts` — número de WhatsApp de soporte de la
+    plataforma (`WHATSAPP_SOPORTE`, hoy `+51912382709`) y
+    `urlWhatsappSoporte()`. No confundir con el teléfono de cada
+    manicurista, que es de su propio negocio.
+  - `src/lib/csv.ts` — `descargarCSV()`, exportación genérica usada por
+    Clientas y Agenda (ver Progreso, "Fase 1 de auditoría premium").
+  - `(publico)/terminos`, `(publico)/privacidad` — páginas legales
+    estáticas, contenido real específico de esta plataforma (ver
+    Progreso).
 - **.env.local** de `web/` ya apunta al proyecto real (`NEXT_PUBLIC_SUPABASE_URL`
   + clave pública `sb_publishable_...`, no es secreta).

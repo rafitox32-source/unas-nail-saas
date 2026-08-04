@@ -11,11 +11,13 @@ export function SeccionServicios({
   idManicurista,
   nombreNegocio,
   urlWhatsapp,
+  politicaCancelacion,
 }: {
   servicios: Servicio[];
   idManicurista: string;
   nombreNegocio: string;
   urlWhatsapp: string | null;
+  politicaCancelacion: string | null;
 }) {
   const [servicioSeleccionado, setServicioSeleccionado] = useState<Servicio | null>(null);
 
@@ -48,6 +50,7 @@ export function SeccionServicios({
           idManicurista={idManicurista}
           nombreNegocio={nombreNegocio}
           urlWhatsapp={urlWhatsapp}
+          politicaCancelacion={politicaCancelacion}
           alCerrar={() => setServicioSeleccionado(null)}
         />
       )}

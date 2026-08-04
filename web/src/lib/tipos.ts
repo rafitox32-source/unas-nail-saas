@@ -9,6 +9,7 @@ export interface Manicurista {
   color_marca: string | null;
   slug_publico: string | null;
   url_avatar: string | null;
+  politica_cancelacion: string | null;
 }
 
 export interface SesionManicurista {

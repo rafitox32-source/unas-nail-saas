@@ -13,7 +13,7 @@ export default async function PaginaPanel() {
   const { data: manicurista } = await supabase
     .from("usuarios_manicuristas")
     .select(
-      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, es_admin",
+      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion, es_admin",
     )
     .eq("id", usuario!.id)
     .maybeSingle<Manicurista & { es_admin: boolean }>();

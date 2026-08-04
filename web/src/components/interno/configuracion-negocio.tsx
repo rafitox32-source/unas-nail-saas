@@ -15,6 +15,9 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
   const [colorMarca, setColorMarca] = useState(manicurista.color_marca ?? COLOR_POR_DEFECTO);
   const [slug, setSlug] = useState(manicurista.slug_publico ?? "");
   const [urlAvatar, setUrlAvatar] = useState(manicurista.url_avatar);
+  const [politicaCancelacion, setPoliticaCancelacion] = useState(
+    manicurista.politica_cancelacion ?? "",
+  );
 
   const [slugDisponible, setSlugDisponible] = useState<boolean | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -61,6 +64,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
         biografia: biografia || null,
         color_marca: colorMarca,
         slug_publico: slug || null,
+        politica_cancelacion: politicaCancelacion || null,
       })
       .eq("id", manicurista.id);
 
@@ -225,6 +229,19 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
         </div>
         <span className="mt-1 block text-xs text-texto-secundario">
           Se usa como color principal en tu página pública (botones, links).
+        </span>
+      </label>
+
+      <label className="text-sm text-texto-secundario">
+        Política de cancelación (opcional)
+        <textarea
+          value={politicaCancelacion}
+          onChange={(e) => setPoliticaCancelacion(e.target.value)}
+          placeholder="Ej: la seña no es reembolsable si cancelás con menos de 24hs de anticipación."
+          className="mt-1 w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+        />
+        <span className="mt-1 block text-xs text-texto-secundario">
+          Se muestra a la clienta antes de confirmar una reserva.
         </span>
       </label>
 
