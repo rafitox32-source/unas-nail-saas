@@ -1,6 +1,7 @@
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { GestionPromociones } from "@/components/interno/gestion-promociones";
 import { ConfiguracionLealtad } from "@/components/interno/configuracion-lealtad";
+import { GeneradorEstados } from "@/components/interno/generador-estados";
 import type { PromocionAdmin, ProgramaLealtad } from "@/lib/tipos";
 
 export default async function PaginaPromociones() {
@@ -24,6 +25,17 @@ export default async function PaginaPromociones() {
     .eq("id", usuario!.id)
     .maybeSingle<ProgramaLealtad>();
 
+  const { data: negocio } = await supabase
+    .from("usuarios_manicuristas")
+    .select("nombre_negocio, color_marca, url_avatar, slug_publico")
+    .eq("id", usuario!.id)
+    .maybeSingle<{
+      nombre_negocio: string;
+      color_marca: string | null;
+      url_avatar: string | null;
+      slug_publico: string | null;
+    }>();
+
   return (
     <main className="mx-auto max-w-2xl flex-1 px-6 py-10">
       <GestionPromociones idManicurista={usuario!.id} promocionesIniciales={promociones ?? []} />
@@ -37,6 +49,14 @@ export default async function PaginaPromociones() {
           }
         }
       />
+      {negocio && (
+        <GeneradorEstados
+          nombreNegocio={negocio.nombre_negocio}
+          colorMarca={negocio.color_marca}
+          urlAvatar={negocio.url_avatar}
+          slugPublico={negocio.slug_publico}
+        />
+      )}
     </main>
   );
 }

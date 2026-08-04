@@ -192,6 +192,25 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       en vez de duplicarla — pero solo si el teléfono coincide texto a
       texto (sin normalización de formato todavía, ni acá ni en el flujo
       de reserva).
+- [x] Generador de estados para WhatsApp/redes con QR: sección nueva en
+      `/panel/promociones` (`generador-estados.tsx`) — dibuja en un
+      `<canvas>` de 1080×1920 (formato historia) el logo o un ícono de
+      respaldo, el nombre del negocio, un llamado a la acción, un QR
+      (librería `qrcode`, nueva dependencia) que apunta a
+      `{origin}/{slug_publico}` y la URL en texto plano abajo del QR para
+      quien no pueda escanear. Botones de **Descargar** (`canvas.toBlob` +
+      link temporal) y **Compartir** (Web Share API con archivo adjunto,
+      solo se muestra si el navegador lo soporta — en el celular abre
+      directo el selector nativo de "compartir a WhatsApp Status/
+      Instagram"). El logo se carga con `crossOrigin="anonymous"` porque
+      viene de Supabase Storage (otro origen) — sin eso el canvas queda
+      "tainted" y `toBlob`/`toDataURL` tiran un error de seguridad en vez
+      de exportar la imagen; probado de punta a punta con un logo real
+      subido (no solo sin logo) para confirmar que el CORS de Supabase
+      Storage lo permite. El texto usa las mismas fuentes que el resto de
+      la app (Playfair Display + Poppins) — hay que esperar
+      `document.fonts.ready` antes de dibujar o el canvas cae a una
+      fuente genérica del sistema.
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -685,5 +704,8 @@ cd "web" && vercel --prod
     compartidas (`animar-aparecer`, `animar-hoja-modal`, etc.) y la regla de
     `font-size: 16px` en inputs (fix de zoom de iOS).
   - Íconos: `lucide-react` (instalado en `web/`).
+  - `src/components/interno/generador-estados.tsx` — canvas + QR para
+    estados de WhatsApp/redes, ver Progreso. Dependencia `qrcode` (+
+    `@types/qrcode`) nueva en `package.json`.
 - **.env.local** de `web/` ya apunta al proyecto real (`NEXT_PUBLIC_SUPABASE_URL`
   + clave pública `sb_publishable_...`, no es secreta).
