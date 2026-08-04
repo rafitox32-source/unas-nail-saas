@@ -159,6 +159,19 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       solo `/panel` (lo que usa la manicurista a diario) — el portal
       público (`/[slug]`) no tiene manifest, las clientas no necesitan
       instalar nada, solo entran al link de vez en cuando.
+- [x] Agregar clienta a mano: hasta ahora las clientas solo se creaban
+      automáticamente al reservar por el link público (`crear_apartado`
+      las crea/reusa por teléfono) — no había forma de cargar una clienta
+      existente que no reserva online. Botón "Agregar" en
+      `/panel/clientas` (mismo patrón que servicios/inventario), directo
+      en `lista-clientas.tsx` sin componente nuevo por lo chico que es.
+      Nombre + teléfono, inserta en `clientas` vía RLS normal (la política
+      `manicurista_administra_sus_clientas` ya es `for all`, no hizo falta
+      tocar la base). Si más tarde esa misma persona reserva online con el
+      mismo teléfono, `crear_apartado` la va a reconocer y reusar la fila
+      en vez de duplicarla — pero solo si el teléfono coincide texto a
+      texto (sin normalización de formato todavía, ni acá ni en el flujo
+      de reserva).
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante

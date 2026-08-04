@@ -1,2 +1,5 @@
 # estado local de herramientas, no es parte del proyecto
 .claude/
+
+# documentos generados (manuales, etc.) — contenido, no código fuente
+*.pdf

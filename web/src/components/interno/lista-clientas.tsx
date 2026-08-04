@@ -2,12 +2,25 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Users, ChevronRight } from "lucide-react";
+import { Search, Users, ChevronRight, Plus, Loader2 } from "lucide-react";
+import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { formateadorPrecio } from "@/lib/formato";
 import type { ClientaAdmin } from "@/lib/tipos";
 
-export function ListaClientas({ clientas }: { clientas: ClientaAdmin[] }) {
+export function ListaClientas({
+  clientas: clientasIniciales,
+  idManicurista,
+}: {
+  clientas: ClientaAdmin[];
+  idManicurista: string;
+}) {
+  const [clientas, setClientas] = useState(clientasIniciales);
   const [busqueda, setBusqueda] = useState("");
+  const [formularioAbierto, setFormularioAbierto] = useState(false);
+  const [nombre, setNombre] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const filtradas = clientas.filter((c) => {
     const texto = busqueda.trim().toLowerCase();
@@ -18,9 +31,93 @@ export function ListaClientas({ clientas }: { clientas: ClientaAdmin[] }) {
     );
   });
 
+  async function agregarClienta(evento: React.FormEvent) {
+    evento.preventDefault();
+    setGuardando(true);
+    setError(null);
+
+    const supabase = crearClienteNavegador();
+    const { data, error: errorGuardar } = await supabase
+      .from("clientas")
+      .insert({
+        id_manicurista: idManicurista,
+        nombre_completo: nombre,
+        telefono: telefono || null,
+      })
+      .select("id, nombre_completo, telefono, email, alergias, notas_internas, valor_vida_cliente, visitas_completadas, premios_canjeados")
+      .single<ClientaAdmin>();
+
+    setGuardando(false);
+    if (errorGuardar) {
+      setError(errorGuardar.message);
+    } else if (data) {
+      setClientas((actual) =>
+        [...actual, data].sort((a, b) => a.nombre_completo.localeCompare(b.nombre_completo)),
+      );
+      setNombre("");
+      setTelefono("");
+      setFormularioAbierto(false);
+    }
+  }
+
   return (
     <div>
-      <h1 className="font-titulo text-2xl font-semibold text-texto-primario">Clientas</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="font-titulo text-2xl font-semibold text-texto-primario">Clientas</h1>
+        <button
+          type="button"
+          onClick={() => setFormularioAbierto((v) => !v)}
+          className="flex shrink-0 items-center gap-1.5 rounded-full bg-rosado px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5"
+        >
+          <Plus className="h-4 w-4" /> Agregar
+        </button>
+      </div>
+
+      {formularioAbierto && (
+        <form
+          onSubmit={agregarClienta}
+          className="animar-aparecer mt-4 flex flex-col gap-3 rounded-2xl border border-borde bg-superficie p-5 shadow-sm"
+        >
+          <label className="text-sm text-texto-secundario">
+            Nombre
+            <input
+              required
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+            />
+          </label>
+          <label className="text-sm text-texto-secundario">
+            Teléfono
+            <input
+              type="tel"
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+            />
+          </label>
+
+          {error && <p className="text-sm text-alerta">{error}</p>}
+
+          <div className="flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={guardando}
+              className="flex items-center gap-1.5 rounded-full bg-rosado px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {guardando && <Loader2 className="h-4 w-4 animate-spin" />}
+              {guardando ? "Guardando…" : "Guardar"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormularioAbierto(false)}
+              className="text-sm text-texto-secundario"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
 
       <div className="relative mt-4">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-texto-secundario" />

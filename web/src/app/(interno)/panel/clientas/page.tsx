@@ -17,7 +17,7 @@ export default async function PaginaClientas() {
 
   return (
     <main className="mx-auto max-w-2xl flex-1 px-6 py-10">
-      <ListaClientas clientas={clientas ?? []} />
+      <ListaClientas clientas={clientas ?? []} idManicurista={usuario!.id} />
     </main>
   );
 }
