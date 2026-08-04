@@ -97,6 +97,12 @@ export interface CitaHistorial {
   servicios: { nombre: string } | null;
 }
 
+export interface CitaReporte {
+  monto_total: number;
+  fecha_hora_inicio: string;
+  servicios: { nombre: string } | null;
+}
+
 export interface InsumoInventario {
   id: string;
   nombre_insumo: string;

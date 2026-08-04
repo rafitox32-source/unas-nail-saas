@@ -253,6 +253,25 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       manicurista). Ver trampas #26, #27 y #28 — esta feature encontró tres
       problemas reales (dos de accesibilidad, uno de datos) que no se veían
       con una sola pasada de axe-core "a ojo".
+- [x] **Fase 2, ítem 2 — Reportes e ingresos**: tarjeta nueva en `/panel`
+      (Inicio), debajo de los 3 tiles de estadística y antes de "Mi
+      negocio" (sin ruta ni ítem de nav nuevo, trampa #8). Gráfico de
+      barras de los últimos 6 meses de ingresos (`citas_apartados` con
+      `estado_cita = 'completada'`) + top 5 servicios más rentables con
+      barra de progreso, todo hecho a mano con CSS/flexbox — sin librería
+      de gráficos nueva, dado el volumen de datos chico de un salón
+      individual. Agregación (`ingresosPorMes`, `topServiciosPorIngreso`)
+      en `src/lib/reportes.ts`, separada del componente de presentación
+      `src/components/interno/reportes-ingresos.tsx` para poder probarla
+      sin renderizar nada. Bug real encontrado al probar con Playwright
+      (no leyendo el código): las barras no se veían — `items-end` en el
+      contenedor `flex` hacía que cada columna de mes se encogiera a su
+      contenido en vez de estirarse a la altura del gráfico, así que el
+      `height: X%` de la barra se calculaba contra una altura de 0.
+      Arreglado sacando `items-end` del contenedor (stretch por defecto)
+      y usando `flex-1` en el envoltorio de la barra en vez de `h-full`.
+      Estado vacío (ícono + mensaje) si todavía no hay ninguna cita
+      completada, mismo patrón que el resto del proyecto.
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -548,6 +567,27 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
     "porque el texto blanco se ve bien arriba", medir el contraste real de
     cada combinación fondo/primer-plano por separado — texto suelto y
     botón sólido son dos problemas de contraste distintos, no el mismo.
+29. **Un contenedor `flex` con `items-end` NO le da altura completa a sus
+    hijos** — los encoge a su contenido antes de alinearlos al final, así
+    que un `height: X%` adentro de un hijo así se calcula contra una
+    altura de 0 (o `auto`), no contra la altura del contenedor. Pasó en el
+    gráfico de barras de `reportes-ingresos.tsx`: cada columna de mes
+    (`flex-col`) estaba dentro de un contenedor con `items-end`, y la
+    barra interna (`height: {porcentaje}%`) simplemente no se veía —
+    0 errores en consola, el bug era 100% visual. Se encontró recién con
+    una captura de Playwright, no leyendo el código (el JSX "se veía bien"
+    a simple vista). **Fix**: sacar `items-end` del contenedor (dejar el
+    `stretch` por defecto de flexbox, que sí da altura completa a los
+    hijos) y usar `flex-1` en el envoltorio directo de la barra en vez de
+    `h-full` — `h-full` necesita que el padre tenga una altura explícita
+    resuelta, cosa que un hijo de `flex-col` sin `flex-1`/`flex-grow` no
+    tiene aunque el abuelo sí mida `7rem`. **Lección**: para cualquier
+    barra/gráfico hecho a mano con `height: %` dentro de flexbox, la
+    cadena completa de contenedores desde la altura fija hasta la barra
+    tiene que propagar altura real (`stretch` o `flex-1`/`h-full`
+    encadenados) — un `items-end`/`items-center` en el medio la corta
+    silenciosamente. Verificar con una captura, no solo leyendo las
+    clases.
 
 ## Pulido 1 — accesibilidad, mobile, contraste
 
@@ -840,5 +880,10 @@ cd "web" && vercel --prod
   - `(publico)/terminos`, `(publico)/privacidad` — páginas legales
     estáticas, contenido real específico de esta plataforma (ver
     Progreso).
+  - `src/lib/reportes.ts` — `ingresosPorMes()`/`topServiciosPorIngreso()`,
+    agregación pura (sin datos, sin JSX) para la tarjeta de "Ingresos" en
+    `/panel`. `src/components/interno/reportes-ingresos.tsx` es la parte
+    de presentación, ver trampa #29 sobre el bug de altura en el gráfico
+    de barras hecho con flexbox.
 - **.env.local** de `web/` ya apunta al proyecto real (`NEXT_PUBLIC_SUPABASE_URL`
   + clave pública `sb_publishable_...`, no es secreta).

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Users, CalendarClock, PackageOpen, ExternalLink, ShieldCheck } from "lucide-react";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { ConfiguracionNegocio } from "@/components/interno/configuracion-negocio";
-import type { Manicurista } from "@/lib/tipos";
+import { ReportesIngresos } from "@/components/interno/reportes-ingresos";
+import type { Manicurista, CitaReporte } from "@/lib/tipos";
 
 export default async function PaginaPanel() {
   const supabase = await crearClienteServidor();
@@ -25,13 +26,29 @@ export default async function PaginaPanel() {
         .eq("estado_cuenta", "pendiente")
     : { count: 0 };
 
-  const [{ count: totalClientas }, { count: proximasCitas }, { data: insumos }] = await Promise.all([
+  const seisMesesAtras = new Date();
+  seisMesesAtras.setMonth(seisMesesAtras.getMonth() - 5);
+  seisMesesAtras.setDate(1);
+  seisMesesAtras.setHours(0, 0, 0, 0);
+
+  const [
+    { count: totalClientas },
+    { count: proximasCitas },
+    { data: insumos },
+    { data: citasCompletadas },
+  ] = await Promise.all([
     supabase.from("clientas").select("id", { count: "exact", head: true }),
     supabase
       .from("citas_apartados")
       .select("id", { count: "exact", head: true })
       .in("estado_cita", ["pendiente_seña", "confirmada"]),
     supabase.from("inventario").select("cantidad_actual, cantidad_minima_alerta"),
+    supabase
+      .from("citas_apartados")
+      .select("monto_total, fecha_hora_inicio, servicios(nombre)")
+      .eq("estado_cita", "completada")
+      .gte("fecha_hora_inicio", seisMesesAtras.toISOString())
+      .returns<CitaReporte[]>(),
   ]);
 
   const insumosBajos =
@@ -84,6 +101,8 @@ export default async function PaginaPanel() {
             );
           })}
         </div>
+
+        <ReportesIngresos citas={citasCompletadas ?? []} />
 
         {manicurista?.es_admin && (
           <Link
