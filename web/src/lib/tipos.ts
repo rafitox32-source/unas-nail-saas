@@ -1,3 +1,5 @@
+export type EstadoCuenta = "pendiente" | "aprobada" | "rechazada";
+
 export interface Manicurista {
   id: string;
   nombre_negocio: string;
@@ -6,6 +8,22 @@ export interface Manicurista {
   biografia: string | null;
   color_marca: string | null;
   slug_publico: string | null;
+}
+
+export interface SesionManicurista {
+  estado_cuenta: EstadoCuenta;
+  es_admin: boolean;
+  nombre_negocio: string;
+}
+
+export interface CuentaAdmin {
+  id: string;
+  usuario: string;
+  nombre_negocio: string;
+  nombre_completo: string;
+  telefono: string | null;
+  estado_cuenta: EstadoCuenta;
+  creado_en: string;
 }
 
 export interface ProgramaLealtad {

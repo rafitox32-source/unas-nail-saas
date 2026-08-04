@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Users, CalendarClock, PackageOpen, ExternalLink, Sparkles } from "lucide-react";
+import { Users, CalendarClock, PackageOpen, ExternalLink, Sparkles, ShieldCheck } from "lucide-react";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { Manicurista } from "@/lib/tipos";
 
@@ -11,9 +11,18 @@ export default async function PaginaPanel() {
 
   const { data: manicurista } = await supabase
     .from("usuarios_manicuristas")
-    .select("id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico")
+    .select(
+      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, es_admin",
+    )
     .eq("id", usuario!.id)
-    .maybeSingle<Manicurista>();
+    .maybeSingle<Manicurista & { es_admin: boolean }>();
+
+  const { count: pendientesDeAprobar } = manicurista?.es_admin
+    ? await supabase
+        .from("usuarios_manicuristas")
+        .select("id", { count: "exact", head: true })
+        .eq("estado_cuenta", "pendiente")
+    : { count: 0 };
 
   const [{ count: totalClientas }, { count: proximasCitas }, { data: insumos }] = await Promise.all([
     supabase.from("clientas").select("id", { count: "exact", head: true }),
@@ -74,6 +83,25 @@ export default async function PaginaPanel() {
             );
           })}
         </div>
+
+        {manicurista?.es_admin && (
+          <Link
+            href="/admin"
+            className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-rosado/30 bg-rosado-suave p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <span className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
+              <ShieldCheck className="h-5 w-5 text-rosado" strokeWidth={1.75} />
+              Administración
+            </span>
+            {(pendientesDeAprobar ?? 0) > 0 ? (
+              <span className="shrink-0 rounded-full bg-rosado px-2.5 py-1 text-xs font-semibold text-white">
+                {pendientesDeAprobar} pendiente{pendientesDeAprobar === 1 ? "" : "s"}
+              </span>
+            ) : (
+              <ExternalLink className="h-4 w-4 shrink-0 text-texto-secundario" />
+            )}
+          </Link>
+        )}
 
         {manicurista ? (
           <div className="mt-6 rounded-2xl border border-borde bg-superficie p-6 shadow-sm">

@@ -100,6 +100,20 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       a la reserva. Probado de punta a punta: reservar un turno de 45 min
       sacó correctamente los dos slots de 30 min que se superponían
       (09:00 y 09:30), no solo el exacto que se eligió.
+- [x] Aprobación de cuentas por admin: toda manicurista nueva queda
+      `pendiente` al registrarse (columna `estado_cuenta` en
+      `usuarios_manicuristas`) — no entra al panel ni su carta pública es
+      visible hasta que el dueño de la plataforma la aprueba desde `/admin`
+      (protegido por `usuarios_manicuristas.es_admin`, no es un rol de
+      manicurista). El gate vive en `(interno)/layout.tsx` (muestra
+      pantalla de "en revisión"/"rechazada" en vez del panel) y en la RLS
+      pública de `usuarios_manicuristas` (`estado_cuenta = 'aprobada'`
+      además de tener slug). `crear_apartado` también valida el estado
+      como defensa en profundidad. Tarjeta de acceso a `/admin` en
+      `/panel` (con contador de pendientes) solo si `es_admin`, en vez de
+      sumar un 7mo ítem a la nav (trap #8). Ver trampa #24 — encontré un
+      bug real de recursión infinita en RLS al construir esto, no al leer
+      el código.
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -286,6 +300,32 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
     detectó de nuevo leyendo `get_logs(service: "auth")` — los dos errores
     se ven distintos en los logs, así que si algo similar vuelve a fallar,
     revisar el `error_code` exacto ahí antes de asumir cuál toggle es.
+24. **Una política RLS de SELECT que vuelve a consultar su propia tabla
+    (`exists (select 1 from usuarios_manicuristas where ...)`) causa
+    recursión infinita real en Postgres** (`42P17: infinite recursion
+    detected in policy`), no solo lentitud — pasó al armar el gate de
+    admin: la política `admin_ve_todas_las_cuentas` necesitaba saber si
+    `auth.uid()` es admin consultando la misma tabla. El bug fue invisible
+    en el navegador: la cuenta pendiente veía el panel normal en vez de la
+    pantalla de "en revisión", porque el código hacía
+    `const { data: cuenta } = await supabase.from(...).maybeSingle()` sin
+    mirar `error` — la query fallaba con 42P17, `data` quedaba `null`, y el
+    `if (cuenta && ...)` simplemente no entraba, fallback silencioso al
+    panel normal. Se encontró recién armando un script aparte que sí
+    imprimía `error`, no leyendo el código ni mirando la UI. **Fix
+    estándar**: una función `security definer` (`es_admin_actual()`) que
+    hace la consulta — como corre con los privilegios del dueño de la
+    función (`postgres`, que tiene `BYPASSRLS` en Supabase, mismo motivo
+    por el que `crear_apartado` puede escribir en tablas con RLS), no
+    dispara la re-evaluación de políticas y no recursiona. Las políticas
+    llaman a la función en vez de repetir la subconsulta inline.
+    **Lección**: cualquier política "¿este usuario es admin/tiene rol X?"
+    que necesite mirar la propia tabla que protege tiene que pasar por una
+    función `security definer`, nunca una subconsulta directa a esa misma
+    tabla — y todo `.maybeSingle()`/`.single()` de una query que alimenta
+    un `if` de control de acceso tiene que revisar `error`, no solo `data`,
+    porque un fallo silencioso ahí se disfraza de "fila no encontrada" en
+    vez de "la base tiró un error".
 
 ## Pulido 1 — accesibilidad, mobile, contraste
 
@@ -392,6 +432,14 @@ usuario, ver trampa #23. El email interno real de esta cuenta ahora es
 `aurora@usuarios.uas-login.com`, pero eso ya no hace falta escribirlo en
 ningún lado.)
 
+**No existe ninguna cuenta admin todavía, ni en local ni en producción.**
+Para crear la primera: registrarse normal por `/registro` (cualquier
+usuario/negocio sirve, es una cuenta del dueño de la plataforma, no de una
+manicurista real) y despues correr
+`update usuarios_manicuristas set es_admin = true, estado_cuenta = 'aprobada' where usuario = '<lo que eligió>';`
+por SQL una sola vez. De ahí en más esa cuenta ve la tarjeta de
+"Administración" en `/panel` y puede aprobar el resto desde `/admin`.
+
 Levantar todo:
 ```bash
 cd "web" && npm run dev
@@ -429,8 +477,14 @@ cd "web" && vercel --prod
   `clientas`, `servicios`, `promociones`, `citas_apartados`, `inventario`.
   Todas con RLS: la manicurista solo ve/edita lo suyo
   (`auth.uid() = id_manicurista`); hay políticas públicas de solo lectura para
-  el portal (`usuarios_manicuristas` por slug, `servicios` activos,
-  `promociones` vigentes).
+  el portal (`usuarios_manicuristas` por slug **y** `estado_cuenta =
+  'aprobada'`, `servicios` activos, `promociones` vigentes).
+- **`usuarios_manicuristas.estado_cuenta`** (`pendiente`/`aprobada`/
+  `rechazada`) y **`.es_admin`**: ver la entrada de Progreso sobre
+  aprobación de cuentas y trampa #24. Función `es_admin_actual()`
+  (security definer) es la única forma correcta de chequear el admin
+  desde una política RLS sobre esta misma tabla — nunca una subconsulta
+  directa (recursión infinita, trampa #24).
 - **`notas_visita`** (`supabase/historial_fotografico.sql`): una fila por
   cita (`id_cita` unique), `formula_color` + `notas` + `rutas_fotos text[]`.
   Bucket privado `fotos-clientas` en Storage, políticas por carpeta
@@ -472,6 +526,11 @@ cd "web" && vercel --prod
   - `(interno)/panel`, `/panel/servicios`, `/panel/agenda`, `/panel/clientas`,
     `/panel/clientas/[id]`, `/panel/inventario`, `/panel/recibo/[id]`,
     `/panel/promociones` — back-office, protegido en `(interno)/layout.tsx`
+    (que también bloquea el acceso si `estado_cuenta != 'aprobada'`)
+  - `/admin` (fuera de `(interno)`, sin la nav de manicurista) —
+    aprobar/rechazar cuentas nuevas, protegido por `es_admin` en el propio
+    `page.tsx`. `src/components/admin/gestion-cuentas.tsx` es la única
+    pieza de UI ahí.
   - `src/lib/supabase/{cliente,servidor}.ts` — clientes browser/server
   - `src/lib/tipos.ts` — tipos TS de las entidades
   - `src/lib/autenticacion.ts` — `emailInternoDesdeUsuario()`, construye el
