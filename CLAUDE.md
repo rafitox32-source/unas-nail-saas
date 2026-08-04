@@ -87,6 +87,19 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       esperaba fotos reales *mías* para la cuenta demo — la solución
       correcta para un SaaS multi-tenant es que cada manicurista cargue las
       suyas, no fotos fijas de una sola cuenta.
+- [x] Reserva pública con horarios reales en vez de un input de hora libre:
+      `modal-reserva.tsx` genera los turnos de inicio que entran completos
+      en el horario de atención (09:00–20:00, pasos de 30 min) y no se
+      superponen con ningún turno ya ocupado ese día — la clienta elige de
+      una lista de botones, no adivina una hora a mano y se entera de si
+      está libre recién al confirmar. Estrategia elegida a pedido del
+      dueño en vez de automatizar WhatsApp (que necesitaría WhatsApp
+      Business API — misma complejidad/costo que las campañas masivas, sin
+      justificarse todavía): la clienta interactúa solo con el link
+      público, sin necesitar el celular de la manicurista para nada previo
+      a la reserva. Probado de punta a punta: reservar un turno de 45 min
+      sacó correctamente los dos slots de 30 min que se superponían
+      (09:00 y 09:30), no solo el exacto que se eligió.
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante

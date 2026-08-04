@@ -1,22 +1,56 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, User, Phone, Tag, Loader2, CheckCircle2, MessageCircle } from "lucide-react";
+import { X, User, Phone, Tag, Loader2, CheckCircle2, MessageCircle, Clock } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { CampoConIcono } from "@/components/campo-con-icono";
 import { formateadorPrecio } from "@/lib/formato";
 import type { Servicio } from "@/lib/tipos";
-
-const formateadorHora = new Intl.DateTimeFormat("es-AR", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 function hoyISO() {
   const hoy = new Date();
   const desfaseMinutos = hoy.getTimezoneOffset();
   const local = new Date(hoy.getTime() - desfaseMinutos * 60000);
   return local.toISOString().slice(0, 10);
+}
+
+const HORA_APERTURA_MIN = 9 * 60;
+const HORA_CIERRE_MIN = 20 * 60;
+const PASO_MINUTOS = 30;
+
+// Genera los horarios de inicio que entran completos en el horario de
+// atención y no se superponen con ningún turno ya ocupado ese día — la
+// clienta elige de una lista de horarios reales, no adivina uno a mano.
+function generarHorariosDisponibles(
+  fecha: string,
+  duracionMinutos: number,
+  horariosOcupados: { inicio: string; fin: string }[],
+) {
+  const disponibles: string[] = [];
+  const ahora = new Date();
+  const esHoy = fecha === hoyISO();
+
+  for (
+    let minutos = HORA_APERTURA_MIN;
+    minutos + duracionMinutos <= HORA_CIERRE_MIN;
+    minutos += PASO_MINUTOS
+  ) {
+    const horaTexto = `${String(Math.floor(minutos / 60)).padStart(2, "0")}:${String(minutos % 60).padStart(2, "0")}`;
+    const inicio = new Date(`${fecha}T${horaTexto}:00`);
+    const fin = new Date(inicio.getTime() + duracionMinutos * 60000);
+
+    if (esHoy && inicio <= ahora) continue;
+
+    const seSuperpone = horariosOcupados.some((h) => {
+      const ocupadoInicio = new Date(h.inicio);
+      const ocupadoFin = new Date(h.fin);
+      return inicio < ocupadoFin && fin > ocupadoInicio;
+    });
+
+    if (!seSuperpone) disponibles.push(horaTexto);
+  }
+
+  return disponibles;
 }
 
 export function ModalReserva({
@@ -58,6 +92,7 @@ export function ModalReserva({
     let cancelado = false;
     const supabase = crearClienteNavegador();
     setCargandoHorarios(true);
+    setHora("");
     supabase
       .rpc("horarios_ocupados", { p_id_manicurista: idManicurista, p_fecha: fecha })
       .then(({ data }) => {
@@ -101,6 +136,12 @@ export function ModalReserva({
       clearTimeout(temporizador);
     };
   }, [codigoPromocional, idManicurista]);
+
+  const horariosDisponibles = generarHorariosDisponibles(
+    fecha,
+    servicio.duracion_minutos,
+    horariosOcupados,
+  );
 
   const precioConDescuento = (() => {
     if (!promoValidada) return null;
@@ -240,55 +281,54 @@ export function ModalReserva({
                   onChange={(e) => setTelefono(e.target.value)}
                 />
               </label>
-              {/* Fecha/Hora sin CampoConIcono a propósito: los inputs
-                  nativos date/time ya traen su propio ícono de selector, y
-                  no se achican con flex tanto como uno pide — sumarles
-                  encima el ícono + padding izquierdo los hacía desbordar el
-                  viewport en Chrome de Android (medido: ~19px de overflow). */}
-              <div className="flex gap-3">
-                <label className="min-w-0 flex-1 text-sm text-texto-secundario">
-                  Fecha
-                  <input
-                    required
-                    type="date"
-                    min={hoyISO()}
-                    value={fecha}
-                    onChange={(e) => setFecha(e.target.value)}
-                    className="mt-1 w-full min-w-0 rounded-xl border border-borde bg-fondo px-3 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
-                  />
-                </label>
-                <label className="min-w-0 flex-1 text-sm text-texto-secundario">
-                  Hora
-                  <input
-                    required
-                    type="time"
-                    step={1800}
-                    min="09:00"
-                    max="20:00"
-                    value={hora}
-                    onChange={(e) => setHora(e.target.value)}
-                    className="mt-1 w-full min-w-0 rounded-xl border border-borde bg-fondo px-3 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
-                  />
-                </label>
-              </div>
+              {/* Fecha sin CampoConIcono a propósito: el input nativo date
+                  ya trae su propio ícono de selector, y no se achica con
+                  flex tanto como uno pide — sumarle encima el ícono +
+                  padding izquierdo lo hacía desbordar el viewport en Chrome
+                  de Android (medido: ~19px de overflow). */}
+              <label className="text-sm text-texto-secundario">
+                Fecha
+                <input
+                  required
+                  type="date"
+                  min={hoyISO()}
+                  value={fecha}
+                  onChange={(e) => setFecha(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-borde bg-fondo px-3 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+                />
+              </label>
 
-              {cargandoHorarios ? (
-                <p className="flex items-center gap-1.5 text-xs text-texto-secundario">
-                  <Loader2 className="h-3 w-3 animate-spin" /> Consultando disponibilidad…
+              <div>
+                <p className="flex items-center gap-1.5 text-sm text-texto-secundario">
+                  <Clock className="h-3.5 w-3.5" /> Horario disponible
                 </p>
-              ) : horariosOcupados.length > 0 ? (
-                <p className="text-xs text-texto-secundario">
-                  Ocupado ese día:{" "}
-                  {horariosOcupados
-                    .map(
-                      (h) =>
-                        `${formateadorHora.format(new Date(h.inicio))}–${formateadorHora.format(new Date(h.fin))}`,
-                    )
-                    .join(", ")}
-                </p>
-              ) : (
-                <p className="text-xs text-texto-secundario">Sin turnos ocupados ese día.</p>
-              )}
+                {cargandoHorarios ? (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-texto-secundario">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Consultando disponibilidad…
+                  </p>
+                ) : horariosDisponibles.length === 0 ? (
+                  <p className="mt-2 text-xs text-alerta">
+                    No quedan turnos disponibles ese día, probá con otra fecha.
+                  </p>
+                ) : (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {horariosDisponibles.map((horaDisponible) => (
+                      <button
+                        key={horaDisponible}
+                        type="button"
+                        onClick={() => setHora(horaDisponible)}
+                        className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+                          hora === horaDisponible
+                            ? "border-rosado bg-rosado text-white"
+                            : "border-borde bg-fondo text-texto-primario hover:border-rosado"
+                        }`}
+                      >
+                        {horaDisponible}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <label className="text-sm text-texto-secundario">
                 Código promocional (opcional)
