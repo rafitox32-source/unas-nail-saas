@@ -33,6 +33,16 @@ export default function RootLayout({
       lang="es"
       className={`${playfair.variable} ${poppins.variable} h-full antialiased`}
     >
+      <head>
+        {/* Bloqueante a propósito: aplica el tema guardado ANTES del primer
+            paint. Sin esto, la página siempre carga en claro un instante y
+            "salta" a oscuro después — molesto y notorio en cada navegación. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('tema');if(t==='claro'||t==='oscuro'){document.documentElement.setAttribute('data-theme',t==='oscuro'?'dark':'light');}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

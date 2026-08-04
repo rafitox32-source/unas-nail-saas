@@ -73,7 +73,7 @@ export default async function PaginaPanel() {
                 }`}
               >
                 <Icono
-                  className={`h-5 w-5 ${stat.alerta ? "text-alerta" : "text-rosado"}`}
+                  className={`h-5 w-5 ${stat.alerta ? "text-alerta" : "text-rosado-texto"}`}
                   strokeWidth={1.75}
                 />
                 <span className="font-titulo text-xl font-semibold text-texto-primario">
@@ -91,7 +91,7 @@ export default async function PaginaPanel() {
             className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-rosado/30 bg-rosado-suave p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
           >
             <span className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
-              <ShieldCheck className="h-5 w-5 text-rosado" strokeWidth={1.75} />
+              <ShieldCheck className="h-5 w-5 text-rosado-texto" strokeWidth={1.75} />
               Administración
             </span>
             {(pendientesDeAprobar ?? 0) > 0 ? (
@@ -111,7 +111,7 @@ export default async function PaginaPanel() {
                 href={`/${manicurista.slug_publico}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-rosado hover:underline"
+                className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-rosado-texto hover:underline"
               >
                 Ver mi página pública
                 <ExternalLink className="h-3.5 w-3.5" />

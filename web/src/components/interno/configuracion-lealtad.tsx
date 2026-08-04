@@ -61,7 +61,7 @@ export function ConfiguracionLealtad({
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Gift className="h-4 w-4 text-rosado" />
+            <Gift className="h-4 w-4 text-rosado-texto" />
             <span className="text-sm font-semibold text-texto-primario">Programa activo</span>
           </div>
           <button

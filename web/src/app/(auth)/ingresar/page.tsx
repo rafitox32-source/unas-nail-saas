@@ -47,7 +47,7 @@ export default function PaginaIngresar() {
     <main className="flex flex-1 items-center justify-center px-6 py-16">
       <form onSubmit={alEnviar} className="animar-aparecer w-full max-w-sm">
         <div className="text-center">
-          <Sparkles className="mx-auto h-7 w-7 text-rosado" strokeWidth={1.5} />
+          <Sparkles className="mx-auto h-7 w-7 text-rosado-texto" strokeWidth={1.5} />
           <h1 className="font-titulo mt-2 text-2xl font-semibold text-texto-primario">
             Iniciá sesión
           </h1>
@@ -85,7 +85,7 @@ export default function PaginaIngresar() {
             )}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 self-start text-xs font-semibold text-texto-secundario transition-colors hover:text-rosado"
+            className="flex items-center gap-1 self-start text-xs font-semibold text-texto-secundario transition-colors hover:text-rosado-texto"
           >
             <MessageCircle className="h-3.5 w-3.5" />
             ¿Olvidaste tu contraseña? Escribinos por WhatsApp
@@ -104,7 +104,7 @@ export default function PaginaIngresar() {
 
           <p className="text-center text-sm text-texto-secundario">
             ¿Todavía no tenés cuenta?{" "}
-            <a href="/registro" className="font-semibold text-rosado hover:underline">
+            <a href="/registro" className="font-semibold text-rosado-texto hover:underline">
               Creá una
             </a>
           </p>

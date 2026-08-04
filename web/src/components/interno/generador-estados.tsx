@@ -250,7 +250,7 @@ export function GeneradorEstados({
   return (
     <div className="mt-8">
       <h2 className="flex items-center gap-1.5 font-titulo text-lg font-semibold text-texto-primario">
-        <Sparkles className="h-4 w-4 text-rosado" /> Generador de estados
+        <Sparkles className="h-4 w-4 text-rosado-texto" /> Generador de estados
       </h2>
       <p className="mt-1 text-sm text-texto-secundario">
         Una imagen lista para tu estado de WhatsApp o Instagram, con tu marca y un código QR que

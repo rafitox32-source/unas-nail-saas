@@ -306,7 +306,7 @@ export function GestionPromociones({
                 type="button"
                 onClick={() => abrirEdicion(promo)}
                 aria-label="Editar promoción"
-                className="flex items-center gap-1 text-xs font-semibold text-rosado transition-colors hover:text-texto-primario"
+                className="flex items-center gap-1 text-xs font-semibold text-rosado-texto transition-colors hover:text-texto-primario"
               >
                 <Pencil className="h-3.5 w-3.5" />
                 Editar

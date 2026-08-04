@@ -110,7 +110,7 @@ export function GestionAgenda({ citasIniciales }: { citasIniciales: CitaAgenda[]
           onClick={exportar}
           disabled={citas.length === 0}
           aria-label="Exportar agenda a CSV"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-borde text-texto-secundario transition-colors hover:border-rosado hover:text-rosado disabled:opacity-40"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-borde text-texto-secundario transition-colors hover:border-rosado hover:text-rosado-texto disabled:opacity-40"
         >
           <Download className="h-4 w-4" />
         </button>
@@ -157,7 +157,7 @@ export function GestionAgenda({ citasIniciales }: { citasIniciales: CitaAgenda[]
                 {cita.clientas?.telefono && (
                   <a
                     href={`https://wa.me/${cita.clientas.telefono.replace(/\D/g, "")}`}
-                    className="flex shrink-0 items-center gap-1 font-semibold text-rosado transition-colors hover:text-texto-primario"
+                    className="flex shrink-0 items-center gap-1 font-semibold text-rosado-texto transition-colors hover:text-texto-primario"
                   >
                     <MessageCircle className="h-4 w-4" />
                     WhatsApp
@@ -218,7 +218,7 @@ export function GestionAgenda({ citasIniciales }: { citasIniciales: CitaAgenda[]
                 <div className="mt-4 border-t border-borde pt-3">
                   <Link
                     href={`/panel/recibo/${cita.id}`}
-                    className="flex items-center gap-1 text-xs font-semibold text-rosado transition-colors hover:text-texto-primario"
+                    className="flex items-center gap-1 text-xs font-semibold text-rosado-texto transition-colors hover:text-texto-primario"
                   >
                     <Receipt className="h-3.5 w-3.5" />
                     Ver recibo →

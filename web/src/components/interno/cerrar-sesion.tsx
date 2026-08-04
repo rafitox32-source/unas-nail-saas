@@ -19,7 +19,7 @@ export function BotonCerrarSesion() {
       type="button"
       onClick={alHacerClic}
       aria-label="Cerrar sesión"
-      className="flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-rosado transition-colors hover:text-texto-primario"
+      className="flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-rosado-texto transition-colors hover:text-texto-primario"
     >
       <LogOut className="h-4 w-4" strokeWidth={1.75} />
       <span className="hidden sm:inline">Cerrar sesión</span>

@@ -13,6 +13,12 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
   const [telefono, setTelefono] = useState(manicurista.telefono ?? "");
   const [biografia, setBiografia] = useState(manicurista.biografia ?? "");
   const [colorMarca, setColorMarca] = useState(manicurista.color_marca ?? COLOR_POR_DEFECTO);
+  // Si nunca tocó el selector, no queremos persistir el color por defecto
+  // como si lo hubiera elegido — eso la dejaría "pegada" a ese color para
+  // siempre en vez de seguir el acento del tema (claro u oscuro) de quien
+  // visite su página. Solo se guarda un color si ya tenía uno antes o si
+  // lo cambia en esta sesión.
+  const [colorTocado, setColorTocado] = useState(manicurista.color_marca !== null);
   const [slug, setSlug] = useState(manicurista.slug_publico ?? "");
   const [urlAvatar, setUrlAvatar] = useState(manicurista.url_avatar);
   const [politicaCancelacion, setPoliticaCancelacion] = useState(
@@ -62,7 +68,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
         nombre_negocio: nombreNegocio,
         telefono: telefono || null,
         biografia: biografia || null,
-        color_marca: colorMarca,
+        color_marca: colorTocado ? colorMarca : null,
         slug_publico: slug || null,
         politica_cancelacion: politicaCancelacion || null,
       })
@@ -113,7 +119,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
       className="mt-6 flex flex-col gap-4 rounded-2xl border border-borde bg-superficie p-6 shadow-sm"
     >
       <p className="flex items-center gap-1.5 text-sm font-semibold text-texto-primario">
-        <Palette className="h-4 w-4 text-rosado" /> Mi negocio
+        <Palette className="h-4 w-4 text-rosado-texto" /> Mi negocio
       </p>
 
       <div className="flex items-center gap-4">
@@ -140,7 +146,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
             type="button"
             onClick={() => inputArchivo.current?.click()}
             disabled={subiendoLogo}
-            className="flex items-center gap-1.5 text-sm font-semibold text-rosado transition-colors hover:text-texto-primario disabled:opacity-50"
+            className="flex items-center gap-1.5 text-sm font-semibold text-rosado-texto transition-colors hover:text-texto-primario disabled:opacity-50"
           >
             {subiendoLogo ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -218,12 +224,18 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
           <input
             type="color"
             value={colorMarca}
-            onChange={(e) => setColorMarca(e.target.value)}
+            onChange={(e) => {
+              setColorMarca(e.target.value);
+              setColorTocado(true);
+            }}
             className="h-11 w-16 cursor-pointer rounded-xl border border-borde bg-fondo"
           />
           <input
             value={colorMarca}
-            onChange={(e) => setColorMarca(e.target.value)}
+            onChange={(e) => {
+              setColorMarca(e.target.value);
+              setColorTocado(true);
+            }}
             className="w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
           />
         </div>

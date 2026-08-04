@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { Home, Sparkles, Calendar, Users, Package, Tag } from "lucide-react";
 import { BotonCerrarSesion } from "@/components/interno/cerrar-sesion";
+import { ToggleTema } from "@/components/interno/toggle-tema";
 
 const enlaces = [
   { etiqueta: "Inicio", href: "/panel", icono: Home },
@@ -37,7 +38,7 @@ export function NavInterno() {
                   href={enlace.href}
                   ref={activo ? enlaceActivoRef : undefined}
                   className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[13px] font-medium transition-colors sm:text-sm ${
-                    activo ? "text-rosado" : "text-texto-secundario hover:text-texto-primario"
+                    activo ? "text-rosado-texto" : "text-texto-secundario hover:text-texto-primario"
                   }`}
                 >
                   <Icono className="h-4 w-4" strokeWidth={activo ? 2.25 : 1.75} />
@@ -50,7 +51,8 @@ export function NavInterno() {
           <div className="pointer-events-none absolute left-0 top-0 h-full w-4 bg-gradient-to-r from-superficie to-transparent sm:hidden" />
           <div className="pointer-events-none absolute right-0 top-0 h-full w-6 bg-gradient-to-l from-superficie to-transparent sm:hidden" />
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex shrink-0 items-center gap-1">
+          <ToggleTema />
           <BotonCerrarSesion />
         </div>
       </div>

@@ -158,7 +158,7 @@ export default function PaginaRegistro() {
     <main className="flex flex-1 items-center justify-center px-6 py-16">
       <form onSubmit={alEnviar} className="animar-aparecer w-full max-w-sm">
         <div className="text-center">
-          <Sparkles className="mx-auto h-7 w-7 text-rosado" strokeWidth={1.5} />
+          <Sparkles className="mx-auto h-7 w-7 text-rosado-texto" strokeWidth={1.5} />
           <h1 className="font-titulo mt-2 text-2xl font-semibold text-texto-primario">
             Creá tu cuenta
           </h1>
@@ -277,11 +277,11 @@ export default function PaginaRegistro() {
 
           <p className="text-center text-xs text-texto-secundario">
             Al crear tu cuenta aceptás nuestros{" "}
-            <a href="/terminos" target="_blank" className="font-semibold text-rosado hover:underline">
+            <a href="/terminos" target="_blank" className="font-semibold text-rosado-texto hover:underline">
               Términos
             </a>{" "}
             y nuestra{" "}
-            <a href="/privacidad" target="_blank" className="font-semibold text-rosado hover:underline">
+            <a href="/privacidad" target="_blank" className="font-semibold text-rosado-texto hover:underline">
               Política de privacidad
             </a>
             .
@@ -289,7 +289,7 @@ export default function PaginaRegistro() {
 
           <p className="text-center text-sm text-texto-secundario">
             ¿Ya tenés cuenta?{" "}
-            <a href="/ingresar" className="font-semibold text-rosado hover:underline">
+            <a href="/ingresar" className="font-semibold text-rosado-texto hover:underline">
               Iniciá sesión
             </a>
           </p>

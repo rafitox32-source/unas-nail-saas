@@ -40,7 +40,7 @@ export default async function PaginaRecibo({
     <main className="animar-aparecer mx-auto max-w-md flex-1 px-6 py-10">
       <div className="rounded-2xl border border-borde bg-superficie p-8 shadow-sm print:border-none print:p-0 print:shadow-none">
         <div className="text-center">
-          <Sparkles className="mx-auto h-6 w-6 text-rosado" strokeWidth={1.5} />
+          <Sparkles className="mx-auto h-6 w-6 text-rosado-texto" strokeWidth={1.5} />
           <h1 className="font-titulo mt-2 text-2xl font-semibold text-texto-primario">
             {negocio?.nombre_negocio ?? "Recibo"}
           </h1>
@@ -93,7 +93,7 @@ export default async function PaginaRecibo({
         {enlaceWhatsapp && (
           <a
             href={enlaceWhatsapp}
-            className="flex items-center gap-1.5 text-sm font-semibold text-rosado hover:underline"
+            className="flex items-center gap-1.5 text-sm font-semibold text-rosado-texto hover:underline"
           >
             <MessageCircle className="h-4 w-4" />
             Enviar por WhatsApp →

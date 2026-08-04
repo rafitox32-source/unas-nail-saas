@@ -30,7 +30,7 @@ export function Encabezado({
               className="h-6 w-6 shrink-0 rounded-full object-cover"
             />
           ) : (
-            <Sparkles className="h-5 w-5 shrink-0 text-rosado" strokeWidth={1.75} />
+            <Sparkles className="h-5 w-5 shrink-0 text-rosado-texto" strokeWidth={1.75} />
           )}
           <span className="truncate">{nombreNegocio}</span>
         </span>
@@ -40,7 +40,7 @@ export function Encabezado({
             <a
               key={enlace.href}
               href={enlace.href}
-              className="text-sm font-medium text-texto-secundario transition-colors hover:text-rosado"
+              className="text-sm font-medium text-texto-secundario transition-colors hover:text-rosado-texto"
             >
               {enlace.etiqueta}
             </a>

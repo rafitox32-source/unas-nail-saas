@@ -10,14 +10,82 @@
      en CLAUDE.md. Los tonos "-suave" quedan igual, son solo decorativos. */
   --color-texto-secundario: #7a6a63;
   --color-rosado: #935060;
+  --color-rosado-texto: #935060;
   --color-rosado-suave: #f1dcda;
   --color-dorado: #735426;
+  --color-dorado-boton: #735426;
   --color-dorado-suave: #e8d9c3;
   --color-nude: #e4c9b6;
   --color-exito: #4f6b49;
   --color-exito-suave: #e7eee4;
   --color-alerta: #9b4a2a;
+  --color-alerta-boton: #9b4a2a;
   --color-alerta-suave: #f5e4da;
+}
+
+/* Modo oscuro: paleta hermana de la clara, no una inversión automática.
+   `@media` cubre la preferencia del sistema operativo por defecto;
+   `[data-theme]` es el override explícito del toggle en el panel y
+   siempre gana (más específico que `:root` solo).
+   Contraste verificado con un script (fórmula de luminancia relativa de
+   WCAG), no a ojo. Limitación real y medida (no evitable con un solo
+   token): --color-rosado, --color-dorado y --color-alerta tienen que
+   servir tanto de texto sobre un fondo casi negro (necesita ser CLARO)
+   como de fondo de botón sólido con texto blanco encima (necesita ser
+   OSCURO) — dos objetivos que se contradicen matemáticamente sobre un
+   fondo tan oscuro (confirmado con la fórmula de luminancia relativa de
+   WCAG: un solo tono no llega a 4.5:1 en los dos usos a la vez). Por eso
+   cada color con las dos formas de uso está DUPLICADO en dos tokens:
+   - --color-rosado / --color-dorado / --color-alerta: para BOTONES
+     sólidos (bg-*) con texto blanco encima — más oscuros.
+   - --color-rosado-texto: para texto/íconos/links sueltos (text-*) sobre
+     fondo/superficie — más claro. (dorado y alerta no tienen "-texto"
+     porque su valor de botón ya cumplía de sobra como texto también —
+     solo rosado necesitaba las dos versiones separadas).
+   - --color-dorado-boton / --color-alerta-boton: variante SOLO para el
+     puñado de usos de botón/insignia sólida con texto blanco de esos dos
+     colores — el valor "de texto" (--color-dorado/--color-alerta) se
+     mantiene igual que antes, ya cumplía AA como texto. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-fondo: #201815;
+    --color-superficie: #2b211d;
+    --color-borde: #453832;
+    --color-texto-primario: #f5ece7;
+    --color-texto-secundario: #c2ada3;
+    --color-rosado: #a36476;
+    --color-rosado-texto: #be748a;
+    --color-rosado-suave: #241318;
+    --color-dorado: #bb8a45;
+    --color-dorado-boton: #966e37;
+    --color-dorado-suave: #2f2614;
+    --color-nude: #5c483d;
+    --color-exito: #92c088;
+    --color-exito-suave: #2c3a28;
+    --color-alerta: #d3703f;
+    --color-alerta-boton: #b35f36;
+    --color-alerta-suave: #2f1d12;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-fondo: #201815;
+  --color-superficie: #2b211d;
+  --color-borde: #453832;
+  --color-texto-primario: #f5ece7;
+  --color-texto-secundario: #c2ada3;
+  --color-rosado: #a36476;
+  --color-rosado-texto: #be748a;
+  --color-rosado-suave: #241318;
+  --color-dorado: #bb8a45;
+  --color-dorado-boton: #966e37;
+  --color-dorado-suave: #2f2614;
+  --color-nude: #5c483d;
+  --color-exito: #92c088;
+  --color-exito-suave: #2c3a28;
+  --color-alerta: #d3703f;
+  --color-alerta-boton: #b35f36;
+  --color-alerta-suave: #2f1d12;
 }
 
 @theme inline {
@@ -27,13 +95,16 @@
   --color-texto-primario: var(--color-texto-primario);
   --color-texto-secundario: var(--color-texto-secundario);
   --color-rosado: var(--color-rosado);
+  --color-rosado-texto: var(--color-rosado-texto);
   --color-rosado-suave: var(--color-rosado-suave);
   --color-dorado: var(--color-dorado);
+  --color-dorado-boton: var(--color-dorado-boton);
   --color-dorado-suave: var(--color-dorado-suave);
   --color-nude: var(--color-nude);
   --color-exito: var(--color-exito);
   --color-exito-suave: var(--color-exito-suave);
   --color-alerta: var(--color-alerta);
+  --color-alerta-boton: var(--color-alerta-boton);
   --color-alerta-suave: var(--color-alerta-suave);
   --font-titulo: var(--font-playfair);
   --font-cuerpo: var(--font-poppins);

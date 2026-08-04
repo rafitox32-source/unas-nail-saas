@@ -99,7 +99,7 @@ export default async function PaginaManicurista({
       <main className="flex-1">
         {/* Hero */}
         <section className="animar-aparecer flex flex-col items-center gap-6 px-6 py-24 text-center sm:py-32">
-          <Sparkles className="h-8 w-8 text-rosado" strokeWidth={1.5} />
+          <Sparkles className="h-8 w-8 text-rosado-texto" strokeWidth={1.5} />
           <h1 className="font-titulo max-w-2xl text-4xl font-semibold leading-tight text-texto-primario sm:text-5xl">
             {manicurista.nombre_negocio}
           </h1>
@@ -177,18 +177,18 @@ export default async function PaginaManicurista({
         {enlaceWhatsapp && (
           <a
             href={enlaceWhatsapp}
-            className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-rosado hover:underline"
+            className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-rosado-texto hover:underline"
           >
             <MessageCircle className="h-4 w-4" />
             Escribinos por WhatsApp →
           </a>
         )}
         <p className="mt-6 flex items-center justify-center gap-3 text-xs text-texto-secundario">
-          <a href="/terminos" className="hover:text-rosado hover:underline">
+          <a href="/terminos" className="hover:text-rosado-texto hover:underline">
             Términos
           </a>
           <span>·</span>
-          <a href="/privacidad" className="hover:text-rosado hover:underline">
+          <a href="/privacidad" className="hover:text-rosado-texto hover:underline">
             Privacidad
           </a>
         </p>

@@ -271,7 +271,7 @@ export function GestionInventario({
                 <p className="font-semibold text-texto-primario">
                   {insumo.nombre_insumo}
                   {bajoStock && (
-                    <span className="ml-2 rounded-full bg-alerta px-2 py-0.5 text-[11px] font-semibold text-white">
+                    <span className="ml-2 rounded-full bg-alerta-boton px-2 py-0.5 text-[11px] font-semibold text-white">
                       Reponer
                     </span>
                   )}
@@ -309,7 +309,7 @@ export function GestionInventario({
                   type="button"
                   onClick={() => abrirEdicion(insumo)}
                   aria-label="Editar insumo"
-                  className="flex items-center gap-1 text-xs font-semibold text-rosado transition-colors hover:text-texto-primario"
+                  className="flex items-center gap-1 text-xs font-semibold text-rosado-texto transition-colors hover:text-texto-primario"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                   Editar

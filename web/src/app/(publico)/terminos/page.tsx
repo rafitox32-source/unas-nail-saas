@@ -11,7 +11,7 @@ export default function PaginaTerminos() {
     <main className="mx-auto max-w-2xl flex-1 px-6 py-16">
       <Link
         href="/"
-        className="flex items-center gap-1.5 text-sm font-semibold text-rosado hover:underline"
+        className="flex items-center gap-1.5 text-sm font-semibold text-rosado-texto hover:underline"
       >
         <ArrowLeft className="h-4 w-4" /> Volver
       </Link>

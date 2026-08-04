@@ -32,7 +32,7 @@ export default async function PaginaAdmin() {
     <main className="mx-auto max-w-2xl flex-1 px-6 py-10">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-6 w-6 text-rosado" strokeWidth={1.75} />
+          <ShieldCheck className="h-6 w-6 text-rosado-texto" strokeWidth={1.75} />
           <h1 className="font-titulo text-2xl font-semibold text-texto-primario">
             Administración
           </h1>

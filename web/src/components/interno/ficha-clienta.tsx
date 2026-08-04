@@ -116,7 +116,7 @@ export function FichaClienta({
               type="button"
               onClick={canjearPremio}
               disabled={canjeando}
-              className="mt-3 flex items-center gap-1.5 rounded-full bg-dorado px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="mt-3 flex items-center gap-1.5 rounded-full bg-dorado-boton px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               {canjeando && <Loader2 className="h-4 w-4 animate-spin" />}
               {canjeando

@@ -87,7 +87,7 @@ export function ListaClientas({
             onClick={exportar}
             disabled={clientas.length === 0}
             aria-label="Exportar clientas a CSV"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-borde text-texto-secundario transition-colors hover:border-rosado hover:text-rosado disabled:opacity-40"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-borde text-texto-secundario transition-colors hover:border-rosado hover:text-rosado-texto disabled:opacity-40"
           >
             <Download className="h-4 w-4" />
           </button>

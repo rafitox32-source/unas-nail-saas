@@ -240,6 +240,19 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         `/panel/agenda` (`src/lib/csv.ts`, sin librería nueva — separador
         `;` porque Excel en español lo autodetecta mejor que `,`, y BOM
         UTF-8 para que no rompan tildes/ñ al abrir el archivo).
+- [x] **Fase 2, ítem 1 — Modo oscuro**: toggle sol/luna en la nav interna
+      (`src/components/interno/toggle-tema.tsx`) que guarda la preferencia
+      en `localStorage` (clave `tema`) y la aplica como `data-theme="dark"`/
+      `"light"` en `<html>`. Un script bloqueante inline en el `<head>` de
+      `layout.tsx` lee `localStorage` y fija el atributo ANTES del primer
+      paint (sin esto, hay un flash del tema equivocado al cargar). Sin
+      preferencia guardada, cae a `prefers-color-scheme` del sistema
+      operativo. Paleta oscura completa en `globals.css` (fondo/superficie/
+      borde/texto/acentos), aplicada también a la carta pública (hereda el
+      tema del navegador de la clienta, no solo del panel de la
+      manicurista). Ver trampas #26, #27 y #28 — esta feature encontró tres
+      problemas reales (dos de accesibilidad, uno de datos) que no se veían
+      con una sola pasada de axe-core "a ojo".
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -470,6 +483,71 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
     si no hay sesión). Lección: para cualquier archivo "especial" de
     metadata que necesite variar por request (no solo por build estático),
     usar un Route Handler normal, no la convención de archivo especial.
+26. **Un `Edit` con `replace_all: true` no garantiza tocar dos bloques
+    "idénticos" si su indentación difiere** — al armar el modo oscuro, el
+    bloque `@media (prefers-color-scheme: dark) { :root:not(...) { ... } }`
+    y el bloque `:root[data-theme="dark"] { ... }` tenían originalmente los
+    mismos valores de color, pero uno estaba anidado (más indentación) y
+    el otro no. Un `replace_all` con el `old_string` copiado de un bloque
+    solo emparejó ese bloque; el otro quedó con los valores viejos sin
+    ningún error ni aviso. Se malinterpretó primero como el bug ya conocido
+    de "CSS viejo servido por el dev server" (trampa #18) — se mató el
+    proceso, se borró `.next`, se reinició limpio, y el valor incorrecto
+    siguió igual, lo cual en realidad **descartó** la teoría del caché en
+    vez de confirmarla. Recién leyendo el archivo en disco con `Read` se
+    vio que el segundo bloque nunca se había tocado. **Lección**: si un
+    valor no cambia después de un `replace_all` que debería haber tocado
+    varios lugares "iguales", releer el archivo entero antes de asumir
+    caché — pueden no ser tan iguales como parecen (indentación,
+    espacios, un carácter distinto rompen el match silenciosamente).
+27. **Una variable CSS que se pisa por tenant (`--color-rosado` vía
+    `style={{ "--color-rosado": manicurista.color_marca }}`, ver
+    Personalización de marca) puede quedar seteada sin que la manicurista
+    lo haya pedido**, si el formulario que la guarda manda el campo
+    siempre, incluso con su valor por defecto. Pasó en `configuracion-
+    negocio.tsx`: `colorMarca` arrancaba en `COLOR_POR_DEFECTO` cuando
+    `manicurista.color_marca` era `null`, y `guardar()` mandaba
+    `color_marca: colorMarca` sin condición — cualquier guardado del
+    formulario (aunque solo se tocara "Política de cancelación", por
+    ejemplo) dejaba a la cuenta "pegada" a ese color para siempre, incluso
+    sin que la manicurista supiera que lo había elegido. Se encontró
+    recién al auditar el modo oscuro: la carta pública de la cuenta demo
+    mostraba el rosado claro fijo en vez del rosado oscuro adaptado al
+    tema, porque `color_marca` tenía el valor por defecto guardado de una
+    prueba anterior de Fase 1. **Fix**: un booleano `colorTocado`
+    (arranca en `manicurista.color_marca !== null`, pasa a `true` solo en
+    el `onChange` del selector de color) — el `update` solo manda
+    `color_marca` si `colorTocado` es `true`, si no manda `null` explícito.
+    **Lección**: cualquier campo de formulario con un valor por defecto
+    visual (no vacío) necesita distinguir "el usuario nunca tocó esto" de
+    "el usuario lo dejó en el valor por defecto a propósito" antes de
+    persistirlo — si no, un guardado no relacionado pisa silenciosamente
+    ese campo.
+28. **Un solo token de color no puede cumplir 4.5:1 a la vez como texto
+    sobre un fondo casi negro Y como fondo de botón sólido con texto
+    blanco encima** — son requisitos matemáticamente opuestos (texto sobre
+    fondo oscuro necesita ser CLARO; fondo de botón con texto blanco
+    necesita ser OSCURO), confirmado con un script de luminancia relativa
+    WCAG, no a ojo. `--color-rosado` en modo oscuro se probó una vez
+    "verificado" (ver comentario viejo en `globals.css`) pero en realidad
+    fallaba los dos usos a la vez (4.06 y 4.30, ninguno llega a 4.5).
+    **Fix real**: separar en dos tokens en vez de buscar un compromiso —
+    `--color-rosado` se dejó afinado para fondo de botón (usado en ~19
+    archivos, la mayoría), y se agregó `--color-rosado-texto` más claro
+    para texto/íconos/links sueltos (usado en ~20 archivos, con un script
+    de reemplazo mecánico en vez de editar uno por uno). `--color-dorado`
+    y `--color-alerta` tenían el problema al revés (buenos como texto,
+    malos como botón con texto blanco) pero solo se usan así en un lugar
+    cada uno (botón "Canjear premio" y la insignia "Reponer") — ahí se
+    agregó `--color-dorado-boton`/`--color-alerta-boton` en vez de tocar
+    el token principal, mucho más barato que duplicar todo el patrón de
+    "-texto". En modo claro los tokens nuevos son iguales al original
+    (no hay conflicto en esa dirección — texto y botón necesitan la misma
+    oscuridad contra un fondo claro), así que no cambia nada visualmente
+    ahí. **Lección**: antes de dar por buena una paleta de modo oscuro
+    "porque el texto blanco se ve bien arriba", medir el contraste real de
+    cada combinación fondo/primer-plano por separado — texto suelto y
+    botón sólido son dos problemas de contraste distintos, no el mismo.
 
 ## Pulido 1 — accesibilidad, mobile, contraste
 
@@ -702,7 +780,12 @@ cd "web" && vercel --prod
     vez de la vieja tarjeta estática de "Negocio". El color se aplica en
     la carta pública pisando `--color-rosado` en un wrapper de
     `[slug]/page.tsx` (Tailwind v4 ya usa esa variable en sus clases, no
-    hace falta tocar componente por componente).
+    hace falta tocar componente por componente). Solo se persiste
+    `color_marca` si la manicurista tocó el selector de color en esta
+    sesión o ya tenía uno guardado (`colorTocado`, ver trampa #27) — si
+    no, guardar cualquier otro campo del formulario dejaría un color por
+    defecto fijo sin que lo haya elegido, pisando el acento adaptado al
+    tema (claro/oscuro) de quien visite su página.
   - `app/(interno)/panel/manifest.webmanifest/route.ts` — manifest de PWA
     dinámico por sesión, ver Progreso y trampa #25. `public/icono-app.svg`
     + `icono-app-{180,192,512}.png` son el ícono genérico de respaldo
@@ -732,6 +815,18 @@ cd "web" && vercel --prod
     mismos nombres que `diseno-sistema/`. Ahí mismo viven las animaciones
     compartidas (`animar-aparecer`, `animar-hoja-modal`, etc.) y la regla de
     `font-size: 16px` en inputs (fix de zoom de iOS).
+  - Modo oscuro: `src/components/interno/toggle-tema.tsx` (toggle sol/luna
+    en la nav), script bloqueante inline en `layout.tsx` (fija `data-theme`
+    antes del primer paint), y en `globals.css` un `@media
+    (prefers-color-scheme: dark)` + `:root[data-theme="dark"]` con los
+    mismos valores en los dos (ver trampa #26 sobre por qué mantenerlos
+    sincronizados a mano es frágil). `--color-rosado`/`--color-dorado`/
+    `--color-alerta` están afinados para uso de BOTÓN sólido con texto
+    blanco; `--color-rosado-texto` (más claro) es el que hay que usar para
+    texto/íconos/links sueltos, y `--color-dorado-boton`/`--color-alerta-
+    boton` (más oscuros) para los pocos botones sólidos de esos dos
+    colores — ver trampa #28 antes de agregar un uso nuevo de cualquiera
+    de estos tres colores como fondo sólido o como texto suelto.
   - Íconos: `lucide-react` (instalado en `web/`).
   - `src/components/interno/generador-estados.tsx` — canvas + QR para
     estados de WhatsApp/redes, ver Progreso. Dependencia `qrcode` (+

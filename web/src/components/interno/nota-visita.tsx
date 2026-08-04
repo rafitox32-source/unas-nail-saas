@@ -116,7 +116,7 @@ export function NotaVisita({
       <button
         type="button"
         onClick={() => setAbierto((v) => !v)}
-        className="flex items-center gap-1.5 text-xs font-semibold text-rosado transition-colors hover:text-texto-primario"
+        className="flex items-center gap-1.5 text-xs font-semibold text-rosado-texto transition-colors hover:text-texto-primario"
       >
         {abierto ? (
           <ChevronUp className="h-3.5 w-3.5" />
