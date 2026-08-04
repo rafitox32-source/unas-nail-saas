@@ -8,6 +8,7 @@ export interface Manicurista {
   biografia: string | null;
   color_marca: string | null;
   slug_publico: string | null;
+  url_avatar: string | null;
 }
 
 export interface SesionManicurista {

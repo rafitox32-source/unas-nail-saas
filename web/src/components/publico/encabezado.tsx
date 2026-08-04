@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Sparkles, Menu, X } from "lucide-react";
 
-export function Encabezado({ nombreNegocio }: { nombreNegocio: string }) {
+export function Encabezado({
+  nombreNegocio,
+  urlAvatar,
+}: {
+  nombreNegocio: string;
+  urlAvatar?: string | null;
+}) {
   const [menuAbierto, setMenuAbierto] = useState(false);
 
   const enlaces = [
@@ -16,7 +22,16 @@ export function Encabezado({ nombreNegocio }: { nombreNegocio: string }) {
     <header className="sticky top-0 z-50 border-b border-borde bg-superficie/90 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-6 py-4">
         <span className="flex min-w-0 items-center gap-2 truncate font-titulo text-lg font-semibold text-texto-primario">
-          <Sparkles className="h-5 w-5 shrink-0 text-rosado" strokeWidth={1.75} />
+          {urlAvatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={urlAvatar}
+              alt=""
+              className="h-6 w-6 shrink-0 rounded-full object-cover"
+            />
+          ) : (
+            <Sparkles className="h-5 w-5 shrink-0 text-rosado" strokeWidth={1.75} />
+          )}
           <span className="truncate">{nombreNegocio}</span>
         </span>
 

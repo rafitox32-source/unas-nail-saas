@@ -11,7 +11,9 @@ async function obtenerManicurista(slug: string) {
 
   const { data: manicurista } = await supabase
     .from("usuarios_manicuristas")
-    .select("id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico")
+    .select(
+      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar",
+    )
     .eq("slug_publico", slug)
     .maybeSingle<Manicurista>();
 
@@ -84,8 +86,15 @@ export default async function PaginaManicurista({
   const enlaceWhatsapp = urlWhatsapp(manicurista.telefono, manicurista.nombre_negocio);
 
   return (
-    <>
-      <Encabezado nombreNegocio={manicurista.nombre_negocio} />
+    <div
+      className="flex flex-1 flex-col"
+      style={
+        manicurista.color_marca
+          ? ({ "--color-rosado": manicurista.color_marca } as React.CSSProperties)
+          : undefined
+      }
+    >
+      <Encabezado nombreNegocio={manicurista.nombre_negocio} urlAvatar={manicurista.url_avatar} />
 
       <main className="flex-1">
         {/* Hero */}
@@ -174,6 +183,6 @@ export default async function PaginaManicurista({
           </a>
         )}
       </footer>
-    </>
+    </div>
   );
 }

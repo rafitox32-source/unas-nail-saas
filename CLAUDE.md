@@ -114,6 +114,31 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       sumar un 7mo ítem a la nav (trap #8). Ver trampa #24 — encontré un
       bug real de recursión infinita en RLS al construir esto, no al leer
       el código.
+- [x] Personalización de marca: nombre del negocio, teléfono, biografía,
+      color de marca y logo, todo editable desde `/panel` (Inicio) — la
+      base ya tenía las columnas (`color_marca`, `url_avatar`) desde el
+      esquema inicial, solo faltaba la pantalla. `src/components/interno/
+      configuracion-negocio.tsx`, reemplaza la tarjeta estática de
+      "Negocio" que había antes. El logo se sube al mismo bucket público
+      `fotos-galeria` (carpeta `{id}/logo-...`, no una tabla nueva — no
+      hace falta reordenar/borrar como las fotos de trabajos, un solo
+      campo `url_avatar` alcanza). Dirección de página (`slug_publico`)
+      también editable con el mismo chequeo de disponibilidad en vivo que
+      el registro, salvo que no se vuelve a pedir si no cambió (si no,
+      `slug_disponible` la marca como "ocupada" por chocar contra sí
+      misma) y con aviso de que cambiar la URL rompe links viejos.
+      El color de marca se aplica en la carta pública sobreescribiendo la
+      variable CSS `--color-rosado` en un `<div style={...}>` que envuelve
+      todo `[slug]/page.tsx` — Tailwind v4 ya generaba las clases
+      (`bg-rosado`, `text-rosado`, etc.) como `var(--color-rosado)`, así
+      que sobreescribir la variable en un ancestro alcanza sin tocar cada
+      componente público uno por uno. Solo se pisa `--color-rosado` (el
+      acento principal); los tonos `-suave` derivados quedan sin tocar por
+      ahora (no hay cálculo de tinte automático desde un hex arbitrario,
+      quedó fuera de alcance). El logo reemplaza el ícono de Sparkles en
+      el header público si está cargado. Probado de punta a punta:
+      cambiar nombre + color + subir logo, verificado en la carta pública
+      real (color del botón, nombre, logo en el header).
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -545,6 +570,12 @@ cd "web" && vercel --prod
     fotos de la galería pública, se renderiza debajo de
     `gestion-servicios.tsx` en `/panel/servicios` (mismo patrón: sin ruta ni
     ítem de nav nuevo, ver trampa #8)
+  - `src/components/interno/configuracion-negocio.tsx` — nombre, teléfono,
+    biografía, color de marca y logo, se renderiza en `/panel` (Inicio) en
+    vez de la vieja tarjeta estática de "Negocio". El color se aplica en
+    la carta pública pisando `--color-rosado` en un wrapper de
+    `[slug]/page.tsx` (Tailwind v4 ya usa esa variable en sus clases, no
+    hace falta tocar componente por componente).
   - `src/components/campo-con-icono.tsx` — input con ícono a la izquierda,
     compartido entre `modal-reserva.tsx`, `registro/page.tsx` e
     `ingresar/page.tsx`. **No usar en `type="date"`/`type="time"`** (trampa #16).

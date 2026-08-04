@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Users, CalendarClock, PackageOpen, ExternalLink, Sparkles, ShieldCheck } from "lucide-react";
+import { Users, CalendarClock, PackageOpen, ExternalLink, ShieldCheck } from "lucide-react";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
+import { ConfiguracionNegocio } from "@/components/interno/configuracion-negocio";
 import type { Manicurista } from "@/lib/tipos";
 
 export default async function PaginaPanel() {
@@ -12,7 +13,7 @@ export default async function PaginaPanel() {
   const { data: manicurista } = await supabase
     .from("usuarios_manicuristas")
     .select(
-      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, es_admin",
+      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, es_admin",
     )
     .eq("id", usuario!.id)
     .maybeSingle<Manicurista & { es_admin: boolean }>();
@@ -104,25 +105,20 @@ export default async function PaginaPanel() {
         )}
 
         {manicurista ? (
-          <div className="mt-6 rounded-2xl border border-borde bg-superficie p-6 shadow-sm">
-            <p className="flex items-center gap-1.5 text-sm text-texto-secundario">
-              <Sparkles className="h-4 w-4" /> Negocio
-            </p>
-            <p className="font-titulo text-lg font-semibold text-texto-primario">
-              {manicurista.nombre_negocio}
-            </p>
+          <>
             {manicurista.slug_publico && (
               <a
                 href={`/${manicurista.slug_publico}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-rosado hover:underline"
+                className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-rosado hover:underline"
               >
                 Ver mi página pública
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             )}
-          </div>
+            <ConfiguracionNegocio manicurista={manicurista} />
+          </>
         ) : (
           <p className="mt-8 text-sm text-texto-secundario">
             Todavía no encontramos tu perfil de negocio.
