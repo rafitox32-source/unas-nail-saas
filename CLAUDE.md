@@ -382,8 +382,9 @@ probar el LTV):
 ```
 usuario: aurora
 password: DemoPass123!
-slug público: aurora-nails → http://localhost:3000/aurora-nails
-panel: http://localhost:3000/panel
+slug público: aurora-nails
+local: http://localhost:3000/aurora-nails · http://localhost:3000/panel
+producción: https://unas-nail-saas.vercel.app/aurora-nails · /panel
 ```
 
 (Antes se ingresaba con `demo.aurora@nailartist.test` — se migró a login por
@@ -400,8 +401,27 @@ Build de verificación antes de dar algo por terminado:
 cd "web" && npm run build
 ```
 
+Deploy a producción (CLI de Vercel ya logueado en esta máquina como
+`rafitox32-source`, equipo `black-house-os`):
+```bash
+cd "web" && vercel --prod
+```
+
 ## Referencia técnica
 
+- **Vercel**: proyecto `unas-nail-saas`, equipo `black-house-os` (mismo
+  equipo que los otros proyectos del dueño, no es nada especial de este
+  SaaS). Directorio raíz del proyecto en Vercel: `web/` (el repo tiene
+  `supabase/` y `diseno-sistema/` como hermanos, no todo vive en la raíz).
+  Variables de entorno (`NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY`) cargadas en Production/Preview/
+  Development vía `vercel env add`. URL de producción:
+  `https://unas-nail-saas.vercel.app` — este es el link real para pasarle
+  a manicuristas nuevas (`/registro`) y a sus clientas (`/<slug>`).
+- **GitHub**: `https://github.com/rafitox32-source/unas-nail-saas`, rama
+  `main`. El repo se creó recién en esta sesión — antes el proyecto no
+  tenía control de versiones. `web/` tenía su propio `.git` suelto (residuo
+  de `create-next-app`) que se eliminó para que todo viva en un solo repo.
 - **Supabase**: proyecto `nail-artist-saas`, id `iaqubsplqtlhzalodnlk`, región
   `sa-east-1`, org `rafitox32-source's Org`. Plan free ($0/mes).
   URL: `https://iaqubsplqtlhzalodnlk.supabase.co`
