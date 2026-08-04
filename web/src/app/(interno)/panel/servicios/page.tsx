@@ -2,13 +2,19 @@ import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { GestionPersonal } from "@/components/interno/gestion-personal";
 import { GestionServicios } from "@/components/interno/gestion-servicios";
 import { GestionGaleria } from "@/components/interno/gestion-galeria";
-import type { ServicioAdmin, FotoGaleria, FotoGaleriaAdmin, Personal } from "@/lib/tipos";
+import type { ServicioAdmin, FotoGaleria, FotoGaleriaAdmin, Personal, TipoNegocio } from "@/lib/tipos";
 
 export default async function PaginaServicios() {
   const supabase = await crearClienteServidor();
   const {
     data: { user: usuario },
   } = await supabase.auth.getUser();
+
+  const { data: cuenta } = await supabase
+    .from("usuarios_manicuristas")
+    .select("tipo_negocio")
+    .eq("id", usuario!.id)
+    .maybeSingle<{ tipo_negocio: TipoNegocio }>();
 
   const { data: personal } = await supabase
     .from("personal")
@@ -44,6 +50,7 @@ export default async function PaginaServicios() {
           idManicurista={usuario!.id}
           serviciosIniciales={servicios ?? []}
           personal={personal ?? []}
+          tipoNegocio={cuenta?.tipo_negocio ?? "uñas"}
         />
       </div>
       <GestionGaleria idManicurista={usuario!.id} fotosIniciales={fotosConUrl} />

@@ -18,6 +18,14 @@ import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { generarSlug } from "@/lib/slug";
 import { emailInternoDesdeUsuario } from "@/lib/autenticacion";
 import { CampoConIcono } from "@/components/campo-con-icono";
+import type { TipoNegocio } from "@/lib/tipos";
+
+const ETIQUETA_TIPO_NEGOCIO: Record<TipoNegocio, string> = {
+  uñas: "Uñas",
+  pestañas: "Pestañas",
+  cabello: "Peluquería",
+  spa_completo: "Spa completo (de todo un poco)",
+};
 
 const MENSAJE_FALTA_CONFIRM_EMAIL_OFF =
   'El proyecto todavía tiene activada la confirmación por email en Supabase Auth, y acá no usamos emails reales. Hay que apagar "Confirm email" en el panel de Supabase (Authentication → Sign In / Up → Email) para que las cuentas queden activas al crearse.';
@@ -42,6 +50,7 @@ export default function PaginaRegistro() {
   const router = useRouter();
 
   const [nombreNegocio, setNombreNegocio] = useState("");
+  const [tipoNegocio, setTipoNegocio] = useState<TipoNegocio>("uñas");
   const [slug, setSlug] = useState("");
   const [slugEditadoAMano, setSlugEditadoAMano] = useState(false);
   const [nombreCompleto, setNombreCompleto] = useState("");
@@ -116,6 +125,7 @@ export default function PaginaRegistro() {
       options: {
         data: {
           nombre_negocio: nombreNegocio,
+          tipo_negocio: tipoNegocio,
           nombre_completo: nombreCompleto,
           telefono: telefono || null,
           slug_publico: slug,
@@ -182,6 +192,21 @@ export default function PaginaRegistro() {
               onChange={(e) => setNombreNegocio(e.target.value)}
               className="bg-superficie"
             />
+          </label>
+
+          <label className="text-sm text-texto-secundario">
+            ¿A qué te dedicás?
+            <select
+              value={tipoNegocio}
+              onChange={(e) => setTipoNegocio(e.target.value as TipoNegocio)}
+              className="mt-1 w-full rounded-xl border border-borde bg-superficie px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+            >
+              {Object.entries(ETIQUETA_TIPO_NEGOCIO).map(([valor, etiqueta]) => (
+                <option key={valor} value={valor}>
+                  {etiqueta}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label className="text-sm text-texto-secundario">

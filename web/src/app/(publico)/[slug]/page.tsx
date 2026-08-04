@@ -90,7 +90,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const datos = await obtenerManicurista(slug);
-  if (!datos) return { title: "Nail Artist" };
+  if (!datos) return { title: "Florece" };
   return {
     title: datos.manicurista.nombre_negocio,
     description: datos.manicurista.biografia ?? undefined,

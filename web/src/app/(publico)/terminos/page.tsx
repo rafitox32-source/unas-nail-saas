@@ -27,7 +27,7 @@ export default function PaginaTerminos() {
             1. Qué es esta plataforma
           </h2>
           <p className="mt-2">
-            Esta plataforma ofrece a manicuristas y estudios de uñas ("negocios") una página
+            Esta plataforma ofrece a profesionales y estudios de belleza ("negocios") una página
             pública para mostrar sus servicios y recibir reservas, junto con un panel de
             administración para gestionar su agenda, clientas e inventario. No somos dueños de
             los negocios que operan acá — cada uno es independiente y responsable de la

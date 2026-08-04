@@ -27,13 +27,13 @@ export default function PaginaPrivacidad() {
             1. Qué datos recolectamos
           </h2>
           <p className="mt-2">
-            De las <strong className="text-texto-primario">manicuristas y negocios</strong>:
+            De las <strong className="text-texto-primario">profesionales y negocios</strong>:
             nombre del negocio, nombre completo, teléfono, nombre de usuario y contraseña
             (guardada de forma cifrada, nunca en texto plano).
           </p>
           <p className="mt-2">
             De las <strong className="text-texto-primario">clientas</strong>: nombre y teléfono
-            al reservar un turno. Si la manicurista lo carga, también alergias, notas internas y
+            al reservar un turno. Si el negocio lo carga, también alergias, notas internas y
             fotos asociadas a una visita — esta información la administra cada negocio, no
             nosotros.
           </p>
@@ -45,7 +45,7 @@ export default function PaginaPrivacidad() {
           </h2>
           <p className="mt-2">
             Exclusivamente para operar la plataforma: mostrar la carta pública de cada negocio,
-            gestionar reservas, y darle a cada manicurista las herramientas de su panel (agenda,
+            gestionar reservas, y darle a cada negocio las herramientas de su panel (agenda,
             clientas, inventario). No usamos estos datos con fines publicitarios ni los vendemos
             a terceros.
           </p>

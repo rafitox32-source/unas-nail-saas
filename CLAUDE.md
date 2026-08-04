@@ -1,8 +1,19 @@
-# Uñas — SaaS para Nail Artists
+# Florece — SaaS para spas y estudios de belleza
 
 SaaS multi-inquilino: carta pública + reservas con seña para clientas, back-office
-para manicuristas. Todo el código (tablas, componentes, variables) en español,
-sin spanglish. Mobile-first.
+para negocios de belleza (uñas, pestañas, peluquería o spa completo). Nació como un
+producto solo de uñas ("Nail Artist") — desde la Fase 3 de spa multi-servicio se
+generalizó a cualquier rubro de belleza, con "Florece" como nombre nuevo. El código
+(tablas, componentes, variables) sigue en español, sin spanglish. Mobile-first.
+
+**Nota sobre el nombre**: "Florece" y la nueva categorización llegaron en la Fase 3
+del plan de spa multi-servicio, elegido por Claude a pedido explícito del dueño
+("ponle algún nombre que identifique spa beauty y organización") — no es una
+decisión de branding definitiva, el logo/paleta final quedan pendientes de
+trabajarse en claude.ai/design como se hizo la primera vez. La carpeta del
+proyecto y el repo siguen llamándose "uñas" — no se renombraron (cambiar eso
+rompería el link de Vercel, el remoto de git y todas las rutas absolutas
+documentadas acá), es solo el nombre de archivo interno, no algo que vea nadie.
 
 Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la sección
 "Progreso" y "Decisiones y trampas" — ahorra tener que releer todo el código.
@@ -495,10 +506,53 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         confirmado que el servicio de una empleada manda su
         `p_id_empleado` real y un servicio sin asignar manda `null`
         exacto (regresión completa a nivel de UI, no solo de base).
-      - **Fuera de esta fase, confirmado con el dueño, sesión aparte**:
-        Fase 3 (rebrand — nuevo nombre/paleta, arranca en
-        claude.ai/design, reemplazo de las strings "manicurista"/"Nail
-        Artist" que quedan).
+- [x] **Spa multi-servicio, Fase 3 — rebrand parcial + tipo de negocio**:
+      - **Nombre nuevo**: "Nail Artist"/"Uñas" → **"Florece"** en los 3
+        lugares donde aparecía como marca (`app/layout.tsx` metadata,
+        `(publico)/page.tsx` — el placeholder de portada del dominio
+        raíz —, y el fallback de `[slug]/page.tsx` cuando el slug no
+        existe). Elegido por Claude a pedido explícito ("que
+        identifique spa beauty y organización"), **no** es la palabra
+        final del dueño — el logo/paleta definitivos quedan para
+        claude.ai/design, ver la nota al principio de este archivo.
+      - **Texto genérico**: las ~6 strings reales que decían
+        "manicurista(s)" en copy visible (`/terminos`, `/privacidad`,
+        `/admin`) pasaron a "profesional"/"negocio". **No** se tocó
+        ningún identificador de base de datos ni tipo TypeScript
+        (`usuarios_manicuristas`, `id_manicurista`, `Manicurista`,
+        `idManicurista` como prop, etc.) — eso es un refactor mucho más
+        grande y riesgoso (RLS, RPCs, decenas de archivos) que
+        deliberadamente quedó fuera de esta fase; ver la exploración
+        completa en el plan (`snug-dazzling-thompson.md`) si algún día
+        se decide encararlo.
+      - **Selector de tipo de negocio al registrarse**: columna nueva
+        `usuarios_manicuristas.tipo_negocio` (`cabello`/`pestañas`/
+        `uñas`/`spa_completo`, default `'uñas'` para no romper cuentas
+        viejas) + selector "¿A qué te dedicás?" en `/registro`, guardado
+        vía metadata de Auth igual que `nombre_negocio`/`usuario`
+        (`manejar_nuevo_usuario` actualizado para leerlo — mismo
+        trigger, sin cambiar su firma). Es **informativo**, no
+        restringe qué categorías de servicio puede cargar el negocio
+        después.
+      - Se usa como categoría sugerida (no forzada) al abrir "Agregar
+        servicio" por primera vez: `cabello`/`pestañas`/`uñas` mapean
+        directo, `spa_completo` cae en `uñas` por no tener un
+        equivalente obvio en `servicios.categoria` (que no tiene un
+        valor "de todo", solo `otro` como comodín genérico).
+      - Probado de punta a punta: registro real con el selector
+        (`tipo_negocio` guardado correcto en la base, cuenta quedó
+        `pendiente` como corresponde, cuenta de prueba borrada después
+        vía `delete from auth.users` — el cascade se lleva el perfil
+        solo), regresión de login normal, 0 violaciones axe en
+        `/terminos`/`/privacidad`/`/registro`, y confirmado que
+        `manejar_nuevo_usuario` sigue sin `EXECUTE` para `anon`/
+        `authenticated` después del `create or replace` (trampa #3).
+      - **Pendiente, no es código**: manual PDF (`Manual para
+        Manicuristas.pdf`) todavía dice "manicuristas" de punta a
+        punta — no se tocó en esta fase (no es parte del build, es un
+        documento generado aparte, ver la nota en "Cómo probar"). Logo
+        y paleta definitivos: arrancar en claude.ai/design cuando el
+        dueño tenga tiempo para esa sesión.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -1078,8 +1132,14 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   usuario de login (no confundir con `slug_publico`, que es la URL pública
   — pueden ser distintos). Ver trampa #23 y la entrada de Progreso sobre
   login sin email.
+- **`usuarios_manicuristas.tipo_negocio`**: `cabello`/`pestañas`/`uñas`/
+  `spa_completo`, default `'uñas'`, declarado al registrarse (ver Progreso
+  "Spa multi-servicio, Fase 3"). Informativo — no restringe categorías de
+  servicio, solo sugiere la categoría por defecto al cargar el primer
+  servicio (`gestion-servicios.tsx`, función `categoriaSugerida()`).
 - **Triggers**: `actualizar_marca_de_tiempo` (todas las tablas con
-  `actualizado_en`), `manejar_nuevo_usuario` (crea perfil al registrarse),
+  `actualizado_en`), `manejar_nuevo_usuario` (crea perfil al registrarse,
+  ahora también lee `tipo_negocio` de la metadata de Auth),
   `actualizar_metricas_clienta` (antes `actualizar_ltv_clienta`; al completar
   una cita suma LTV **y** incrementa `clientas.visitas_completadas` en el
   mismo `UPDATE`, ver trampa #20).

@@ -15,7 +15,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Nail Artist",
+  title: "Florece",
   description: "Reservá tu cita y descubrí nuestros servicios",
 };
 

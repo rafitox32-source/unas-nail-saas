@@ -40,7 +40,7 @@ export default async function PaginaAdmin() {
         <BotonCerrarSesion />
       </div>
       <p className="mt-1 text-sm text-texto-secundario">
-        Aprobá o rechazá el registro de nuevas manicuristas.
+        Aprobá o rechazá el registro de nuevos negocios.
       </p>
 
       <GestionCuentas cuentasIniciales={cuentas ?? []} />

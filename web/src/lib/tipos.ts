@@ -1,5 +1,10 @@
 export type EstadoCuenta = "pendiente" | "aprobada" | "rechazada";
 
+// Declarado al registrarse: en qué se especializa el negocio, o si ofrece
+// de todo (spa_completo). Informativo — no restringe qué categorías de
+// servicio puede cargar después.
+export type TipoNegocio = "cabello" | "pestañas" | "uñas" | "spa_completo";
+
 export interface Manicurista {
   id: string;
   nombre_negocio: string;

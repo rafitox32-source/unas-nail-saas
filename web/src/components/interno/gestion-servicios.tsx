@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, Power, Loader2, Sparkles } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { formateadorPrecio } from "@/lib/formato";
-import type { ServicioAdmin, Personal, CategoriaServicio } from "@/lib/tipos";
+import type { ServicioAdmin, Personal, CategoriaServicio, TipoNegocio } from "@/lib/tipos";
 
 interface ValoresFormulario {
   nombre: string;
@@ -16,22 +16,22 @@ interface ValoresFormulario {
   id_empleado: string;
 }
 
-const VACIO: ValoresFormulario = {
-  nombre: "",
-  descripcion: "",
-  precio: "",
-  duracion_minutos: "",
-  monto_seña: "",
-  categoria: "uñas",
-  id_empleado: "",
-};
-
 const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
   cabello: "Cabello",
   pestañas: "Pestañas",
   uñas: "Uñas",
   otro: "Otro",
 };
+
+// tipo_negocio (declarado al registrarse) no tiene un "otro"/"spa_completo"
+// equivalente en categoria de servicios — para spa_completo no hay una
+// categoría obvia por defecto, así que cae en "uñas" como el resto.
+function categoriaSugerida(tipoNegocio: TipoNegocio): CategoriaServicio {
+  if (tipoNegocio === "cabello" || tipoNegocio === "pestañas" || tipoNegocio === "uñas") {
+    return tipoNegocio;
+  }
+  return "uñas";
+}
 
 const columnas =
   "id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, activo";
@@ -40,21 +40,32 @@ export function GestionServicios({
   idManicurista,
   serviciosIniciales,
   personal,
+  tipoNegocio,
 }: {
   idManicurista: string;
   serviciosIniciales: ServicioAdmin[];
   personal: Personal[];
+  tipoNegocio: TipoNegocio;
 }) {
+  const vacio: ValoresFormulario = {
+    nombre: "",
+    descripcion: "",
+    precio: "",
+    duracion_minutos: "",
+    monto_seña: "",
+    categoria: categoriaSugerida(tipoNegocio),
+    id_empleado: "",
+  };
   const [servicios, setServicios] = useState(serviciosIniciales);
   const [formularioAbierto, setFormularioAbierto] = useState(false);
   const [editandoId, setEditandoId] = useState<string | null>(null);
-  const [valores, setValores] = useState<ValoresFormulario>(VACIO);
+  const [valores, setValores] = useState<ValoresFormulario>(vacio);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function abrirNuevo() {
     setEditandoId(null);
-    setValores(VACIO);
+    setValores(vacio);
     setFormularioAbierto(true);
     setError(null);
   }
