@@ -52,7 +52,11 @@ export function ModalReserva({
     setCargandoHorarios(true);
     setHora("");
     supabase
-      .rpc("horarios_ocupados", { p_id_manicurista: idManicurista, p_fecha: fecha })
+      .rpc("horarios_ocupados", {
+        p_id_manicurista: idManicurista,
+        p_fecha: fecha,
+        p_id_empleado: servicio.id_empleado,
+      })
       .then(({ data }) => {
         if (cancelado) return;
         setHorariosOcupados(data ?? []);
@@ -61,7 +65,7 @@ export function ModalReserva({
     return () => {
       cancelado = true;
     };
-  }, [fecha, idManicurista]);
+  }, [fecha, idManicurista, servicio.id_empleado]);
 
   useEffect(() => {
     const codigo = codigoPromocional.trim();
@@ -254,6 +258,7 @@ export function ModalReserva({
                 <div className="mt-1 rounded-xl border border-borde bg-fondo p-3">
                   <CalendarioDisponibilidad
                     idManicurista={idManicurista}
+                    idEmpleado={servicio.id_empleado}
                     duracionMinutos={servicio.duracion_minutos}
                     fechaSeleccionada={fecha}
                     onSeleccionar={setFecha}

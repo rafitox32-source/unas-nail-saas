@@ -4,8 +4,9 @@ import { Sparkles, Phone, MessageCircle, Image as ImageIcon } from "lucide-react
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { Encabezado } from "@/components/publico/encabezado";
 import { SeccionServicios } from "@/components/publico/seccion-servicios";
+import { SeccionEquipo } from "@/components/publico/seccion-equipo";
 import { SeccionResenas } from "@/components/publico/seccion-resenas";
-import type { Manicurista, Servicio, FotoGaleria, ResenaPublica } from "@/lib/tipos";
+import type { Manicurista, Servicio, FotoGaleria, ResenaPublica, Personal } from "@/lib/tipos";
 
 async function obtenerManicurista(slug: string) {
   const supabase = await crearClienteServidor();
@@ -28,6 +29,14 @@ async function obtenerManicurista(slug: string) {
     .order("precio", { ascending: true })
     .returns<Servicio[]>();
 
+  const { data: personal } = await supabase
+    .from("personal")
+    .select("id, nombre, categoria, url_foto, activo")
+    .eq("id_negocio", manicurista.id)
+    .eq("activo", true)
+    .order("creado_en", { ascending: true })
+    .returns<Personal[]>();
+
   const { data: fotos } = await supabase
     .from("fotos_galeria")
     .select("id, ruta_archivo, orden")
@@ -47,7 +56,13 @@ async function obtenerManicurista(slug: string) {
     .order("creado_en", { ascending: false })
     .returns<ResenaPublica[]>();
 
-  return { manicurista, servicios: servicios ?? [], urlsGaleria, resenas: resenas ?? [] };
+  return {
+    manicurista,
+    servicios: servicios ?? [],
+    personal: personal ?? [],
+    urlsGaleria,
+    resenas: resenas ?? [],
+  };
 }
 
 function urlWhatsapp(telefono: string | null, nombreNegocio: string) {
@@ -91,7 +106,7 @@ export default async function PaginaManicurista({
   const datos = await obtenerManicurista(slug);
   if (!datos) notFound();
 
-  const { manicurista, servicios, urlsGaleria, resenas } = datos;
+  const { manicurista, servicios, personal, urlsGaleria, resenas } = datos;
   const enlaceWhatsapp = urlWhatsapp(manicurista.telefono, manicurista.nombre_negocio);
 
   return (
@@ -128,11 +143,15 @@ export default async function PaginaManicurista({
         {/* Servicios */}
         <SeccionServicios
           servicios={servicios}
+          personal={personal}
           idManicurista={manicurista.id}
           nombreNegocio={manicurista.nombre_negocio}
           urlWhatsapp={enlaceWhatsapp}
           politicaCancelacion={manicurista.politica_cancelacion}
         />
+
+        {/* Equipo */}
+        <SeccionEquipo personal={personal} />
 
         {/* Galería */}
         <section id="galeria" className="border-t border-borde bg-superficie px-6 py-16">

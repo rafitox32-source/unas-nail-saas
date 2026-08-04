@@ -458,11 +458,47 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         horario para las dos NO choca, pero reservar dos veces para la
         misma empleada SÍ choca. `get_advisors` sin novedades más allá
         del mismo patrón ya aceptado.
-      - **Fuera de esta fase, confirmado con el dueño, cada una su propia
-        sesión**: Fase 2 (flujo público — agrupar por categoría, elegir
-        empleada al reservar) y Fase 3 (rebrand — nuevo nombre/paleta,
-        arranca en claude.ai/design, reemplazo de las strings
-        "manicurista"/"Nail Artist" que quedan).
+- [x] **Spa multi-servicio, Fase 2 — flujo público**: la carta pública
+      ahora agrupa los servicios por categoría (cabello/pestañas/uñas/
+      otro) — **solo si hay más de una categoría presente**; con una
+      sola (el caso de casi todas las cuentas hoy, todo por defecto
+      `'uñas'`) se ve exactamente igual que antes, sin encabezados de
+      categoría de más. Cada tarjeta de servicio muestra el nombre de
+      la profesional asignada, si tiene una. Sección nueva "Nuestro
+      equipo" (`seccion-equipo.tsx`, mismo patrón que `seccion-
+      resenas.tsx`: se auto-oculta si no hay personal activo) con
+      avatar/foto, nombre y categoría de cada una.
+      - **Elegir empleada se infiere del servicio, no hay un selector
+        aparte** — como cada `servicios.id_empleado` ya define quién lo
+        ofrece (cargado en el panel, Fase 1), la clienta no elige
+        empleada explícitamente: reserva el servicio y la empleada
+        queda determinada sola. Si dos empleadas ofrecen "lo mismo", el
+        negocio carga dos servicios separados (ej. "Manicura — Camila"
+        y "Manicura — Vale") — más simple que una relación
+        muchos-a-muchos servicio↔personal, suficiente para esta fase.
+      - `ModalReserva`/`CalendarioDisponibilidad` ahora mandan
+        `servicio.id_empleado` como `p_id_empleado` a `horarios_ocupados`/
+        `horarios_ocupados_mes`. `crear_apartado` no necesitó ningún
+        cambio de cliente — ya leía `servicios.id_empleado` server-side
+        desde la Fase 1.
+      - **RLS nueva**: `personal` solo tenía política del dueño (Fase 1,
+        a propósito — en ese momento nada la consultaba desde afuera).
+        Esta fase sí necesita leerla públicamente (para "Nuestro
+        equipo" y resolver nombres en las tarjetas), así que se agregó
+        `publico_ve_personal_activo` (select, anon, `activo = true`) —
+        mismo patrón que `publico_ve_servicios_activos`.
+      - Probado de punta a punta: regresión sin personal (0 cambios
+        visibles, 0 violaciones axe), con 2 empleadas de prueba y
+        categorías distintas (agrupación visible, tarjetas de equipo,
+        nombre de profesional en la tarjeta correcta), y — interceptando
+        las requests reales del navegador, no solo por RPC directo —
+        confirmado que el servicio de una empleada manda su
+        `p_id_empleado` real y un servicio sin asignar manda `null`
+        exacto (regresión completa a nivel de UI, no solo de base).
+      - **Fuera de esta fase, confirmado con el dueño, sesión aparte**:
+        Fase 3 (rebrand — nuevo nombre/paleta, arranca en
+        claude.ai/design, reemplazo de las strings "manicurista"/"Nail
+        Artist" que quedan).
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -999,10 +1035,12 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   se encontró de paso construyendo esto).
 - **`personal`**: `id_negocio` (FK a `usuarios_manicuristas`), `nombre`,
   `categoria` (`cabello`/`pestañas`/`uñas`/`otro`), `url_foto`, `activo`.
-  RLS igual que el resto (`auth.uid() = id_negocio`). `servicios.
+  RLS: `manicurista_administra_su_personal` (dueña, `auth.uid() =
+  id_negocio`) **y** `publico_ve_personal_activo` (select, anon,
+  `activo = true` — agregada en la Fase 2, no en la 1). `servicios.
   id_empleado`, `citas_apartados.id_empleado` y `bloqueos_agenda.
   id_empleado` (los tres nullable) referencian esta tabla — ver Progreso
-  "Spa multi-servicio, Fase 1" y el plan completo en
+  "Spa multi-servicio, Fase 1" y "Fase 2", y el plan completo en
   `C:\Users\BLACK HOUSE\.claude\plans\snug-dazzling-thompson.md`.
 - **`suscripciones_push`**: `endpoint` (único), `p256dh`, `auth`,
   `id_manicurista`. RLS normal (dueña administra las suyas). Leídas desde
@@ -1161,6 +1199,14 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
     reciben `personal` para el filtro/selector — todos ocultan la UI de
     personal por completo si la cuenta no cargó a nadie (trampa #8, y
     ver Progreso "Spa multi-servicio, Fase 1").
+  - `src/components/publico/seccion-equipo.tsx` — "Nuestro equipo" en la
+    carta pública, mismo patrón de auto-ocultarse que `seccion-
+    resenas.tsx`. `seccion-servicios.tsx` agrupa por categoría (solo si
+    hay más de una presente) y resuelve el nombre de la profesional
+    para `tarjeta-servicio.tsx`. `modal-reserva.tsx` y `calendario-
+    disponibilidad.tsx` mandan `servicio.id_empleado` como
+    `p_id_empleado` a las RPC de disponibilidad — ver Progreso "Spa
+    multi-servicio, Fase 2".
   - `src/components/interno/tour-bienvenida.tsx` — modal de bienvenida de
     5 pasos en `/panel`, ver Progreso Fase 2 ítem 4. Se muestra solo si
     `usuarios_manicuristas.tour_completado` es `false` (estado de cuenta

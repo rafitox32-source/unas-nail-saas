@@ -19,11 +19,13 @@ function fechaISOLocal(anio: number, mes: number, dia: number) {
 
 export function CalendarioDisponibilidad({
   idManicurista,
+  idEmpleado,
   duracionMinutos,
   fechaSeleccionada,
   onSeleccionar,
 }: {
   idManicurista: string;
+  idEmpleado?: string | null;
   duracionMinutos: number;
   fechaSeleccionada: string;
   onSeleccionar: (fecha: string) => void;
@@ -42,6 +44,7 @@ export function CalendarioDisponibilidad({
         p_id_manicurista: idManicurista,
         p_anio: mesVisible.getFullYear(),
         p_mes: mesVisible.getMonth() + 1,
+        p_id_empleado: idEmpleado ?? null,
       })
       .then(({ data }) => {
         if (cancelado) return;
@@ -51,7 +54,7 @@ export function CalendarioDisponibilidad({
     return () => {
       cancelado = true;
     };
-  }, [idManicurista, mesVisible]);
+  }, [idManicurista, idEmpleado, mesVisible]);
 
   const anio = mesVisible.getFullYear();
   const mes = mesVisible.getMonth();

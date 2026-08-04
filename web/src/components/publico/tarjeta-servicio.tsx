@@ -1,12 +1,14 @@
-import { Sparkles, Clock } from "lucide-react";
+import { Sparkles, Clock, User } from "lucide-react";
 import { formateadorPrecio } from "@/lib/formato";
 import type { Servicio } from "@/lib/tipos";
 
 export function TarjetaServicio({
   servicio,
+  nombreEmpleado,
   onReservar,
 }: {
   servicio: Servicio;
+  nombreEmpleado?: string | null;
   onReservar: () => void;
 }) {
   return (
@@ -29,6 +31,12 @@ export function TarjetaServicio({
         {servicio.descripcion && (
           <p className="mt-1.5 text-sm leading-relaxed text-texto-secundario">
             {servicio.descripcion}
+          </p>
+        )}
+        {nombreEmpleado && (
+          <p className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-rosado-texto">
+            <User className="h-3 w-3" />
+            {nombreEmpleado}
           </p>
         )}
         <div className="mt-4 flex items-center justify-between gap-3">
