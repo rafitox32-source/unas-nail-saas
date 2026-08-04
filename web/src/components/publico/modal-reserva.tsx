@@ -4,54 +4,10 @@ import { useEffect, useState } from "react";
 import { X, User, Phone, Tag, Loader2, CheckCircle2, MessageCircle, Clock } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { CampoConIcono } from "@/components/campo-con-icono";
+import { CalendarioDisponibilidad } from "@/components/publico/calendario-disponibilidad";
 import { formateadorPrecio } from "@/lib/formato";
-import type { Servicio } from "@/lib/tipos";
-
-function hoyISO() {
-  const hoy = new Date();
-  const desfaseMinutos = hoy.getTimezoneOffset();
-  const local = new Date(hoy.getTime() - desfaseMinutos * 60000);
-  return local.toISOString().slice(0, 10);
-}
-
-const HORA_APERTURA_MIN = 9 * 60;
-const HORA_CIERRE_MIN = 20 * 60;
-const PASO_MINUTOS = 30;
-
-// Genera los horarios de inicio que entran completos en el horario de
-// atención y no se superponen con ningún turno ya ocupado ese día — la
-// clienta elige de una lista de horarios reales, no adivina uno a mano.
-function generarHorariosDisponibles(
-  fecha: string,
-  duracionMinutos: number,
-  horariosOcupados: { inicio: string; fin: string }[],
-) {
-  const disponibles: string[] = [];
-  const ahora = new Date();
-  const esHoy = fecha === hoyISO();
-
-  for (
-    let minutos = HORA_APERTURA_MIN;
-    minutos + duracionMinutos <= HORA_CIERRE_MIN;
-    minutos += PASO_MINUTOS
-  ) {
-    const horaTexto = `${String(Math.floor(minutos / 60)).padStart(2, "0")}:${String(minutos % 60).padStart(2, "0")}`;
-    const inicio = new Date(`${fecha}T${horaTexto}:00`);
-    const fin = new Date(inicio.getTime() + duracionMinutos * 60000);
-
-    if (esHoy && inicio <= ahora) continue;
-
-    const seSuperpone = horariosOcupados.some((h) => {
-      const ocupadoInicio = new Date(h.inicio);
-      const ocupadoFin = new Date(h.fin);
-      return inicio < ocupadoFin && fin > ocupadoInicio;
-    });
-
-    if (!seSuperpone) disponibles.push(horaTexto);
-  }
-
-  return disponibles;
-}
+import { generarHorariosDisponibles, hoyISO } from "@/lib/disponibilidad";
+import type { Servicio, RangoOcupado } from "@/lib/tipos";
 
 export function ModalReserva({
   servicio,
@@ -70,7 +26,7 @@ export function ModalReserva({
   const [telefono, setTelefono] = useState("");
   const [fecha, setFecha] = useState(hoyISO());
   const [hora, setHora] = useState("");
-  const [horariosOcupados, setHorariosOcupados] = useState<{ inicio: string; fin: string }[]>([]);
+  const [horariosOcupados, setHorariosOcupados] = useState<RangoOcupado[]>([]);
   const [cargandoHorarios, setCargandoHorarios] = useState(false);
   const [codigoPromocional, setCodigoPromocional] = useState("");
   const [promoValidada, setPromoValidada] = useState<{
@@ -281,22 +237,17 @@ export function ModalReserva({
                   onChange={(e) => setTelefono(e.target.value)}
                 />
               </label>
-              {/* Fecha sin CampoConIcono a propósito: el input nativo date
-                  ya trae su propio ícono de selector, y no se achica con
-                  flex tanto como uno pide — sumarle encima el ícono +
-                  padding izquierdo lo hacía desbordar el viewport en Chrome
-                  de Android (medido: ~19px de overflow). */}
-              <label className="text-sm text-texto-secundario">
-                Fecha
-                <input
-                  required
-                  type="date"
-                  min={hoyISO()}
-                  value={fecha}
-                  onChange={(e) => setFecha(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-borde bg-fondo px-3 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
-                />
-              </label>
+              <div>
+                <p className="text-sm text-texto-secundario">Elegí el día</p>
+                <div className="mt-1 rounded-xl border border-borde bg-fondo p-3">
+                  <CalendarioDisponibilidad
+                    idManicurista={idManicurista}
+                    duracionMinutos={servicio.duracion_minutos}
+                    fechaSeleccionada={fecha}
+                    onSeleccionar={setFecha}
+                  />
+                </div>
+              </div>
 
               <div>
                 <p className="flex items-center gap-1.5 text-sm text-texto-secundario">

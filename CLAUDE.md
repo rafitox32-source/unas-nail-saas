@@ -100,6 +100,26 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       a la reserva. Probado de punta a punta: reservar un turno de 45 min
       sacó correctamente los dos slots de 30 min que se superponían
       (09:00 y 09:30), no solo el exacto que se eligió.
+- [x] Calendario visual en la reserva + bloqueos manuales de agenda:
+      evolución del punto anterior — el input de fecha nativo se reemplazó
+      por `calendario-disponibilidad.tsx`, un mes navegable donde los días
+      sin ningún horario libre aparecen tachados y deshabilitados (la
+      clienta ni puede tocarlos, no se entera recién al elegir). Usa la
+      RPC nueva `horarios_ocupados_mes` (mismo shape que `horarios_ocupados`
+      pero para un mes completo, una sola consulta en vez de una por día) y
+      reutiliza la lógica de slots ya existente, ahora movida a
+      `src/lib/disponibilidad.ts` para que la comparta el calendario y el
+      selector de horario del mismo modal. Del lado de la manicurista:
+      tabla `bloqueos_agenda` (día completo o rango de horas, con motivo
+      opcional) editable desde `/panel/agenda` (`gestion-bloqueos.tsx`,
+      debajo de `gestion-agenda.tsx`, sin ruta ni ítem de nav nuevo —
+      trampa #8). `horarios_ocupados`, `horarios_ocupados_mes` y
+      `crear_apartado` ahora consideran citas reales **y** bloqueos
+      manuales por igual — ni la clienta ve un día bloqueado como
+      disponible, ni puede reservar ahí aunque intente forzarlo por API
+      directa. Probado de punta a punta: bloqueo de un día completo →
+      confirmado que aparece tachado en el calendario público → reserva
+      exitosa en un día distinto que sigue libre.
 - [x] Aprobación de cuentas por admin: toda manicurista nueva queda
       `pendiente` al registrarse (columna `estado_cuenta` en
       `usuarios_manicuristas`) — no entra al panel ni su carta pública es
@@ -555,6 +575,12 @@ cd "web" && vercel --prod
   (`auth.uid() = id_manicurista`); hay políticas públicas de solo lectura para
   el portal (`usuarios_manicuristas` por slug **y** `estado_cuenta =
   'aprobada'`, `servicios` activos, `promociones` vigentes).
+- **`bloqueos_agenda`**: `fecha_hora_inicio`/`fecha_hora_fin` (un día
+  completo o un rango de horas) + `motivo` opcional. RLS igual que el
+  resto (`manicurista_administra_sus_bloqueos`, `for all`). No es pública
+  — la clienta nunca la consulta directo, solo indirectamente a través de
+  `horarios_ocupados`/`horarios_ocupados_mes`, que ya mezclan bloqueos con
+  citas reales.
 - **`usuarios_manicuristas.estado_cuenta`** (`pendiente`/`aprobada`/
   `rechazada`) y **`.es_admin`**: ver la entrada de Progreso sobre
   aprobación de cuentas y trampa #24. Función `es_admin_actual()`
@@ -576,11 +602,13 @@ cd "web" && vercel --prod
   `public_bucket_allows_listing` y además no hace falta: las URLs públicas
   se sirven sin RLS en un bucket público).
 - **Funciones RPC públicas** (`supabase/funciones_reserva.sql` +
-  migraciones aplicadas directo): `horarios_ocupados`, `crear_apartado`
-  (reserva sin exponer INSERT directo a `anon`; acepta
-  `p_codigo_promocional` opcional), `slug_disponible`,
-  `validar_codigo_promocional`, `usuario_disponible` (chequeo en vivo del
-  nombre de usuario de login, mismo patrón que `slug_disponible`).
+  migraciones aplicadas directo): `horarios_ocupados`, `horarios_ocupados_mes`
+  (mismo shape, un mes entero en una sola consulta — pinta el calendario sin
+  pedir día por día), `crear_apartado` (reserva sin exponer INSERT directo a
+  `anon`; acepta `p_codigo_promocional` opcional; valida contra citas reales
+  **y** `bloqueos_agenda`), `slug_disponible`, `validar_codigo_promocional`,
+  `usuario_disponible` (chequeo en vivo del nombre de usuario de login,
+  mismo patrón que `slug_disponible`).
 - **`usuarios_manicuristas.usuario`**: columna única, es el nombre de
   usuario de login (no confundir con `slug_publico`, que es la URL pública
   — pueden ser distintos). Ver trampa #23 y la entrada de Progreso sobre
@@ -631,6 +659,17 @@ cd "web" && vercel --prod
     dinámico por sesión, ver Progreso y trampa #25. `public/icono-app.svg`
     + `icono-app-{180,192,512}.png` son el ícono genérico de respaldo
     cuando la manicurista no subió logo propio.
+  - `src/lib/disponibilidad.ts` — `generarHorariosDisponibles()` y
+    constantes de horario de atención, compartido entre
+    `calendario-disponibilidad.tsx` (calendario del mes) y el selector de
+    horario dentro de `modal-reserva.tsx` (mismo modal, dos vistas).
+  - `src/components/publico/calendario-disponibilidad.tsx` — calendario
+    navegable por mes en la reserva pública, días sin horarios libres
+    tachados y deshabilitados.
+  - `src/components/interno/gestion-bloqueos.tsx` — bloqueos manuales de
+    agenda (día completo o rango de horas), se renderiza debajo de
+    `gestion-agenda.tsx` en `/panel/agenda` (sin ruta ni ítem de nav
+    nuevo, trampa #8).
   - `src/components/campo-con-icono.tsx` — input con ícono a la izquierda,
     compartido entre `modal-reserva.tsx`, `registro/page.tsx` e
     `ingresar/page.tsx`. **No usar en `type="date"`/`type="time"`** (trampa #16).

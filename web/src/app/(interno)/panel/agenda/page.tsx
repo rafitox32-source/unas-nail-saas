@@ -1,6 +1,7 @@
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { GestionAgenda } from "@/components/interno/gestion-agenda";
-import type { CitaAgenda } from "@/lib/tipos";
+import { GestionBloqueos } from "@/components/interno/gestion-bloqueos";
+import type { CitaAgenda, BloqueoAgenda } from "@/lib/tipos";
 
 export default async function PaginaAgenda() {
   const supabase = await crearClienteServidor();
@@ -17,9 +18,18 @@ export default async function PaginaAgenda() {
     .order("fecha_hora_inicio", { ascending: true })
     .returns<CitaAgenda[]>();
 
+  const { data: bloqueos } = await supabase
+    .from("bloqueos_agenda")
+    .select("id, fecha_hora_inicio, fecha_hora_fin, motivo")
+    .eq("id_manicurista", usuario!.id)
+    .gte("fecha_hora_fin", new Date().toISOString())
+    .order("fecha_hora_inicio", { ascending: true })
+    .returns<BloqueoAgenda[]>();
+
   return (
     <main className="mx-auto max-w-2xl flex-1 px-6 py-10">
       <GestionAgenda citasIniciales={citas ?? []} />
+      <GestionBloqueos idManicurista={usuario!.id} bloqueosIniciales={bloqueos ?? []} />
     </main>
   );
 }

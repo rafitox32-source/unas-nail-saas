@@ -53,6 +53,18 @@ export type EstadoCita =
   | "cancelada"
   | "no_asistio";
 
+export interface BloqueoAgenda {
+  id: string;
+  fecha_hora_inicio: string;
+  fecha_hora_fin: string;
+  motivo: string | null;
+}
+
+export interface RangoOcupado {
+  inicio: string;
+  fin: string;
+}
+
 export interface CitaAgenda {
   id: string;
   fecha_hora_inicio: string;
