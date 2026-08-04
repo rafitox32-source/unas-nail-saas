@@ -131,6 +131,11 @@ export default function PaginaRegistro() {
     }
 
     if (data.session) {
+      fetch("/api/notificaciones/cuenta-pendiente", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombreNegocio }),
+      }).catch(() => {});
       router.push("/panel");
     } else {
       // No debería pasar con "Confirm email" apagado en Supabase Auth: acá

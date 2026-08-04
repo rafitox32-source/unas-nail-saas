@@ -142,6 +142,16 @@ export function ModalReserva({
     }
 
     setResultado(data as { monto_seña: number; monto_total: number; descuento_aplicado: number });
+
+    fetch("/api/notificaciones/nueva-reserva", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        idManicurista,
+        nombreClienta: nombre,
+        nombreServicio: servicio.nombre,
+      }),
+    }).catch(() => {});
   }
 
   const urlWhatsappConfirmacion =

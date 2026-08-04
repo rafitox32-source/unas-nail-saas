@@ -318,6 +318,57 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       usa la app hace meses) — solo las cuentas nuevas lo ven. Probado
       de punta a punta: los 5 pasos, Anterior/Siguiente, "Empezar" cierra
       y persiste en la base, recargar la página no lo vuelve a mostrar.
+- [x] **Fase 3 — Notificaciones push reales**: campanita en la nav
+      interna (`toggle-notificaciones.tsx`, junto al toggle de tema) para
+      activar/desactivar notificaciones del sistema operativo — dos
+      eventos avisan: cuenta nueva por aprobar (a los admins) y reserva
+      nueva (a la manicurista dueña de esa reserva). Arquitectura, de
+      punta a punta:
+      - **Service worker** `public/sw.js` (nuevo — antes la PWA
+        instalaba sin service worker, solo con el manifest). Escucha
+        `push` (muestra la notificación) y `notificationclick` (enfoca o
+        abre la pestaña en la URL relevante).
+      - **VAPID**: par de claves generado una sola vez con `web-push`
+        (nueva dependencia npm) y cargado como secreto — `VAPID_PRIVATE_KEY`
+        y `VAPID_SUBJECT` server-only, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+        pública (así tiene que ser, la usa el navegador para suscribirse) —
+        en `.env.local` y en Vercel (Production/Preview/Development).
+      - **Tabla `suscripciones_push`** (`endpoint`, `p256dh`, `auth`,
+        `id_manicurista`): RLS normal, la dueña administra las suyas.
+      - **Sin clave `service_role` nueva** (decisión deliberada, mismo
+        espíritu que la de recuperar contraseña por WhatsApp en Fase 1):
+        en vez de eso, tres RPC `security definer` — mismo patrón que
+        `crear_apartado`/`horarios_ocupados` — `suscripciones_para_admins()`,
+        `suscripciones_para_manicurista(id)` y
+        `eliminar_suscripcion_push(endpoint)`, expuestas a `anon` porque
+        se llaman justo después de un registro o de una reserva pública,
+        antes de que exista sesión. El compromiso de seguridad es el
+        mismo que ya acepta el resto del proyecto para RPCs públicas
+        (`get_advisors` ya las marca WARN "anon puede ejecutar" por
+        diseño): exponen endpoint/claves de suscripción push, no datos
+        de clientas ni nada más sensible.
+      - **Dos Route Handlers** (`/api/notificaciones/cuenta-pendiente`,
+        `/api/notificaciones/nueva-reserva`) mandan la notificación real
+        vía `web-push` desde el servidor (la clave privada nunca sale de
+        ahí) y limpian de la base las suscripciones que devuelven
+        404/410 (el navegador las dio de baja — ej. desinstaló la app).
+        Se llaman con `fetch(...).catch(() => {})` (sin bloquear ni
+        romper el flujo principal) justo después de un registro exitoso
+        (`registro/page.tsx`) y justo después de `crear_apartado`
+        (`modal-reserva.tsx`).
+      - **Verificado de punta a punta lo que se puede verificar acá**:
+        build y typecheck limpios, axe-core en 0 violaciones con la
+        campanita en la nav (claro y oscuro), las dos rutas responden
+        bien a payload inválido (400) y a "todavía nadie suscripto"
+        (200, sin romper), las 3 RPC probadas directo por SQL (devuelven
+        filas, borran filas), y una suscripción de prueba insertada a
+        mano confirmó que la ruta intenta mandar el push y NO borra la
+        fila si la falla no es un 404/410 real (solo limpia suscripciones
+        genuinamente vencidas). **Lo que NO se pudo verificar acá, y
+        queda para probar en un dispositivo real**: que la notificación
+        realmente aparezca en el celular — ver trampa #31, Chromium sin
+        cabeza no soporta la Push API real, ni con perfil persistente ni
+        con permisos concedidos por Playwright.
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -651,6 +702,34 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
     imágenes, otro color de tema) — conviene revisar también
     `resultado.incomplete` y, sobre todo, mirar capturas reales en
     ambos temas, no confiar solo en el conteo de violaciones.
+31. **Chromium sin cabeza (headless) no soporta la Push API real, bajo
+    ninguna configuración probada** — ni un contexto normal (ahí Chrome
+    directamente tira "Push API no soportada en modo incógnito", porque
+    un contexto efímero de Playwright cuenta como incógnito), ni un
+    perfil persistente (`launchPersistentContext`) con
+    `context.grantPermissions(['notifications'], {origin})` llamado
+    antes de la primera navegación: `Notification.permission` seguía
+    devolviendo `"denied"` incluso con perfil nuevo. Es una limitación
+    de la plataforma (falta la integración real con el servicio de
+    notificaciones del sistema operativo en modo headless), no un bug
+    de la app ni de la suscripción. **Cómo se verificó la feature de
+    notificaciones push sin poder hacer el flujo 100% real**: se probó
+    cada capa por separado — las RPC `security definer` directo por
+    SQL (devuelven/borran filas bien), los Route Handlers con `curl`
+    (400 en payload inválido, 200 sin romper cuando no hay
+    suscriptores, y con una suscripción de prueba insertada a mano por
+    SQL confirmar que intenta mandar el push vía `web-push` y solo
+    borra la fila si la respuesta es un 404/410 real, no ante
+    cualquier error de red) — y la UI del botón (aria-label, ambos
+    temas, axe-core). Lo único que quedó sin poder probarse acá es el
+    paso final: que el toast realmente aparezca en un navegador de
+    verdad. **Lección**: para cualquier feature que dependa de permisos
+    del navegador ligados al sistema operativo real (push, geolocation
+    con GPS real, cámara/micrófono con hardware real), diseñar la
+    verificación en capas desde el principio — probar cada pieza
+    server-side/RPC por separado con datos de prueba en vez de asumir
+    que un solo test end-to-end con Playwright va a poder cubrir todo,
+    porque puede que estructuralmente no pueda.
 
 ## Pulido 1 — accesibilidad, mobile, contraste
 
@@ -822,6 +901,12 @@ cd "web" && vercel --prod
   dueña administra todo, público solo ve `visible = true` (sin re-chequear
   `estado_cuenta`, ver Progreso y trampa #30 sobre el bug de contraste que
   se encontró de paso construyendo esto).
+- **`suscripciones_push`**: `endpoint` (único), `p256dh`, `auth`,
+  `id_manicurista`. RLS normal (dueña administra las suyas). Leídas desde
+  el servidor sin clave `service_role` vía 3 RPC `security definer`
+  expuestas a `anon`: `suscripciones_para_admins()`,
+  `suscripciones_para_manicurista(uuid)`, `eliminar_suscripcion_push(text)`
+  — ver Progreso "Fase 3" y trampa #31.
 - **`notas_visita`** (`supabase/historial_fotografico.sql`): una fila por
   cita (`id_cita` unique), `formula_color` + `notas` + `rutas_fotos text[]`.
   Bucket privado `fotos-clientas` en Storage, políticas por carpeta
@@ -963,5 +1048,16 @@ cd "web" && vercel --prod
     `usuarios_manicuristas.tour_completado` es `false` (estado de cuenta
     en la base, no `localStorage` — a propósito, ver esa misma entrada de
     Progreso).
+  - Notificaciones push (Fase 3): `public/sw.js` (service worker, nuevo),
+    `src/lib/notificaciones-push.ts` (suscribir/desuscribir desde el
+    navegador), `src/components/interno/toggle-notificaciones.tsx`
+    (campanita en la nav), `src/lib/enviar-push.ts` (envío server-side
+    con `web-push`, nueva dependencia), `src/app/api/notificaciones/
+    {cuenta-pendiente,nueva-reserva}/route.ts` (Route Handlers que
+    mandan el push real y limpian suscripciones vencidas). Variables de
+    entorno `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` /
+    `VAPID_SUBJECT` en `.env.local` y Vercel (las tres). Ver Progreso
+    "Fase 3" y trampa #31 (limitación de Playwright/Chromium headless
+    para probar el flujo 100% real).
 - **.env.local** de `web/` ya apunta al proyecto real (`NEXT_PUBLIC_SUPABASE_URL`
   + clave pública `sb_publishable_...`, no es secreta).

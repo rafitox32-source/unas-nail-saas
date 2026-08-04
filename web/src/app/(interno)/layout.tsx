@@ -93,7 +93,7 @@ export default async function LayoutInterno({
 
   return (
     <>
-      <NavInterno />
+      <NavInterno idManicurista={usuario.id} />
       {children}
     </>
   );

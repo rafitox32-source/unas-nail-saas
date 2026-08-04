@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { Home, Sparkles, Calendar, Users, Package, Tag } from "lucide-react";
 import { BotonCerrarSesion } from "@/components/interno/cerrar-sesion";
 import { ToggleTema } from "@/components/interno/toggle-tema";
+import { ToggleNotificaciones } from "@/components/interno/toggle-notificaciones";
 
 const enlaces = [
   { etiqueta: "Inicio", href: "/panel", icono: Home },
@@ -16,7 +17,7 @@ const enlaces = [
   { etiqueta: "Promociones", href: "/panel/promociones", icono: Tag },
 ];
 
-export function NavInterno() {
+export function NavInterno({ idManicurista }: { idManicurista: string }) {
   const ruta = usePathname();
   const enlaceActivoRef = useRef<HTMLAnchorElement>(null);
 
@@ -52,6 +53,7 @@ export function NavInterno() {
           <div className="pointer-events-none absolute right-0 top-0 h-full w-6 bg-gradient-to-l from-superficie to-transparent sm:hidden" />
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          <ToggleNotificaciones idManicurista={idManicurista} />
           <ToggleTema />
           <BotonCerrarSesion />
         </div>
