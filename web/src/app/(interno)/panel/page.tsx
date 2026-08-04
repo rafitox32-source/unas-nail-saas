@@ -3,6 +3,7 @@ import { Users, CalendarClock, PackageOpen, ExternalLink, ShieldCheck } from "lu
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { ConfiguracionNegocio } from "@/components/interno/configuracion-negocio";
 import { ReportesIngresos } from "@/components/interno/reportes-ingresos";
+import { TourBienvenida } from "@/components/interno/tour-bienvenida";
 import type { Manicurista, CitaReporte } from "@/lib/tipos";
 
 export default async function PaginaPanel() {
@@ -14,10 +15,10 @@ export default async function PaginaPanel() {
   const { data: manicurista } = await supabase
     .from("usuarios_manicuristas")
     .select(
-      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion, es_admin",
+      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion, es_admin, tour_completado",
     )
     .eq("id", usuario!.id)
-    .maybeSingle<Manicurista & { es_admin: boolean }>();
+    .maybeSingle<Manicurista & { es_admin: boolean; tour_completado: boolean }>();
 
   const { count: pendientesDeAprobar } = manicurista?.es_admin
     ? await supabase
@@ -73,6 +74,9 @@ export default async function PaginaPanel() {
 
   return (
     <main className="flex-1 px-6 py-10">
+      {manicurista && !manicurista.tour_completado && (
+        <TourBienvenida idManicurista={manicurista.id} slugPublico={manicurista.slug_publico} />
+      )}
       <div className="mx-auto max-w-2xl">
         <h1 className="font-titulo text-2xl font-semibold text-texto-primario">
           Hola{manicurista?.nombre_completo ? `, ${manicurista.nombre_completo}` : ""}

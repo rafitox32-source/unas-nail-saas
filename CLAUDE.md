@@ -302,6 +302,22 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       "violación" cuando no puede resolver el color de fondo efectivo
       con certeza, así que quedó invisible a las auditorías anteriores
       hasta que se vio a simple vista en una captura.
+- [x] **Fase 2, ítem 4 — Tour guiado**: modal de bienvenida de 5 pasos
+      (`tour-bienvenida.tsx`) que aparece en `/panel` la primera vez que
+      una manicurista entra — bienvenida, personalizar marca, cargar
+      servicios, compartir el link (muestra el slug real si ya lo tiene),
+      gestionar la agenda. Botones Anterior/Siguiente + "Omitir" +
+      "Empezar" en el último paso, con puntitos de progreso. Columna
+      nueva `usuarios_manicuristas.tour_completado` (default `false`) en
+      vez de `localStorage`: a diferencia del modo oscuro (que sí es una
+      preferencia de dispositivo), completar el tour es estado de
+      cuenta — no tendría sentido que lo vuelva a ver si entra desde el
+      celular en vez de la compu. Todas las cuentas existentes al
+      momento de esta migración se marcaron `tour_completado = true` a
+      mano por SQL (no tiene sentido mostrarle el tour a alguien que ya
+      usa la app hace meses) — solo las cuentas nuevas lo ven. Probado
+      de punta a punta: los 5 pasos, Anterior/Siguiente, "Empezar" cierra
+      y persiste en la base, recargar la página no lo vuelve a mostrar.
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -942,5 +958,10 @@ cd "web" && vercel --prod
     `/panel/promociones`. `src/components/publico/seccion-resenas.tsx` —
     la muestra en la carta pública, se auto-oculta si no hay ninguna
     reseña visible (ver Progreso, Fase 2 ítem 3).
+  - `src/components/interno/tour-bienvenida.tsx` — modal de bienvenida de
+    5 pasos en `/panel`, ver Progreso Fase 2 ítem 4. Se muestra solo si
+    `usuarios_manicuristas.tour_completado` es `false` (estado de cuenta
+    en la base, no `localStorage` — a propósito, ver esa misma entrada de
+    Progreso).
 - **.env.local** de `web/` ya apunta al proyecto real (`NEXT_PUBLIC_SUPABASE_URL`
   + clave pública `sb_publishable_...`, no es secreta).
