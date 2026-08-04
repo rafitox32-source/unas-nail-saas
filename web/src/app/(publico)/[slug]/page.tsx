@@ -4,7 +4,8 @@ import { Sparkles, Phone, MessageCircle, Image as ImageIcon } from "lucide-react
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { Encabezado } from "@/components/publico/encabezado";
 import { SeccionServicios } from "@/components/publico/seccion-servicios";
-import type { Manicurista, Servicio, FotoGaleria } from "@/lib/tipos";
+import { SeccionResenas } from "@/components/publico/seccion-resenas";
+import type { Manicurista, Servicio, FotoGaleria, ResenaPublica } from "@/lib/tipos";
 
 async function obtenerManicurista(slug: string) {
   const supabase = await crearClienteServidor();
@@ -38,7 +39,15 @@ async function obtenerManicurista(slug: string) {
     (foto) => supabase.storage.from("fotos-galeria").getPublicUrl(foto.ruta_archivo).data.publicUrl,
   );
 
-  return { manicurista, servicios: servicios ?? [], urlsGaleria };
+  const { data: resenas } = await supabase
+    .from("resenas")
+    .select("id, nombre_clienta, calificacion, comentario")
+    .eq("id_manicurista", manicurista.id)
+    .eq("visible", true)
+    .order("creado_en", { ascending: false })
+    .returns<ResenaPublica[]>();
+
+  return { manicurista, servicios: servicios ?? [], urlsGaleria, resenas: resenas ?? [] };
 }
 
 function urlWhatsapp(telefono: string | null, nombreNegocio: string) {
@@ -82,7 +91,7 @@ export default async function PaginaManicurista({
   const datos = await obtenerManicurista(slug);
   if (!datos) notFound();
 
-  const { manicurista, servicios, urlsGaleria } = datos;
+  const { manicurista, servicios, urlsGaleria, resenas } = datos;
   const enlaceWhatsapp = urlWhatsapp(manicurista.telefono, manicurista.nombre_negocio);
 
   return (
@@ -161,6 +170,9 @@ export default async function PaginaManicurista({
             </div>
           </div>
         </section>
+
+        {/* Reseñas */}
+        <SeccionResenas resenas={resenas} />
       </main>
 
       {/* Footer / Contacto */}

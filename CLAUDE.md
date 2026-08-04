@@ -272,6 +272,36 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       y usando `flex-1` en el envoltorio de la barra en vez de `h-full`.
       Estado vacío (ícono + mensaje) si todavía no hay ninguna cita
       completada, mismo patrón que el resto del proyecto.
+- [x] **Fase 2, ítem 3 — Reseñas en la página pública**: tabla nueva
+      `resenas` (nombre_clienta, calificación 1-5, comentario, `visible`)
+      — la manicurista las carga a mano (por ejemplo, copiando lo que le
+      mandan por WhatsApp), no hay formulario público de la clienta
+      todavía. CRUD en `/panel/promociones`
+      (`gestion-resenas.tsx`, debajo de "Programa de lealtad", sin ruta ni
+      ítem de nav nuevo — trampa #8), con selector de estrellas y
+      "Ocultar"/"Mostrar" en vez de borrar (igual patrón que
+      activar/desactivar de promociones). En la carta pública
+      (`seccion-resenas.tsx`) solo se muestran las que están `visible =
+      true`, ordenadas por más nuevas primero; **si no hay ninguna
+      reseña visible, la sección entera no se renderiza** (no se muestra
+      un estado vacío ahí — a diferencia del panel, mostrarle a una
+      clienta potencial "todavía no hay reseñas" en una página de
+      reservas no ayuda). RLS calcada del patrón de `servicios`/
+      `promociones`: `manicurista_administra_sus_resenas` (for all,
+      dueña) + `publico_ve_resenas_visibles` (select, `visible = true`,
+      sin chequear `estado_cuenta` porque `[slug]/page.tsx` ya filtra
+      eso antes de llegar a pedir reseñas). De paso, probando esta
+      feature en modo oscuro se encontró un bug real y **pre-existente**
+      (no de esta feature): la insignia "Seña S/X" de `tarjeta-
+      servicio.tsx` usaba `bg-white/90` fijo en vez de un token de tema,
+      así que con `text-texto-primario` (casi blanco en oscuro) el
+      texto quedaba casi invisible sobre un fondo casi blanco. Corregido
+      a `bg-superficie/90` (sí es tema-consciente). axe-core no lo había
+      marcado como violación porque el elemento es semi-transparente
+      sobre un degradé — axe lo clasifica como "incompleto" en vez de
+      "violación" cuando no puede resolver el color de fondo efectivo
+      con certeza, así que quedó invisible a las auditorías anteriores
+      hasta que se vio a simple vista en una captura.
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -588,6 +618,23 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
     encadenados) — un `items-end`/`items-center` en el medio la corta
     silenciosamente. Verificar con una captura, no solo leyendo las
     clases.
+30. **axe-core no marca como "violación" un contraste que no puede
+    calcular con certeza** — si el texto está sobre un fondo
+    semi-transparente encima de un degradé/imagen (`bg-white/90` sobre
+    `bg-gradient-to-br`, por ejemplo), axe no sabe qué color efectivo
+    hay detrás y lo clasifica como "incompleto", no como violación. El
+    resultado: `resultado.violations.length` puede dar 0 aunque haya
+    texto realmente invisible a simple vista (pasó con la insignia
+    "Seña S/X" de `tarjeta-servicio.tsx`, que usaba `bg-white/90` fijo
+    en vez de un token de tema — en modo oscuro el texto quedaba casi
+    blanco sobre un fondo casi blanco, y ninguna auditoría anterior lo
+    había marcado). Se encontró recién mirando una captura de pantalla a
+    simple vista, no corriendo axe. **Lección**: `violations.length ===
+    0` no es sinónimo de "sin problemas de contraste" cuando hay
+    elementos semi-transparentes sobre fondos dinámicos (degradés,
+    imágenes, otro color de tema) — conviene revisar también
+    `resultado.incomplete` y, sobre todo, mirar capturas reales en
+    ambos temas, no confiar solo en el conteo de violaciones.
 
 ## Pulido 1 — accesibilidad, mobile, contraste
 
@@ -753,6 +800,12 @@ cd "web" && vercel --prod
   (security definer) es la única forma correcta de chequear el admin
   desde una política RLS sobre esta misma tabla — nunca una subconsulta
   directa (recursión infinita, trampa #24).
+- **`resenas`**: `nombre_clienta`, `calificacion` (1-5), `comentario`,
+  `visible`. Sin formulario público todavía — la manicurista las carga a
+  mano en `/panel/promociones`. RLS calcada de `servicios`/`promociones`:
+  dueña administra todo, público solo ve `visible = true` (sin re-chequear
+  `estado_cuenta`, ver Progreso y trampa #30 sobre el bug de contraste que
+  se encontró de paso construyendo esto).
 - **`notas_visita`** (`supabase/historial_fotografico.sql`): una fila por
   cita (`id_cita` unique), `formula_color` + `notas` + `rutas_fotos text[]`.
   Bucket privado `fotos-clientas` en Storage, políticas por carpeta
@@ -885,5 +938,9 @@ cd "web" && vercel --prod
     `/panel`. `src/components/interno/reportes-ingresos.tsx` es la parte
     de presentación, ver trampa #29 sobre el bug de altura en el gráfico
     de barras hecho con flexbox.
+  - `src/components/interno/gestion-resenas.tsx` — CRUD de reseñas en
+    `/panel/promociones`. `src/components/publico/seccion-resenas.tsx` —
+    la muestra en la carta pública, se auto-oculta si no hay ninguna
+    reseña visible (ver Progreso, Fase 2 ítem 3).
 - **.env.local** de `web/` ya apunta al proyecto real (`NEXT_PUBLIC_SUPABASE_URL`
   + clave pública `sb_publishable_...`, no es secreta).

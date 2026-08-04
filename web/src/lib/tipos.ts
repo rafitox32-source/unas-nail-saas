@@ -103,6 +103,21 @@ export interface CitaReporte {
   servicios: { nombre: string } | null;
 }
 
+export interface ResenaAdmin {
+  id: string;
+  nombre_clienta: string;
+  calificacion: number;
+  comentario: string;
+  visible: boolean;
+}
+
+export interface ResenaPublica {
+  id: string;
+  nombre_clienta: string;
+  calificacion: number;
+  comentario: string;
+}
+
 export interface InsumoInventario {
   id: string;
   nombre_insumo: string;

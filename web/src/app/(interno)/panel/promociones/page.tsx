@@ -1,8 +1,9 @@
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { GestionPromociones } from "@/components/interno/gestion-promociones";
 import { ConfiguracionLealtad } from "@/components/interno/configuracion-lealtad";
+import { GestionResenas } from "@/components/interno/gestion-resenas";
 import { GeneradorEstados } from "@/components/interno/generador-estados";
-import type { PromocionAdmin, ProgramaLealtad } from "@/lib/tipos";
+import type { PromocionAdmin, ProgramaLealtad, ResenaAdmin } from "@/lib/tipos";
 
 export default async function PaginaPromociones() {
   const supabase = await crearClienteServidor();
@@ -24,6 +25,13 @@ export default async function PaginaPromociones() {
     .select("lealtad_activo, lealtad_visitas_objetivo, lealtad_premio_descripcion")
     .eq("id", usuario!.id)
     .maybeSingle<ProgramaLealtad>();
+
+  const { data: resenas } = await supabase
+    .from("resenas")
+    .select("id, nombre_clienta, calificacion, comentario, visible")
+    .eq("id_manicurista", usuario!.id)
+    .order("creado_en", { ascending: false })
+    .returns<ResenaAdmin[]>();
 
   const { data: negocio } = await supabase
     .from("usuarios_manicuristas")
@@ -49,6 +57,7 @@ export default async function PaginaPromociones() {
           }
         }
       />
+      <GestionResenas idManicurista={usuario!.id} resenasIniciales={resenas ?? []} />
       {negocio && (
         <GeneradorEstados
           nombreNegocio={negocio.nombre_negocio}
