@@ -411,6 +411,58 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       email de verdad (recuperar contraseña, recibos por correo, etc. — hoy
       nada de eso existe). Si aparece esa necesidad: cuenta en resend.com +
       dominio propio verificado, no delegable
+- [x] **Spa multi-servicio, Fase 1 — modelo de datos + personal** (primer
+      paso de convertir el producto en un spa con pelo/pestañas/uñas, no
+      solo uñas — ver el plan completo, con las fases futuras y las
+      decisiones de alcance, en `C:\Users\BLACK HOUSE\.claude\plans\
+      snug-dazzling-thompson.md`). Decisión de arquitectura clave: **una
+      sola cuenta de login por negocio** (la dueña del spa) — las
+      empleadas son perfiles internos sin login propio, no rehace RLS en
+      ninguna de las 10 tablas existentes. Se puede sumar login propio
+      por empleada más adelante sin tirar este diseño.
+      - Tabla nueva `personal` (`nombre`, `categoria` — cabello/pestañas/
+        uñas/otro —, `url_foto`, `activo`), RLS calcada del resto
+        (`auth.uid() = id_negocio`).
+      - `servicios` ganó `categoria` (default `'uñas'`, no rompe datos
+        viejos) y `id_empleado` (nullable) — qué empleada ofrece ese
+        servicio, opcional.
+      - `citas_apartados` y `bloqueos_agenda` ganaron `id_empleado`
+        (nullable). Un bloqueo sin empleada bloquea todo el negocio
+        (como antes); con empleada, solo bloquea a esa persona.
+      - `crear_apartado` **no cambió de firma** — en vez de agregar un
+        parámetro nuevo, lee `servicios.id_empleado` (ya lo consulta) y
+        arma la colisión de horario con eso. Evita la trampa #12 del
+        todo para esta función.
+      - `horarios_ocupados`/`horarios_ocupados_mes` sí cambiaron de firma
+        (`p_id_empleado uuid default null` nuevo) — se hizo `drop
+        function` explícito antes de recrearlas (trampa #12), confirmado
+        con `pg_get_function_identity_arguments` que no quedó ningún
+        overload viejo.
+      - Regla de colisión, en las tres funciones: si el servicio/consulta
+        no tiene empleada asignada, se comporta **exactamente igual que
+        antes** (toda la cuenta es una sola agenda compartida) — así una
+        cuenta que nunca carga personal no nota ningún cambio. Con
+        empleada asignada, la colisión se acota a esa persona (más los
+        bloqueos de cuenta entera, que siguen aplicando a todas).
+      - UI: pantalla "Personal" nueva en `/panel/servicios` (arriba de
+        Servicios, sin ruta ni ítem de nav nuevo — trampa #8), CRUD con
+        activar/desactivar. `gestion-servicios.tsx` suma selector de
+        categoría + profesional asignada (el selector de profesional
+        solo aparece si ya hay personal cargado). `gestion-agenda.tsx`
+        suma tabs de filtro por empleada (solo si hay personal).
+        `gestion-bloqueos.tsx` suma selector opcional de empleada.
+      - Probado de punta a punta vía RPC directo (más preciso que
+        clickear el calendario a ciegas): cuenta sin personal sigue
+        chocando horarios exactamente igual que antes; con 2 empleadas
+        de prueba y servicios distintos asignados, reservar el mismo
+        horario para las dos NO choca, pero reservar dos veces para la
+        misma empleada SÍ choca. `get_advisors` sin novedades más allá
+        del mismo patrón ya aceptado.
+      - **Fuera de esta fase, confirmado con el dueño, cada una su propia
+        sesión**: Fase 2 (flujo público — agrupar por categoría, elegir
+        empleada al reservar) y Fase 3 (rebrand — nuevo nombre/paleta,
+        arranca en claude.ai/design, reemplazo de las strings
+        "manicurista"/"Nail Artist" que quedan).
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -945,6 +997,13 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   dueña administra todo, público solo ve `visible = true` (sin re-chequear
   `estado_cuenta`, ver Progreso y trampa #30 sobre el bug de contraste que
   se encontró de paso construyendo esto).
+- **`personal`**: `id_negocio` (FK a `usuarios_manicuristas`), `nombre`,
+  `categoria` (`cabello`/`pestañas`/`uñas`/`otro`), `url_foto`, `activo`.
+  RLS igual que el resto (`auth.uid() = id_negocio`). `servicios.
+  id_empleado`, `citas_apartados.id_empleado` y `bloqueos_agenda.
+  id_empleado` (los tres nullable) referencian esta tabla — ver Progreso
+  "Spa multi-servicio, Fase 1" y el plan completo en
+  `C:\Users\BLACK HOUSE\.claude\plans\snug-dazzling-thompson.md`.
 - **`suscripciones_push`**: `endpoint` (único), `p256dh`, `auth`,
   `id_manicurista`. RLS normal (dueña administra las suyas). Leídas desde
   el servidor sin clave `service_role` vía 3 RPC `security definer`
@@ -968,9 +1027,13 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
 - **Funciones RPC públicas** (`supabase/funciones_reserva.sql` +
   migraciones aplicadas directo): `horarios_ocupados`, `horarios_ocupados_mes`
   (mismo shape, un mes entero en una sola consulta — pinta el calendario sin
-  pedir día por día), `crear_apartado` (reserva sin exponer INSERT directo a
+  pedir día por día; ambas aceptan `p_id_empleado` opcional desde la Fase 1
+  de spa multi-servicio, sin usar todavía desde el front — eso es Fase 2),
+  `crear_apartado` (reserva sin exponer INSERT directo a
   `anon`; acepta `p_codigo_promocional` opcional; valida contra citas reales
-  **y** `bloqueos_agenda`), `slug_disponible`, `validar_codigo_promocional`,
+  **y** `bloqueos_agenda`; la colisión de horario se acota a
+  `servicios.id_empleado` cuando el servicio tiene una empleada asignada),
+  `slug_disponible`, `validar_codigo_promocional`,
   `usuario_disponible` (chequeo en vivo del nombre de usuario de login,
   mismo patrón que `slug_disponible`).
 - **`usuarios_manicuristas.usuario`**: columna única, es el nombre de
@@ -1091,6 +1154,13 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
     `/panel/promociones`. `src/components/publico/seccion-resenas.tsx` —
     la muestra en la carta pública, se auto-oculta si no hay ninguna
     reseña visible (ver Progreso, Fase 2 ítem 3).
+  - `src/components/interno/gestion-personal.tsx` — CRUD de personal en
+    `/panel/servicios`, arriba de `gestion-servicios.tsx` (que ahora
+    recibe `personal` como prop para el selector de profesional
+    asignada). `gestion-agenda.tsx` y `gestion-bloqueos.tsx` también
+    reciben `personal` para el filtro/selector — todos ocultan la UI de
+    personal por completo si la cuenta no cargó a nadie (trampa #8, y
+    ver Progreso "Spa multi-servicio, Fase 1").
   - `src/components/interno/tour-bienvenida.tsx` — modal de bienvenida de
     5 pasos en `/panel`, ver Progreso Fase 2 ítem 4. Se muestra solo si
     `usuarios_manicuristas.tour_completado` es `false` (estado de cuenta

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CalendarOff, Loader2, Trash2, Plus } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
-import type { BloqueoAgenda } from "@/lib/tipos";
+import type { BloqueoAgenda, Personal } from "@/lib/tipos";
 
 const formateadorFecha = new Intl.DateTimeFormat("es-AR", {
   weekday: "short",
@@ -22,9 +22,11 @@ function hoyISO() {
 export function GestionBloqueos({
   idManicurista,
   bloqueosIniciales,
+  personal,
 }: {
   idManicurista: string;
   bloqueosIniciales: BloqueoAgenda[];
+  personal: Personal[];
 }) {
   const [bloqueos, setBloqueos] = useState(
     [...bloqueosIniciales].sort((a, b) => a.fecha_hora_inicio.localeCompare(b.fecha_hora_inicio)),
@@ -35,6 +37,7 @@ export function GestionBloqueos({
   const [horaInicio, setHoraInicio] = useState("09:00");
   const [horaFin, setHoraFin] = useState("18:00");
   const [motivo, setMotivo] = useState("");
+  const [idEmpleado, setIdEmpleado] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [borrando, setBorrando] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -62,8 +65,9 @@ export function GestionBloqueos({
         fecha_hora_inicio: new Date(inicio).toISOString(),
         fecha_hora_fin: new Date(fin).toISOString(),
         motivo: motivo || null,
+        id_empleado: idEmpleado || null,
       })
-      .select("id, fecha_hora_inicio, fecha_hora_fin, motivo")
+      .select("id, fecha_hora_inicio, fecha_hora_fin, motivo, id_empleado")
       .single<BloqueoAgenda>();
 
     setGuardando(false);
@@ -74,6 +78,7 @@ export function GestionBloqueos({
         [...actual, data].sort((a, b) => a.fecha_hora_inicio.localeCompare(b.fecha_hora_inicio)),
       );
       setMotivo("");
+      setIdEmpleado("");
       setFormularioAbierto(false);
     }
   }
@@ -177,6 +182,27 @@ export function GestionBloqueos({
             />
           </label>
 
+          {personal.length > 0 && (
+            <label className="text-sm text-texto-secundario">
+              Empleada (opcional)
+              <select
+                value={idEmpleado}
+                onChange={(e) => setIdEmpleado(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+              >
+                <option value="">Toda la cuenta</option>
+                {personal.map((persona) => (
+                  <option key={persona.id} value={persona.id}>
+                    {persona.nombre}
+                  </option>
+                ))}
+              </select>
+              <span className="mt-1 block text-xs text-texto-secundario">
+                Sin elegir empleada, el bloqueo aplica a todo el negocio.
+              </span>
+            </label>
+          )}
+
           {error && <p className="text-sm text-alerta">{error}</p>}
 
           <div className="flex items-center gap-3">
@@ -224,7 +250,14 @@ export function GestionBloqueos({
                   </>
                 )}
               </p>
-              {b.motivo && <p className="truncate text-xs text-texto-secundario">{b.motivo}</p>}
+              {(b.motivo || b.id_empleado) && (
+                <p className="truncate text-xs text-texto-secundario">
+                  {b.id_empleado &&
+                    (personal.find((p) => p.id === b.id_empleado)?.nombre ?? "Empleada")}
+                  {b.motivo && b.id_empleado && " · "}
+                  {b.motivo}
+                </p>
+              )}
             </div>
             <button
               type="button"

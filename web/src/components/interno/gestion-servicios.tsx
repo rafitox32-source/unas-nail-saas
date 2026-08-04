@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, Power, Loader2, Sparkles } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { formateadorPrecio } from "@/lib/formato";
-import type { ServicioAdmin } from "@/lib/tipos";
+import type { ServicioAdmin, Personal, CategoriaServicio } from "@/lib/tipos";
 
 interface ValoresFormulario {
   nombre: string;
@@ -12,6 +12,8 @@ interface ValoresFormulario {
   precio: string;
   duracion_minutos: string;
   monto_seña: string;
+  categoria: CategoriaServicio;
+  id_empleado: string;
 }
 
 const VACIO: ValoresFormulario = {
@@ -20,14 +22,28 @@ const VACIO: ValoresFormulario = {
   precio: "",
   duracion_minutos: "",
   monto_seña: "",
+  categoria: "uñas",
+  id_empleado: "",
 };
+
+const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
+  cabello: "Cabello",
+  pestañas: "Pestañas",
+  uñas: "Uñas",
+  otro: "Otro",
+};
+
+const columnas =
+  "id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, activo";
 
 export function GestionServicios({
   idManicurista,
   serviciosIniciales,
+  personal,
 }: {
   idManicurista: string;
   serviciosIniciales: ServicioAdmin[];
+  personal: Personal[];
 }) {
   const [servicios, setServicios] = useState(serviciosIniciales);
   const [formularioAbierto, setFormularioAbierto] = useState(false);
@@ -51,6 +67,8 @@ export function GestionServicios({
       precio: String(servicio.precio),
       duracion_minutos: String(servicio.duracion_minutos),
       monto_seña: String(servicio.monto_seña),
+      categoria: servicio.categoria,
+      id_empleado: servicio.id_empleado ?? "",
     });
     setFormularioAbierto(true);
     setError(null);
@@ -68,6 +86,8 @@ export function GestionServicios({
       precio: Number(valores.precio),
       duracion_minutos: Number(valores.duracion_minutos),
       monto_seña: Number(valores.monto_seña || 0),
+      categoria: valores.categoria,
+      id_empleado: valores.id_empleado || null,
     };
 
     if (editandoId) {
@@ -75,7 +95,7 @@ export function GestionServicios({
         .from("servicios")
         .update(payload)
         .eq("id", editandoId)
-        .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, activo")
+        .select(columnas)
         .single<ServicioAdmin>();
 
       if (errorGuardar) {
@@ -88,7 +108,7 @@ export function GestionServicios({
       const { data, error: errorGuardar } = await supabase
         .from("servicios")
         .insert({ ...payload, id_manicurista: idManicurista })
-        .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, activo")
+        .select(columnas)
         .single<ServicioAdmin>();
 
       if (errorGuardar) {
@@ -108,7 +128,7 @@ export function GestionServicios({
       .from("servicios")
       .update({ activo: !servicio.activo })
       .eq("id", servicio.id)
-      .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, activo")
+      .select(columnas)
       .single<ServicioAdmin>();
 
     if (data) {
@@ -196,6 +216,41 @@ export function GestionServicios({
               />
             </label>
           </div>
+          <div className="flex gap-3">
+            <label className="flex-1 text-sm text-texto-secundario">
+              Categoría
+              <select
+                value={valores.categoria}
+                onChange={(e) =>
+                  setValores({ ...valores, categoria: e.target.value as CategoriaServicio })
+                }
+                className="mt-1 w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+              >
+                {Object.entries(ETIQUETAS_CATEGORIA).map(([valor, etiqueta]) => (
+                  <option key={valor} value={valor}>
+                    {etiqueta}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {personal.length > 0 && (
+              <label className="flex-1 text-sm text-texto-secundario">
+                Profesional (opcional)
+                <select
+                  value={valores.id_empleado}
+                  onChange={(e) => setValores({ ...valores, id_empleado: e.target.value })}
+                  className="mt-1 w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+                >
+                  <option value="">Sin asignar</option>
+                  {personal.map((persona) => (
+                    <option key={persona.id} value={persona.id}>
+                      {persona.nombre}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
 
           {error && <p className="text-sm text-alerta">{error}</p>}
 
@@ -245,6 +300,10 @@ export function GestionServicios({
               <p className="text-sm text-texto-secundario">
                 {formateadorPrecio.format(servicio.precio)} · {servicio.duracion_minutos} min
                 {servicio.monto_seña > 0 && ` · Seña ${formateadorPrecio.format(servicio.monto_seña)}`}
+                {personal.length > 0 &&
+                  ` · ${
+                    personal.find((p) => p.id === servicio.id_empleado)?.nombre ?? "Sin asignar"
+                  }`}
               </p>
             </div>
             <div className="flex items-center gap-4">

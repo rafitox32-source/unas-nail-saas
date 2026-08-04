@@ -22,7 +22,7 @@ async function obtenerManicurista(slug: string) {
 
   const { data: servicios } = await supabase
     .from("servicios")
-    .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña")
+    .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado")
     .eq("id_manicurista", manicurista.id)
     .eq("activo", true)
     .order("precio", { ascending: true })

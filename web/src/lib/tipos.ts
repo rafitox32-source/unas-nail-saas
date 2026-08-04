@@ -34,6 +34,16 @@ export interface ProgramaLealtad {
   lealtad_premio_descripcion: string | null;
 }
 
+export type CategoriaServicio = "cabello" | "pestañas" | "uñas" | "otro";
+
+export interface Personal {
+  id: string;
+  nombre: string;
+  categoria: CategoriaServicio;
+  url_foto: string | null;
+  activo: boolean;
+}
+
 export interface Servicio {
   id: string;
   nombre: string;
@@ -41,6 +51,8 @@ export interface Servicio {
   precio: number;
   duracion_minutos: number;
   monto_seña: number;
+  categoria: CategoriaServicio;
+  id_empleado: string | null;
 }
 
 export interface ServicioAdmin extends Servicio {
@@ -59,6 +71,7 @@ export interface BloqueoAgenda {
   fecha_hora_inicio: string;
   fecha_hora_fin: string;
   motivo: string | null;
+  id_empleado: string | null;
 }
 
 export interface RangoOcupado {
@@ -73,8 +86,10 @@ export interface CitaAgenda {
   monto_total: number;
   monto_seña_pagado: number;
   monto_restante: number;
+  id_empleado: string | null;
   clientas: { nombre_completo: string; telefono: string | null } | null;
   servicios: { nombre: string } | null;
+  personal: { nombre: string } | null;
 }
 
 export interface ClientaAdmin {
