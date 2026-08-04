@@ -369,6 +369,38 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         realmente aparezca en el celular — ver trampa #31, Chromium sin
         cabeza no soporta la Push API real, ni con perfil persistente ni
         con permisos concedidos por Playwright.
+- [x] **Tres botones sueltos, a pedido puntual del dueño**:
+      - **"Instalar app"** (`boton-instalar-app.tsx`): tarjeta que aparece
+        en `/panel` (Inicio), debajo de "Hola, X", solo si el navegador
+        dispara `beforeinstallprompt` (Chrome/Android — en iOS Safari no
+        existe esa API, ahí sigue siendo el paso manual del manual). Se
+        pidió que apareciera "al terminar de registrarse" — técnicamente
+        no se puede: el evento depende de que la página actual tenga un
+        manifest enlazado, y `/registro` no lo tiene (el manifest es
+        deliberadamente exclusivo de `/panel`, ver trampa #25). Como el
+        registro redirige a `/panel` al instante, mostrarlo ahí cumple lo
+        mismo en la práctica. Mismo problema de verificación que las
+        notificaciones push (trampa #31): Chromium headless no dispara
+        `beforeinstallprompt`, así que se confirmó que el componente
+        compila, no rompe nada y se auto-oculta correctamente sin el
+        evento — no que el navegador realmente lo ofrezca en un
+        dispositivo real.
+      - **Link público visible + botón "Copiar"** (`enlace-publico.tsx`):
+        reemplaza el link de solo texto "Ver mi página pública" — ahora
+        muestra la URL completa y tiene un botón que la copia al
+        portapapeles con confirmación "¡Copiado!" (2 segundos). Arranca
+        mostrando `/slug` (igual en servidor y cliente, evita parpadeo de
+        hidratación) y recién en un `useEffect` se completa con
+        `window.location.origin` — igual que ya hacía `generador-
+        estados.tsx` con el mismo problema.
+      - **Botón de ayuda** (`boton-ayuda.tsx`): ícono de "?" en la nav
+        interna (primero de los cuatro, junto a campanita/luna/salir),
+        abre WhatsApp al mismo número de soporte que ya usaba "¿Olvidaste
+        tu contraseña?" (`src/lib/soporte.ts`), con el nombre del negocio
+        en el mensaje. También se agregó como link de texto en la
+        pantalla de cuenta pendiente/rechazada (`(interno)/layout.tsx`),
+        que no tiene nav — es la pantalla donde más falta puede hacer un
+        "algo no anda, escribime".
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -1046,6 +1078,10 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   - `(publico)/terminos`, `(publico)/privacidad` — páginas legales
     estáticas, contenido real específico de esta plataforma (ver
     Progreso).
+  - `src/components/interno/boton-instalar-app.tsx`,
+    `src/components/interno/enlace-publico.tsx`,
+    `src/components/interno/boton-ayuda.tsx` — los tres botones sueltos
+    de la entrada de Progreso "Tres botones sueltos".
   - `src/lib/reportes.ts` — `ingresosPorMes()`/`topServiciosPorIngreso()`,
     agregación pura (sin datos, sin JSX) para la tarjeta de "Ingresos" en
     `/panel`. `src/components/interno/reportes-ingresos.tsx` es la parte

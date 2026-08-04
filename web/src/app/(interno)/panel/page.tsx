@@ -4,6 +4,8 @@ import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { ConfiguracionNegocio } from "@/components/interno/configuracion-negocio";
 import { ReportesIngresos } from "@/components/interno/reportes-ingresos";
 import { TourBienvenida } from "@/components/interno/tour-bienvenida";
+import { BotonInstalarApp } from "@/components/interno/boton-instalar-app";
+import { EnlacePublico } from "@/components/interno/enlace-publico";
 import type { Manicurista, CitaReporte } from "@/lib/tipos";
 
 export default async function PaginaPanel() {
@@ -82,6 +84,8 @@ export default async function PaginaPanel() {
           Hola{manicurista?.nombre_completo ? `, ${manicurista.nombre_completo}` : ""}
         </h1>
 
+        <BotonInstalarApp />
+
         <div className="mt-6 grid grid-cols-3 gap-3">
           {estadisticas.map((stat) => {
             const Icono = stat.icono;
@@ -129,17 +133,7 @@ export default async function PaginaPanel() {
 
         {manicurista ? (
           <>
-            {manicurista.slug_publico && (
-              <a
-                href={`/${manicurista.slug_publico}`}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-rosado-texto hover:underline"
-              >
-                Ver mi página pública
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            )}
+            {manicurista.slug_publico && <EnlacePublico slug={manicurista.slug_publico} />}
             <ConfiguracionNegocio manicurista={manicurista} />
           </>
         ) : (

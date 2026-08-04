@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { Clock3, XCircle } from "lucide-react";
+import { Clock3, XCircle, MessageCircle } from "lucide-react";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { NavInterno } from "@/components/interno/nav-interno";
 import { BotonCerrarSesion } from "@/components/interno/cerrar-sesion";
+import { urlWhatsappSoporte } from "@/lib/soporte";
 import type { SesionManicurista } from "@/lib/tipos";
 
 // Nombre dinámico según la sesión: si Aurora instala el panel como app
@@ -86,6 +87,17 @@ export default async function LayoutInterno({
               ". En cuanto la aprobemos vas a poder entrar al panel."
             : "Si creés que es un error, contactanos para revisarlo."}
         </p>
+        <a
+          href={urlWhatsappSoporte(
+            `Hola! Tengo una duda sobre mi cuenta (${cuenta.nombre_negocio}).`,
+          )}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-1 text-xs font-semibold text-texto-secundario transition-colors hover:text-rosado-texto"
+        >
+          <MessageCircle className="h-3.5 w-3.5" />
+          ¿Algo no anda bien? Escribinos por WhatsApp
+        </a>
         <BotonCerrarSesion />
       </main>
     );
@@ -93,7 +105,7 @@ export default async function LayoutInterno({
 
   return (
     <>
-      <NavInterno idManicurista={usuario.id} />
+      <NavInterno idManicurista={usuario.id} nombreNegocio={cuenta?.nombre_negocio} />
       {children}
     </>
   );

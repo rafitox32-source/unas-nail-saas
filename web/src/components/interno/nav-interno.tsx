@@ -7,6 +7,7 @@ import { Home, Sparkles, Calendar, Users, Package, Tag } from "lucide-react";
 import { BotonCerrarSesion } from "@/components/interno/cerrar-sesion";
 import { ToggleTema } from "@/components/interno/toggle-tema";
 import { ToggleNotificaciones } from "@/components/interno/toggle-notificaciones";
+import { BotonAyuda } from "@/components/interno/boton-ayuda";
 
 const enlaces = [
   { etiqueta: "Inicio", href: "/panel", icono: Home },
@@ -17,7 +18,13 @@ const enlaces = [
   { etiqueta: "Promociones", href: "/panel/promociones", icono: Tag },
 ];
 
-export function NavInterno({ idManicurista }: { idManicurista: string }) {
+export function NavInterno({
+  idManicurista,
+  nombreNegocio,
+}: {
+  idManicurista: string;
+  nombreNegocio?: string;
+}) {
   const ruta = usePathname();
   const enlaceActivoRef = useRef<HTMLAnchorElement>(null);
 
@@ -53,6 +60,7 @@ export function NavInterno({ idManicurista }: { idManicurista: string }) {
           <div className="pointer-events-none absolute right-0 top-0 h-full w-6 bg-gradient-to-l from-superficie to-transparent sm:hidden" />
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          <BotonAyuda nombreNegocio={nombreNegocio} />
           <ToggleNotificaciones idManicurista={idManicurista} />
           <ToggleTema />
           <BotonCerrarSesion />
