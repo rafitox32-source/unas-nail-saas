@@ -139,6 +139,26 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       el header público si está cargado. Probado de punta a punta:
       cambiar nombre + color + subir logo, verificado en la carta pública
       real (color del botón, nombre, logo en el header).
+- [x] PWA instalable para las manicuristas (no una app nativa — sin cuenta
+      de Apple Developer ni Google Play, ver trampa #25 para el porqué):
+      `/panel` se puede "Agregar a inicio" desde Safari (iPhone) o Chrome
+      (Android) y queda con ícono propio, pantalla completa, sin la barra
+      del navegador. El manifest (`/panel/manifest.webmanifest`) **no** usa
+      la convención especial `manifest.ts` de Next.js — esa solo genera un
+      único manifest fijo en la raíz de la app, no uno distinto por sesión
+      (confirmado con un 404 real al probarlo, no leyendo la doc). Es un
+      Route Handler común (`app/(interno)/panel/manifest.webmanifest/
+      route.ts`) que lee la sesión activa y devuelve el nombre/logo DE ESA
+      manicurista — si subió un logo propio en "Mi negocio" (ver arriba),
+      se usa ese; si no, el ícono genérico de la app
+      (`public/icono-app-{192,512}.png`, generado con Pillow ya que no hay
+      `gh`/ImageMagick en esta máquina pero sí Python+PIL). El nombre de la
+      pestaña/título y los meta tags de iOS (`apple-mobile-web-app-*`,
+      `apple-touch-icon`) también son dinámicos por sesión vía
+      `generateMetadata` en `(interno)/layout.tsx`. Alcance a propósito:
+      solo `/panel` (lo que usa la manicurista a diario) — el portal
+      público (`/[slug]`) no tiene manifest, las clientas no necesitan
+      instalar nada, solo entran al link de vez en cuando.
 - [ ] Campañas de marketing masivo — decisión pendiente: se evaluó
       email (Resend) vs. WhatsApp Business API, quedó pausado a pedido
       del dueño para más adelante
@@ -351,6 +371,24 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
     un `if` de control de acceso tiene que revisar `error`, no solo `data`,
     porque un fallo silencioso ahí se disfraza de "fila no encontrada" en
     vez de "la base tiró un error".
+25. **La convención especial `manifest.ts` de Next.js (como `sitemap.ts` o
+    `robots.ts`) solo genera un manifest único y estático para toda la
+    app, en la raíz** — ponerla en una subcarpeta tipo `app/(interno)/
+    panel/manifest.ts` esperando un manifest distinto ahí no funciona: la
+    ruta ni se registra, `/panel/manifest.webmanifest` devuelve 404 posta
+    (confirmado con `curl`, no asumido leyendo la doc). Como el manifest
+    de este proyecto necesita ser distinto por sesión (nombre/logo de cada
+    manicurista), la solución fue un Route Handler común en
+    `app/(interno)/panel/manifest.webmanifest/route.ts` (carpeta con
+    punto en el nombre, Next.js la soporta) devolviendo el JSON a mano con
+    `Content-Type: application/manifest+json`. Un Route Handler bajo una
+    carpeta con `layout.tsx` **no** pasa por ese layout (los layouts solo
+    envuelven páginas React, no rutas HTTP crudas) — por eso el gate de
+    aprobación de cuentas en `(interno)/layout.tsx` no bloquea ni redirige
+    el manifest, que se sigue pudiendo pedir igual (con fallback genérico
+    si no hay sesión). Lección: para cualquier archivo "especial" de
+    metadata que necesite variar por request (no solo por build estático),
+    usar un Route Handler normal, no la convención de archivo especial.
 
 ## Pulido 1 — accesibilidad, mobile, contraste
 
@@ -576,6 +614,10 @@ cd "web" && vercel --prod
     la carta pública pisando `--color-rosado` en un wrapper de
     `[slug]/page.tsx` (Tailwind v4 ya usa esa variable en sus clases, no
     hace falta tocar componente por componente).
+  - `app/(interno)/panel/manifest.webmanifest/route.ts` — manifest de PWA
+    dinámico por sesión, ver Progreso y trampa #25. `public/icono-app.svg`
+    + `icono-app-{180,192,512}.png` son el ícono genérico de respaldo
+    cuando la manicurista no subió logo propio.
   - `src/components/campo-con-icono.tsx` — input con ícono a la izquierda,
     compartido entre `modal-reserva.tsx`, `registro/page.tsx` e
     `ingresar/page.tsx`. **No usar en `type="date"`/`type="time"`** (trampa #16).

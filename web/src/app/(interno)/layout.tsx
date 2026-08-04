@@ -1,9 +1,53 @@
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { Clock3, XCircle } from "lucide-react";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { NavInterno } from "@/components/interno/nav-interno";
 import { BotonCerrarSesion } from "@/components/interno/cerrar-sesion";
 import type { SesionManicurista } from "@/lib/tipos";
+
+// Nombre dinámico según la sesión: si Aurora instala el panel como app
+// desde su celular ("Agregar a inicio"), el ícono queda con "Aurora Nails
+// Studio", no un nombre genérico — mismo dato que lee manifest.webmanifest.
+//
+// `other["apple-mobile-web-app-capable"]` es a propósito, además de
+// `appleWebApp.capable`: esta versión de Next solo emite la etiqueta nueva
+// sin prefijo (`mobile-web-app-capable`), pero versiones de iOS Safari
+// anteriores a la adopción del estándar nuevo solo entienden la vieja con
+// prefijo `apple-`. Verificado leyendo el HTML real que genera esta
+// página, no solo confiando en la config de `appleWebApp`.
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await crearClienteServidor();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let nombre = "Mi negocio";
+  if (user) {
+    const { data: manicurista } = await supabase
+      .from("usuarios_manicuristas")
+      .select("nombre_negocio")
+      .eq("id", user.id)
+      .maybeSingle<{ nombre_negocio: string }>();
+    if (manicurista?.nombre_negocio) nombre = manicurista.nombre_negocio;
+  }
+
+  return {
+    title: nombre,
+    manifest: "/panel/manifest.webmanifest",
+    appleWebApp: {
+      capable: true,
+      title: nombre,
+      statusBarStyle: "default",
+    },
+    other: {
+      "apple-mobile-web-app-capable": "yes",
+    },
+    icons: {
+      apple: "/icono-app-180.png",
+    },
+  };
+}
 
 export default async function LayoutInterno({
   children,

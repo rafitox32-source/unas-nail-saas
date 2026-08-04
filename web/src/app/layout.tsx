@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Poppins } from "next/font/google";
 import "./globals.css";
 
@@ -17,6 +17,10 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Nail Artist",
   description: "Reservá tu cita y descubrí nuestros servicios",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#935060",
 };
 
 export default function RootLayout({
