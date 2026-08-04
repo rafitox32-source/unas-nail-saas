@@ -859,6 +859,18 @@ Deploy a producción (CLI de Vercel ya logueado en esta máquina como
 cd "web" && vercel --prod
 ```
 
+**`Manual para Manicuristas.pdf`** (raíz del proyecto, `*.pdf` en
+`.gitignore` — es contenido generado, no código fuente): 20 páginas,
+HTML + Playwright `page.pdf()`, no una librería de PDF. **No se
+regenera solo** cuando se agrega una feature — hay que acordarse de
+actualizarlo a mano. El script y la plantilla NO viven en el repo (son
+scratch, se recrean fácil si hace falta): plantilla HTML/CSS +
+`generar-manual.js` arma las páginas a partir de capturas de pantalla
+reales (viewport 390×844, ocultando el overlay de dev tools de Next.js
+con `nextjs-portal { display: none }` antes de cada captura). Para
+agregar una sección nueva: tomar la captura, sumar una página al
+array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
+
 ## Referencia técnica
 
 - **Vercel**: proyecto `unas-nail-saas`, equipo `black-house-os` (mismo
