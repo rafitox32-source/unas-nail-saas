@@ -1004,6 +1004,46 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         0 violaciones axe-core en panel y vista pública, claro y oscuro.
         Datos de prueba (turnos de prueba, `tipo_negocio` de la cuenta
         demo) limpiados/revertidos después.
+- [x] **Período de prueba gratis de 7 días**, a pedido puntual del
+      dueño (precio real confirmado de paso: **S/100/mes + S/50/año de
+      mantenimiento** — ver el PDF de ventas, entrada de Progreso más
+      abajo, es donde vive esta info comercial, no en el código).
+      `usuarios_negocios.activacion_completa` (`boolean`, default
+      `false`). El reloj de la prueba corre desde `creado_en` (el
+      registro), no desde la aprobación del admin — así lo pidió el
+      dueño explícitamente ("usuarios creados"). **Las cuentas que ya
+      existían al momento de la migración se marcaron activadas de
+      una** (`update ... set activacion_completa = true` sin `where`,
+      mismo criterio que `tour_completado` en su momento) — ningún
+      negocio real que ya viene usando Florece se queda afuera de
+      golpe.
+      - A los 7 días, si nadie activó la cuenta a mano, `(interno)/
+        layout.tsx` bloquea el panel con una pantalla nueva ("Tu
+        período de prueba terminó") — mismo patrón visual y misma
+        posición en el árbol de decisiones que las pantallas de
+        `pendiente`/`rechazada` que ya existían ahí, pero sin inventar
+        un estado nuevo de `estado_cuenta` (la cuenta sigue
+        `aprobada`, solo que la prueba venció). Botón directo a
+        WhatsApp (`urlWhatsappSoporte`, mismo número de soporte de
+        siempre) con el mensaje ya armado pidiendo activación.
+      - `/admin` (`gestion-cuentas.tsx`) suma una insignia por cuenta
+        aprobada sin activar ("Prueba: día X/7" en dorado, "Prueba
+        vencida" en alerta, calculada en el cliente a partir de
+        `creado_en`) y un botón "Activar completo" que pone
+        `activacion_completa = true` — mismo patrón de `cambiarEstado`
+        ya existente, sin RLS nueva (`admin_actualiza_cualquier_cuenta`
+        ya cubre cualquier columna de cualquier cuenta).
+      - Verificado de punta a punta con Playwright, no solo por
+        SQL: una cuenta de prueba registrada real con `creado_en`
+        adelantado 8 días atrás por SQL (no se puede simular tiempo
+        real en 8 días, así que se truquea la fecha) → login → bloqueo
+        visible, 0 violaciones axe-core en claro y oscuro → un admin de
+        prueba la activa desde `/admin` → recargando la misma sesión
+        (sin volver a iniciar sesión) el panel entra normal. Cuentas
+        reales ya existentes (demo `aurora` y otras cuentas de negocios
+        reales que ya estaban en producción) confirmadas sin ningún
+        cambio de comportamiento tras la migración. Cuentas y sesiones
+        de prueba borradas después (`delete from auth.users`, cascada).
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -1611,6 +1651,15 @@ página al array `paginas`, actualizar el índice (página 2), la lista de
   (security definer) es la única forma correcta de chequear el admin
   desde una política RLS sobre esta misma tabla — nunca una subconsulta
   directa (recursión infinita, trampa #24).
+- **`usuarios_negocios.activacion_completa`** (`boolean`, default
+  `false`): período de prueba de 7 días desde `creado_en`, ver Progreso
+  "Período de prueba gratis de 7 días". `true` = cuenta ya activada
+  (paga) o grandfathered por la migración; `false` + más de 7 días
+  desde `creado_en` = panel bloqueado en `(interno)/layout.tsx` hasta
+  que un admin la active desde `/admin`. Precio real: S/100/mes + S/50/
+  año de mantenimiento — vive en el PDF de ventas, no hace falta
+  repetirlo en código ni cobrarlo automáticamente todavía (no hay
+  gateway de pago, ver `/terminos`).
 - **`resenas`**: `nombre_clienta`, `calificacion` (1-5), `comentario`,
   `visible`. Sin formulario público todavía — la dueña del negocio las carga a
   mano en `/panel/promociones`. RLS calcada de `servicios`/`promociones`:
