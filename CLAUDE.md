@@ -892,6 +892,25 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         de la captura). 0 violaciones axe-core en las cuatro pantallas
         tocadas (modal de reserva con el flujo por encargo, agenda,
         ficha de clienta, formulario de servicios).
+- [x] **Manual PDF actualizado a v4 (25 páginas)**, para reflejar todo lo
+      construido en esta sesión que todavía no estaba documentado: los
+      nueve rubros (se sumaron barbería/costura/postres/odontología al
+      selector de registro), el tema visual automático de barbería, foto
+      + "por encargo" + "retoque sugerido" en el formulario de servicios,
+      el selector de método de pago (Yape/Plin/Efectivo) en la reserva, y
+      el calendario de bloqueos tipo tocar-para-bloquear que reemplazó al
+      formulario de fecha por texto. Tres páginas nuevas ("Tu rubro, tu
+      estilo", "Cómo cobrás: Yape, Plin o efectivo", "Bloqueá tu agenda
+      con un toque") más la actualización de las páginas de registro y de
+      carga de servicios, cuatro capturas nuevas (`generar-manual-v4.js`,
+      scratch, no vive en el repo — mismo criterio que las versiones
+      anteriores), índice y FAQ actualizados, `TOTAL_PAGINAS` recalculado.
+      Para la captura del tema de barbería se usó el mismo patrón ya
+      establecido de cambiar `tipo_negocio` de la cuenta demo por SQL
+      temporalmente y revertirlo enseguida (confirmado con un SELECT
+      posterior). Las 25 páginas se revisaron una por una con capturas de
+      Playwright antes de dar el PDF por terminado, no solo se generó y
+      se asumió que salió bien.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -1421,16 +1440,17 @@ cd "web" && vercel --prod
 ```
 
 **`Manual para Manicuristas.pdf`** (raíz del proyecto, `*.pdf` en
-`.gitignore` — es contenido generado, no código fuente): 20 páginas,
-HTML + Playwright `page.pdf()`, no una librería de PDF. **No se
-regenera solo** cuando se agrega una feature — hay que acordarse de
-actualizarlo a mano. El script y la plantilla NO viven en el repo (son
-scratch, se recrean fácil si hace falta): plantilla HTML/CSS +
-`generar-manual.js` arma las páginas a partir de capturas de pantalla
-reales (viewport 390×844, ocultando el overlay de dev tools de Next.js
-con `nextjs-portal { display: none }` antes de cada captura). Para
-agregar una sección nueva: tomar la captura, sumar una página al
-array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
+`.gitignore` — es contenido generado, no código fuente): **25 páginas**
+(v4, 2026-08-05), HTML + Playwright `page.pdf()`, no una librería de
+PDF. **No se regenera solo** cuando se agrega una feature — hay que
+acordarse de actualizarlo a mano. El script y la plantilla NO viven en
+el repo (son scratch, se recrean fácil si hace falta): plantilla
+HTML/CSS + `generar-manual-v4.js` arma las páginas a partir de capturas
+de pantalla reales (viewport 390×844, ocultando el overlay de dev tools
+de Next.js con `nextjs-portal { display: none }` antes de cada
+captura). Para agregar una sección nueva: tomar la captura, sumar una
+página al array `paginas`, actualizar el índice (página 2), la lista de
+`pie(N, ...)` de las páginas siguientes y el `TOTAL_PAGINAS`.
 
 ## Referencia técnica
 
