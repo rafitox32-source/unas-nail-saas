@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Pencil, Trash2, Power, Loader2, Sparkles } from "lucide-react";
+import { useRef, useState } from "react";
+import { Plus, Pencil, Trash2, Power, Loader2, Sparkles, ImagePlus, X } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { formateadorPrecio } from "@/lib/formato";
 import type { ServicioAdmin, Personal, CategoriaServicio, TipoNegocio } from "@/lib/tipos";
@@ -14,6 +14,7 @@ interface ValoresFormulario {
   monto_seña: string;
   categoria: CategoriaServicio;
   id_empleado: string;
+  url_foto: string;
 }
 
 const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
@@ -23,6 +24,7 @@ const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
   uñas: "Uñas",
   costura: "Costura",
   postres: "Postres",
+  odontologia: "Odontología",
   otro: "Otro",
 };
 
@@ -36,7 +38,8 @@ function categoriaSugerida(tipoNegocio: TipoNegocio): CategoriaServicio {
     tipoNegocio === "pestañas" ||
     tipoNegocio === "uñas" ||
     tipoNegocio === "costura" ||
-    tipoNegocio === "postres"
+    tipoNegocio === "postres" ||
+    tipoNegocio === "odontologia"
   ) {
     return tipoNegocio;
   }
@@ -44,7 +47,7 @@ function categoriaSugerida(tipoNegocio: TipoNegocio): CategoriaServicio {
 }
 
 const columnas =
-  "id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, activo";
+  "id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, url_foto, activo";
 
 export function GestionServicios({
   idNegocio,
@@ -65,13 +68,16 @@ export function GestionServicios({
     monto_seña: "",
     categoria: categoriaSugerida(tipoNegocio),
     id_empleado: "",
+    url_foto: "",
   };
   const [servicios, setServicios] = useState(serviciosIniciales);
   const [formularioAbierto, setFormularioAbierto] = useState(false);
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [valores, setValores] = useState<ValoresFormulario>(vacio);
   const [guardando, setGuardando] = useState(false);
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inputArchivo = useRef<HTMLInputElement>(null);
 
   function abrirNuevo() {
     setEditandoId(null);
@@ -90,9 +96,31 @@ export function GestionServicios({
       monto_seña: String(servicio.monto_seña),
       categoria: servicio.categoria,
       id_empleado: servicio.id_empleado ?? "",
+      url_foto: servicio.url_foto ?? "",
     });
     setFormularioAbierto(true);
     setError(null);
+  }
+
+  async function subirFoto(archivo: File) {
+    setSubiendoFoto(true);
+    setError(null);
+    const supabase = crearClienteNavegador();
+    const ruta = `${idNegocio}/servicio-${crypto.randomUUID()}-${archivo.name}`;
+
+    const { error: errorSubir } = await supabase.storage.from("fotos-galeria").upload(ruta, archivo);
+    if (errorSubir) {
+      setError(errorSubir.message);
+      setSubiendoFoto(false);
+      return;
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("fotos-galeria").getPublicUrl(ruta);
+
+    setValores((actual) => ({ ...actual, url_foto: publicUrl }));
+    setSubiendoFoto(false);
   }
 
   async function guardar(evento: React.FormEvent) {
@@ -109,6 +137,7 @@ export function GestionServicios({
       monto_seña: Number(valores.monto_seña || 0),
       categoria: valores.categoria,
       id_empleado: valores.id_empleado || null,
+      url_foto: valores.url_foto || null,
     };
 
     if (editandoId) {
@@ -184,6 +213,48 @@ export function GestionServicios({
           onSubmit={guardar}
           className="animar-aparecer mt-6 flex flex-col gap-3 rounded-2xl border border-borde bg-superficie p-5 shadow-sm"
         >
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-borde bg-fondo">
+              {valores.url_foto ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={valores.url_foto} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <Sparkles className="h-6 w-6 text-texto-secundario" strokeWidth={1.5} />
+              )}
+            </div>
+            <div>
+              <input
+                ref={inputArchivo}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                hidden
+                onChange={(e) => e.target.files?.[0] && subirFoto(e.target.files[0])}
+              />
+              <button
+                type="button"
+                onClick={() => inputArchivo.current?.click()}
+                disabled={subiendoFoto}
+                className="flex items-center gap-1.5 text-sm font-semibold text-rosado-texto transition-colors hover:text-texto-primario disabled:opacity-50"
+              >
+                {subiendoFoto ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ImagePlus className="h-4 w-4" />
+                )}
+                {subiendoFoto ? "Subiendo…" : valores.url_foto ? "Cambiar foto" : "Subir foto"}
+              </button>
+              {valores.url_foto && (
+                <button
+                  type="button"
+                  onClick={() => setValores({ ...valores, url_foto: "" })}
+                  className="mt-1 flex items-center gap-1 text-xs text-texto-secundario transition-colors hover:text-alerta"
+                >
+                  <X className="h-3 w-3" /> Quitar foto
+                </button>
+              )}
+            </div>
+          </div>
+
           <label className="text-sm text-texto-secundario">
             Nombre
             <input
@@ -309,23 +380,33 @@ export function GestionServicios({
               servicio.activo ? "bg-superficie" : "bg-borde/30"
             }`}
           >
-            <div>
-              <p className="font-semibold text-texto-primario">
-                {servicio.nombre}
-                {!servicio.activo && (
-                  <span className="ml-2 rounded-full bg-borde px-2 py-0.5 text-[11px] font-semibold text-texto-primario">
-                    Inactivo
-                  </span>
-                )}
-              </p>
-              <p className="text-sm text-texto-secundario">
-                {formateadorPrecio.format(servicio.precio)} · {servicio.duracion_minutos} min
-                {servicio.monto_seña > 0 && ` · Abono ${formateadorPrecio.format(servicio.monto_seña)}`}
-                {personal.length > 0 &&
-                  ` · ${
-                    personal.find((p) => p.id === servicio.id_empleado)?.nombre ?? "Sin asignar"
-                  }`}
-              </p>
+            <div className="flex items-center gap-3">
+              {servicio.url_foto && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={servicio.url_foto}
+                  alt=""
+                  className="h-12 w-12 shrink-0 rounded-lg object-cover"
+                />
+              )}
+              <div>
+                <p className="font-semibold text-texto-primario">
+                  {servicio.nombre}
+                  {!servicio.activo && (
+                    <span className="ml-2 rounded-full bg-borde px-2 py-0.5 text-[11px] font-semibold text-texto-primario">
+                      Inactivo
+                    </span>
+                  )}
+                </p>
+                <p className="text-sm text-texto-secundario">
+                  {formateadorPrecio.format(servicio.precio)} · {servicio.duracion_minutos} min
+                  {servicio.monto_seña > 0 && ` · Abono ${formateadorPrecio.format(servicio.monto_seña)}`}
+                  {personal.length > 0 &&
+                    ` · ${
+                      personal.find((p) => p.id === servicio.id_empleado)?.nombre ?? "Sin asignar"
+                    }`}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <button

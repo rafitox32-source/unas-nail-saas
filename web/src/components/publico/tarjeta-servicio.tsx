@@ -14,10 +14,19 @@ export function TarjetaServicio({
   return (
     <div className="group flex flex-col overflow-hidden rounded-[20px] border border-borde bg-superficie shadow-[0_10px_30px_rgba(54,42,39,0.06)] transition-all hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(54,42,39,0.12)]">
       <div className="relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br from-rosado-suave to-nude">
-        <Sparkles
-          className="h-10 w-10 text-white/50 transition-transform duration-300 group-hover:scale-110"
-          strokeWidth={1.25}
-        />
+        {servicio.url_foto ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={servicio.url_foto}
+            alt={servicio.nombre}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <Sparkles
+            className="h-10 w-10 text-white/50 transition-transform duration-300 group-hover:scale-110"
+            strokeWidth={1.25}
+          />
+        )}
         {servicio.monto_seña > 0 && (
           <span className="absolute right-3 top-3 rounded-full bg-superficie/90 px-2.5 py-1 text-xs font-semibold text-texto-primario">
             Abono {formateadorPrecio.format(servicio.monto_seña)}

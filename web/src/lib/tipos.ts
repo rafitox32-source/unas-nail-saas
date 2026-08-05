@@ -10,6 +10,7 @@ export type TipoNegocio =
   | "costura"
   | "barberia"
   | "postres"
+  | "odontologia"
   | "spa_completo";
 
 export interface Negocio {
@@ -59,6 +60,7 @@ export type CategoriaServicio =
   | "costura"
   | "barberia"
   | "postres"
+  | "odontologia"
   | "otro";
 
 export interface Personal {
@@ -78,6 +80,7 @@ export interface Servicio {
   monto_seña: number;
   categoria: CategoriaServicio;
   id_empleado: string | null;
+  url_foto: string | null;
 }
 
 export interface ServicioAdmin extends Servicio {

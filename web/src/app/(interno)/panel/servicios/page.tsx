@@ -25,7 +25,7 @@ export default async function PaginaServicios() {
 
   const { data: servicios } = await supabase
     .from("servicios")
-    .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, activo")
+    .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, url_foto, activo")
     .eq("id_negocio", usuario!.id)
     .order("creado_en", { ascending: true })
     .returns<ServicioAdmin[]>();

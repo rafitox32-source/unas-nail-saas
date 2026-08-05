@@ -27,7 +27,7 @@ async function obtenerNegocio(slug: string) {
 
   const { data: servicios } = await supabase
     .from("servicios")
-    .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado")
+    .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, url_foto")
     .eq("id_negocio", negocio.id)
     .eq("activo", true)
     .order("precio", { ascending: true })
