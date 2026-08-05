@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, User, Phone, Tag, Loader2, CheckCircle2, MessageCircle, Clock, Info, Wallet } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { CampoConIcono } from "@/components/campo-con-icono";
@@ -43,6 +43,9 @@ export function ModalReserva({
   const [validandoPromo, setValidandoPromo] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [seccionConError, setSeccionConError] = useState<"hora" | "metodoPago" | null>(null);
+  const refHorario = useRef<HTMLDivElement>(null);
+  const refMetodoPago = useRef<HTMLDivElement>(null);
   const [resultado, setResultado] = useState<{
     monto_seña: number;
     monto_total: number;
@@ -118,17 +121,24 @@ export function ModalReserva({
     return Math.max(0, servicio.precio - Math.min(descuento, servicio.precio));
   })();
 
+  function irAError(seccion: "hora" | "metodoPago", mensaje: string) {
+    setError(mensaje);
+    setSeccionConError(seccion);
+    const ref = seccion === "hora" ? refHorario : refMetodoPago;
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
   async function alEnviar(evento: React.FormEvent) {
     evento.preventDefault();
     setError(null);
 
     if (!hora) {
-      setError("Elegí un horario.");
+      irAError("hora", "Te faltó elegir un horario — mirá arriba ↑");
       return;
     }
 
     if (!metodoPago) {
-      setError("Elegí cómo vas a pagar.");
+      irAError("metodoPago", "Te faltó elegir cómo vas a pagar — mirá arriba ↑");
       return;
     }
 
@@ -260,31 +270,112 @@ export function ModalReserva({
             </div>
 
             <form onSubmit={alEnviar} className="flex flex-col gap-3">
-              <label className="text-sm text-texto-secundario">
-                Tu nombre
-                <CampoConIcono
-                  icono={User}
-                  required
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                />
-              </label>
-              <label className="text-sm text-texto-secundario">
-                Teléfono (WhatsApp)
-                <CampoConIcono
-                  icono={Phone}
-                  required
-                  type="tel"
-                  value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
-                />
-              </label>
+              <div>
+                <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
+                    1
+                  </span>
+                  Tus datos
+                </p>
+                <div className="mt-2 flex flex-col gap-3 pl-7">
+                  <label className="text-sm text-texto-secundario">
+                    Tu nombre
+                    <CampoConIcono
+                      icono={User}
+                      required
+                      value={nombre}
+                      onChange={(e) => setNombre(e.target.value)}
+                    />
+                  </label>
+                  <label className="text-sm text-texto-secundario">
+                    Teléfono (WhatsApp)
+                    <CampoConIcono
+                      icono={Phone}
+                      required
+                      type="tel"
+                      value={telefono}
+                      onChange={(e) => setTelefono(e.target.value)}
+                    />
+                  </label>
+                </div>
+              </div>
 
               <div>
-                <p className="flex items-center gap-1.5 text-sm text-texto-secundario">
-                  <Wallet className="h-3.5 w-3.5" /> ¿Cómo vas a pagar?
+                <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
+                    2
+                  </span>
+                  Elegí el día
                 </p>
-                <div className="mt-2 grid grid-cols-3 gap-2">
+                <div className="mt-2 rounded-xl border border-borde bg-fondo p-3 pl-3">
+                  <CalendarioDisponibilidad
+                    idNegocio={idNegocio}
+                    idEmpleado={servicio.id_empleado}
+                    duracionMinutos={servicio.duracion_minutos}
+                    fechaSeleccionada={fecha}
+                    onSeleccionar={setFecha}
+                  />
+                </div>
+              </div>
+
+              <div
+                ref={refHorario}
+                className={`rounded-xl transition-shadow ${
+                  seccionConError === "hora" ? "animar-aparecer ring-2 ring-alerta ring-offset-2" : ""
+                }`}
+              >
+                <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
+                    3
+                  </span>
+                  <Clock className="h-3.5 w-3.5 text-texto-secundario" /> Elegí el horario
+                </p>
+                <div className="pl-7">
+                  {cargandoHorarios ? (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-texto-secundario">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Consultando disponibilidad…
+                    </p>
+                  ) : horariosDisponibles.length === 0 ? (
+                    <p className="mt-2 text-xs text-alerta">
+                      No quedan turnos disponibles ese día, probá con otra fecha.
+                    </p>
+                  ) : (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {horariosDisponibles.map((horaDisponible) => (
+                        <button
+                          key={horaDisponible}
+                          type="button"
+                          onClick={() => {
+                            setHora(horaDisponible);
+                            setSeccionConError(null);
+                          }}
+                          className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+                            hora === horaDisponible
+                              ? "border-rosado bg-rosado text-white"
+                              : "border-borde bg-fondo text-texto-primario hover:border-rosado"
+                          }`}
+                        >
+                          {horaDisponible}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div
+                ref={refMetodoPago}
+                className={`rounded-xl transition-shadow ${
+                  seccionConError === "metodoPago" ? "animar-aparecer ring-2 ring-alerta ring-offset-2" : ""
+                }`}
+              >
+                <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
+                    4
+                  </span>
+                  <Wallet className="h-3.5 w-3.5 text-texto-secundario" /> ¿Cómo vas a pagar?
+                </p>
+                <div className="mt-2 grid grid-cols-3 gap-2 pl-7">
                   {METODOS_PAGO.map((metodo) => {
                     const Icono = ICONO_METODO_PAGO[metodo];
                     const clases = CLASES_METODO_PAGO[metodo];
@@ -293,7 +384,10 @@ export function ModalReserva({
                       <button
                         key={metodo}
                         type="button"
-                        onClick={() => setMetodoPago(metodo)}
+                        onClick={() => {
+                          setMetodoPago(metodo);
+                          setSeccionConError(null);
+                        }}
                         className={`flex flex-col items-center gap-1 rounded-xl border-2 py-2.5 text-xs font-semibold transition-colors ${
                           seleccionado
                             ? `${clases.borde} ${clases.fondoSuave} ${clases.texto}`
@@ -306,50 +400,6 @@ export function ModalReserva({
                     );
                   })}
                 </div>
-              </div>
-              <div>
-                <p className="text-sm text-texto-secundario">Elegí el día</p>
-                <div className="mt-1 rounded-xl border border-borde bg-fondo p-3">
-                  <CalendarioDisponibilidad
-                    idNegocio={idNegocio}
-                    idEmpleado={servicio.id_empleado}
-                    duracionMinutos={servicio.duracion_minutos}
-                    fechaSeleccionada={fecha}
-                    onSeleccionar={setFecha}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <p className="flex items-center gap-1.5 text-sm text-texto-secundario">
-                  <Clock className="h-3.5 w-3.5" /> Horario disponible
-                </p>
-                {cargandoHorarios ? (
-                  <p className="mt-2 flex items-center gap-1.5 text-xs text-texto-secundario">
-                    <Loader2 className="h-3 w-3 animate-spin" /> Consultando disponibilidad…
-                  </p>
-                ) : horariosDisponibles.length === 0 ? (
-                  <p className="mt-2 text-xs text-alerta">
-                    No quedan turnos disponibles ese día, probá con otra fecha.
-                  </p>
-                ) : (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {horariosDisponibles.map((horaDisponible) => (
-                      <button
-                        key={horaDisponible}
-                        type="button"
-                        onClick={() => setHora(horaDisponible)}
-                        className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-                          hora === horaDisponible
-                            ? "border-rosado bg-rosado text-white"
-                            : "border-borde bg-fondo text-texto-primario hover:border-rosado"
-                        }`}
-                      >
-                        {horaDisponible}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <label className="text-sm text-texto-secundario">
@@ -386,7 +436,12 @@ export function ModalReserva({
                 </p>
               )}
 
-              {error && <p className="animar-aparecer text-sm text-alerta">{error}</p>}
+              {error && (
+                <p className="animar-aparecer flex items-center gap-1.5 rounded-xl bg-alerta-suave px-3 py-2.5 text-sm font-semibold text-alerta">
+                  <Info className="h-4 w-4 shrink-0" />
+                  {error}
+                </p>
+              )}
 
               <button
                 type="submit"
