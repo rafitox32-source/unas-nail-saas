@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import {
   Palette,
+  Stethoscope,
   ChevronDown,
   ChevronUp,
   Loader2,
@@ -11,19 +12,28 @@ import {
   X,
 } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
-import type { FotoFirmada, NotaVisita as TipoNotaVisita } from "@/lib/tipos";
+import type { FotoFirmada, NotaVisita as TipoNotaVisita, TipoNegocio } from "@/lib/tipos";
 
 export function NotaVisita({
   idCita,
   idNegocio,
   notaInicial,
   fotosIniciales,
+  tipoNegocio,
 }: {
   idCita: string;
   idNegocio: string;
   notaInicial: TipoNotaVisita | null;
   fotosIniciales: FotoFirmada[];
+  tipoNegocio?: TipoNegocio;
 }) {
+  const esOdontologia = tipoNegocio === "odontologia";
+  const IconoToggle = esOdontologia ? Stethoscope : Palette;
+  const etiquetaCampoPrincipal = esOdontologia ? "Tratamiento realizado" : "Fórmula de color";
+  const placeholderCampoPrincipal = esOdontologia
+    ? "Ej: Resina en pieza 24, control en 6 meses"
+    : "Ej: OPI Bubble Bath + top coat mate";
+  const etiquetaToggleBase = esOdontologia ? "nota de la consulta" : "nota de la visita";
   const [abierto, setAbierto] = useState(false);
   const [formulaColor, setFormulaColor] = useState(notaInicial?.formula_color ?? "");
   const [notas, setNotas] = useState(notaInicial?.notas ?? "");
@@ -123,23 +133,23 @@ export function NotaVisita({
         ) : tieneAlgo ? (
           <ChevronDown className="h-3.5 w-3.5" />
         ) : (
-          <Palette className="h-3.5 w-3.5" />
+          <IconoToggle className="h-3.5 w-3.5" />
         )}
         {abierto
-          ? "Ocultar nota de la visita"
+          ? `Ocultar ${etiquetaToggleBase}`
           : tieneAlgo
-            ? "Ver nota de la visita"
-            : "Agregar nota de la visita"}
+            ? `Ver ${etiquetaToggleBase}`
+            : `Agregar ${etiquetaToggleBase}`}
       </button>
 
       {abierto && (
         <div className="animar-aparecer mt-3 flex flex-col gap-3">
           <label className="text-xs text-texto-secundario">
-            Fórmula de color
+            {etiquetaCampoPrincipal}
             <input
               value={formulaColor}
               onChange={(e) => setFormulaColor(e.target.value)}
-              placeholder="Ej: OPI Bubble Bath + top coat mate"
+              placeholder={placeholderCampoPrincipal}
               className="mt-1 w-full rounded-lg border border-borde bg-superficie px-3 py-2 text-sm text-texto-primario transition-colors focus:border-rosado focus:outline-none"
             />
           </label>

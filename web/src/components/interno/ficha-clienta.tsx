@@ -12,6 +12,7 @@ import type {
   NotaVisita as TipoNotaVisita,
   FotoFirmada,
   ProgramaLealtad,
+  TipoNegocio,
 } from "@/lib/tipos";
 
 const formateadorFecha = new Intl.DateTimeFormat("es-AR", {
@@ -34,12 +35,14 @@ export function FichaClienta({
   historial,
   notasPorCita,
   lealtad,
+  tipoNegocio,
 }: {
   clienta: ClientaAdmin;
   idNegocio: string;
   historial: CitaHistorial[];
   notasPorCita: Record<string, { nota: TipoNotaVisita | null; fotos: FotoFirmada[] }>;
   lealtad: ProgramaLealtad;
+  tipoNegocio?: TipoNegocio;
 }) {
   const [alergias, setAlergias] = useState(clienta.alergias ?? "");
   const [notas, setNotas] = useState(clienta.notas_internas ?? "");
@@ -232,6 +235,7 @@ export function FichaClienta({
                 idNegocio={idNegocio}
                 notaInicial={infoNota.nota}
                 fotosIniciales={infoNota.fotos}
+                tipoNegocio={tipoNegocio}
               />
             </div>
           );

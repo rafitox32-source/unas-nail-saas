@@ -7,6 +7,7 @@ import type {
   NotaVisita,
   FotoFirmada,
   ProgramaLealtad,
+  TipoNegocio,
 } from "@/lib/tipos";
 
 export default async function PaginaClienta({
@@ -35,6 +36,12 @@ export default async function PaginaClienta({
     .select("lealtad_activo, lealtad_visitas_objetivo, lealtad_premio_descripcion")
     .eq("id", usuario!.id)
     .maybeSingle<ProgramaLealtad>();
+
+  const { data: negocio } = await supabase
+    .from("usuarios_negocios")
+    .select("tipo_negocio")
+    .eq("id", usuario!.id)
+    .maybeSingle<{ tipo_negocio: TipoNegocio }>();
 
   const { data: historial } = await supabase
     .from("citas_apartados")
@@ -77,6 +84,7 @@ export default async function PaginaClienta({
         idNegocio={usuario!.id}
         historial={historial ?? []}
         notasPorCita={notasPorCita}
+        tipoNegocio={negocio?.tipo_negocio}
         lealtad={
           lealtad ?? {
             lealtad_activo: false,
