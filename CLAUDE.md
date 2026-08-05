@@ -840,6 +840,58 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       por categoría con Odontología), 0 violaciones axe-core. Foto y
       servicio de prueba borrados de Storage vía la API después
       (`storage.objects.remove()`, no SQL directo — trampa #10).
+- [x] **Lógica específica por rubro** ("investiga como profesional de
+      cada materia y aplica"): en vez de tratar los 9 rubros como
+      idénticos, tres piezas concretas, aditivas y de bajo riesgo —
+      pensadas desde qué necesita de verdad cada oficio, no solo
+      agregadas a ciegas:
+      - **Notas del cliente al reservar**
+        (`citas_apartados.notas_clienta`, nullable): cualquier rubro,
+        pero clave para costura/postres (talla, sabor, diseño de
+        referencia) — campo opcional en `modal-reserva.tsx`, visible en
+        la agenda interna (`gestion-agenda.tsx`) y en el CSV exportado.
+      - **Retoque sugerido** (`servicios.dias_para_retoque`, nullable):
+        pestañas, color de cabello, semipermanente — rubros con ciclo
+        real de mantenimiento, no todos lo tienen. Se calcula en
+        `ficha-clienta.tsx` desde la última cita **completada** de ese
+        servicio (el historial ya viene ordenado del más nuevo al más
+        viejo, `.find()` alcanza) + los días configurados; banner
+        dorado si es futuro, naranja (`--color-alerta`) si ya venció.
+      - **Por encargo** (`servicios.es_por_encargo`, default `false`):
+        costura y postres no reservan un horario exclusivo de X
+        minutos — la clienta elige una fecha de entrega (input de
+        fecha simple, sin calendario de disponibilidad ni grilla de
+        horarios) y coordina el horario exacto por WhatsApp.
+        `crear_apartado` saltea el chequeo de colisión de horario
+        **solo** para estos servicios (envuelto en
+        `if not v_servicio.es_por_encargo then ...`) — una modista
+        puede tomar varios pedidos con la misma fecha de entrega, no
+        son turnos que se pisen entre sí; el chequeo de bloqueos de
+        agenda (día cerrado) sigue aplicando igual. `crear_apartado`
+        ganó `p_notas_clienta` — mismo criterio de siempre para un
+        parámetro nuevo: `drop function` + `create function` explícito
+        porque cambia la lista de tipos (trampa #12/#32), grants
+        reaplicados a mano (`revoke ... from public` +
+        `grant ... to anon, authenticated, service_role`).
+      - **Deliberadamente fuera de esta pasada, con motivo declarado al
+        usuario antes de tocar código** (no se construyó a ciegas):
+        historial médico completo para odontología (plan de
+        tratamiento, fichas, consentimientos) — es una categoría de
+        datos sensible/regulada distinta al resto, no algo para
+        improvisar sin discutirlo primero; y cola de espera en tiempo
+        real para walk-ins de barbería — es un tipo de funcionalidad
+        distinto (tiempo real, no agenda con horario), no encaja en
+        una tarde de trabajo aditivo.
+      - Verificado con Playwright de punta a punta: dos pedidos "por
+        encargo" para la misma fecha, confirmado en la base que
+        **no** chocan (mismo `fecha_hora_inicio` exacto, dos filas
+        distintas); notas del cliente visibles en la agenda con su
+        insignia de método de pago al lado; retoque sugerido calculado
+        y mostrado en la ficha de Camila Rodríguez (dato de demo real,
+        `dias_para_retoque` seteado temporalmente y revertido después
+        de la captura). 0 violaciones axe-core en las cuatro pantallas
+        tocadas (modal de reserva con el flujo por encargo, agenda,
+        ficha de clienta, formulario de servicios).
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
