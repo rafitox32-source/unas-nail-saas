@@ -732,6 +732,39 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         puntual con motivo (aparece el punto, el panel del día lista
         ambos bloqueos), borrar bloqueos. 0 violaciones axe-core en
         `/panel/agenda` con el calendario abierto, claro y oscuro.
+- [x] **Rubros nuevos: costura y barbería**. Costura es una categoría
+      más (servicio/personal/tipo de negocio), misma lógica de siempre
+      (precio + duración + abono, reserva por horario) — a pedido
+      explícito del dueño, sin modelo de pedido/entrega especial.
+      Barbería además activa un **tema visual propio** en la carta
+      pública cuando `tipo_negocio = 'barberia'`:
+      - Poste de barbero francés (rojo/blanco/azul, remates dorados) en
+        vez del isotipo floral en el hero; una versión chica (bigote,
+        `IconoBigote`) como marca en el header; encabezado del negocio
+        en mayúsculas; una franja de bigotes como marca de agua
+        decorativa debajo del hero. `src/components/iconos-barberia.tsx`
+        — `IconoPosteBarbero` (SVG con `<pattern>` de rayas + `useId()`
+        para que el id del pattern no choque si se renderiza más de una
+        vez en la página, cosa que un contador de módulo normal no
+        garantiza entre servidor y cliente).
+      - Color de acento por defecto `#9c2b2b` (rojo de barbería) **solo
+        si la dueña todavía no eligió su propio `color_marca`** — el
+        color personalizado sigue ganando siempre, esto es nada más el
+        punto de partida de una cuenta nueva. Reusa el mecanismo que ya
+        existía para pisar `--color-rosado` (Personalización de marca,
+        más arriba) — todos los botones/links/acentos de la carta
+        pública heredan el tema solos, sin tocar componente por
+        componente.
+      - `costura`/`barberia` sumados a los check constraints de
+        `servicios.categoria`, `personal.categoria` y
+        `usuarios_negocios.tipo_negocio`. `Negocio.tipo_negocio` faltaba
+        en el tipo TS y en la consulta de `[slug]/page.tsx` — se agregó
+        ahí, es donde vive la lógica del tema.
+      - Verificado cambiando `tipo_negocio` de la cuenta demo a
+        `'barberia'` temporalmente (revertido a `'uñas'` después):
+        captura real del hero/header/footer en claro y oscuro, 0
+        violaciones axe-core en los dos. Selector "¿A qué te dedicás?"
+        del registro muestra Barbería y Costura.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -1360,10 +1393,17 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   — pueden ser distintos). Ver trampa #23 y la entrada de Progreso sobre
   login sin email.
 - **`usuarios_negocios.tipo_negocio`**: `cabello`/`pestañas`/`uñas`/
-  `spa_completo`, default `'uñas'`, declarado al registrarse (ver Progreso
-  "Spa multi-servicio, Fase 3"). Informativo — no restringe categorías de
-  servicio, solo sugiere la categoría por defecto al cargar el primer
-  servicio (`gestion-servicios.tsx`, función `categoriaSugerida()`).
+  `costura`/`barberia`/`spa_completo`, default `'uñas'`, declarado al
+  registrarse (ver Progreso "Spa multi-servicio, Fase 3" y "Rubros
+  nuevos: costura y barbería"). Informativo para el resto de las
+  cuentas — no restringe categorías de servicio, solo sugiere la
+  categoría por defecto al cargar el primer servicio
+  (`gestion-servicios.tsx`, función `categoriaSugerida()`). **Excepción:
+  `'barberia'` sí tiene efecto real** — activa el tema visual propio en
+  `[slug]/page.tsx` (poste de barbero, encabezado en mayúsculas, marca
+  de agua de bigotes, color de acento por defecto), ver esa entrada de
+  Progreso. `servicios.categoria`/`personal.categoria` tienen el mismo
+  enum menos `spa_completo`, más `otro`.
 - **Triggers**: `actualizar_marca_de_tiempo` (todas las tablas con
   `actualizado_en`), `manejar_nuevo_usuario` (crea perfil al registrarse,
   ahora también lee `tipo_negocio` de la metadata de Auth),
