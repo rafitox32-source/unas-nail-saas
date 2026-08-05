@@ -557,6 +557,9 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         registro y una pregunta nueva en el FAQ sobre tener empleadas.
         Logo y paleta definitivos siguen pendientes: arrancar en
         claude.ai/design cuando el dueño tenga tiempo para esa sesión.
+        **Actualización posterior**: ver la entrada de Progreso "Marca
+        Florece — isotipo + paleta sincronizada", más abajo — ya no
+        está totalmente pendiente, hay un primer isotipo real.
 - [x] **Renombrar identificadores: manicurista → negocio**, para terminar
       de alinear el código/base con el rebrand de Fase 3 (que a propósito
       había dejado afuera los nombres internos, ver esa entrada). Tabla
@@ -591,6 +594,48 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       + navegación de las 6 secciones del panel sin errores de consola,
       `get_advisors(type: security)` sin hallazgos nuevos más allá de los
       WARN ya aceptados de siempre (RPCs `security definer` públicas).
+- [x] **Marca Florece — isotipo + paleta sincronizada**: primer isotipo
+      real para la plataforma, un mónogram floral de 5 pétalos (blanco
+      sobre `--color-rosado`, centro en `--color-dorado`) — deliberadamente
+      geométrico y simple para seguir siendo legible a tamaño de favicon
+      (16–32px), donde un trazo fino desaparece. **No es la decisión de
+      branding definitiva del dueño** (ver nota al principio de este
+      archivo) — es un punto de partida coherente con la paleta que ya
+      existía, no un rediseño desde cero.
+      - `public/icono-app.svg` + los 3 PNG (180/192/512, regenerados con
+        Python + Pillow, mismo método que la vez anterior) usan el
+        isotipo nuevo — es el respaldo genérico del favicon/PWA cuando
+        una cuenta no subió su propio logo.
+      - El ícono `Sparkles` (genérico, placeholder) se reemplazó por
+        `Flower` de lucide-react (misma librería ya instalada, mismo
+        lenguaje visual del resto de la interfaz) en los lugares donde
+        de verdad funciona como marca de la plataforma:
+        `encabezado.tsx` (header público), `[slug]/page.tsx` (hero),
+        `registro/page.tsx` e `ingresar/page.tsx` (pantallas de auth),
+        `recibo/[id]/page.tsx`, y la portada del dominio raíz
+        (`(publico)/page.tsx`, que antes era texto solo). Los usos
+        decorativos/de categoría de `Sparkles` (ícono de categoría
+        "uñas" en `seccion-servicios.tsx`/`seccion-equipo.tsx`, paso del
+        tour guiado, estados vacíos, nav de "Servicios", generador de
+        estados) **no cambiaron** — no son la marca, es iconografía de
+        contenido.
+      - **Sistema de diseño sincronizado** (claude.ai/design, proyecto
+        "Nail Artist SaaS — Sistema de Diseño", ver Referencia técnica):
+        página nueva `fundamentos/marca.html` con el isotipo, tamaños de
+        referencia (16 a 160px), la versión lineal de uso inline y guía
+        de uso sobre distintos fondos. `fundamentos/paleta-color.html`
+        **estaba desactualizada** — todavía mostraba los tonos pastel de
+        antes del endurecido WCAG de Pulido 1 y no conocía la separación
+        texto/botón del modo oscuro (trampa #28) — se reescribió entera
+        para reflejar los tokens reales de `globals.css` (claro y
+        oscuro, con un toggle para alternar). `fundamentos/tipografia.html`
+        actualizada de "Uñas con carácter"/`$500` a "Florece"/`S/ 50`
+        (moneda real del proyecto, soles, no pesos).
+      - Verificado con capturas reales (Playwright) del isotipo a varios
+        tamaños, de las dos páginas del sistema de diseño en ambos temas,
+        y de la app real con el mark nuevo en el header público, login y
+        la portada del dominio raíz — build y typecheck limpios,
+        desplegado a producción.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
