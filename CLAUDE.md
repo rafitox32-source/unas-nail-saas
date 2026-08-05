@@ -911,6 +911,34 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       posterior). Las 25 páginas se revisaron una por una con capturas de
       Playwright antes de dar el PDF por terminado, no solo se generó y
       se asumió que salió bien.
+- [x] **Odontología — nota de visita adaptada, versión deliberadamente
+      conservadora**: la entrada de Progreso sobre servicios por
+      rubro/pago (más arriba) ya había dejado esto afuera a propósito,
+      con el motivo explicado antes de tocar código: un historial
+      clínico completo (plan de tratamiento, fichas, consentimientos) es
+      una categoría de datos sensible/regulada distinta al resto, no
+      algo para improvisar. Esta pasada **no** construye eso — reutiliza
+      tal cual la infraestructura de `notas_visita` que ya existía para
+      uñas/pestañas (misma tabla, mismo bucket privado `fotos-clientas`,
+      cero cambios de esquema) y solo cambia el copy del componente
+      `NotaVisita` según `tipo_negocio` del negocio: con `'odontologia'`,
+      "Fórmula de color" pasa a "Tratamiento realizado", "nota de la
+      visita" a "nota de la consulta", y el ícono de paleta a uno de
+      estetoscopio (`Stethoscope` de lucide-react); el resto de los
+      rubros ve exactamente lo mismo que antes. El campo sigue siendo
+      texto libre sin estructura clínica — es una nota de trabajo, no un
+      registro médico. `tipo_negocio` se levanta en
+      `/panel/clientas/[id]/page.tsx` (consulta aparte a
+      `usuarios_negocios`, no se sumó a la que ya traía los datos de
+      lealtad para no acoplar dos preocupaciones distintas en una sola
+      query) y baja como prop opcional por `FichaClienta` →
+      `NotaVisita`. El aviso de "retoque sugerido" (`servicios.
+      dias_para_retoque`) no necesitó ningún cambio — ya es genérico por
+      diseño y sirve igual de bien para "próximo control" dental que
+      para un retoque de semipermanente. Verificado con Playwright +
+      axe-core (0 violaciones, claro y oscuro) sobre la ficha de Camila
+      Rodríguez con `tipo_negocio` de la cuenta demo cambiado
+      temporalmente por SQL y revertido después.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
