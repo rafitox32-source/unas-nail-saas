@@ -134,7 +134,7 @@ export function GestionAgenda({
             className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
               filtroEmpleado === "todas"
                 ? "bg-rosado text-white"
-                : "bg-borde/50 text-texto-secundario hover:text-texto-primario"
+                : "bg-borde/50 text-texto-primario"
             }`}
           >
             Todas
@@ -147,7 +147,7 @@ export function GestionAgenda({
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                 filtroEmpleado === persona.id
                   ? "bg-rosado text-white"
-                  : "bg-borde/50 text-texto-secundario hover:text-texto-primario"
+                  : "bg-borde/50 text-texto-primario"
               }`}
             >
               {persona.nombre}

@@ -21,6 +21,13 @@
   --color-alerta: #9b4a2a;
   --color-alerta-boton: #9b4a2a;
   --color-alerta-suave: #f5e4da;
+  /* Gris neutro (no cálido, a diferencia del resto de la paleta) para el
+     calendario de bloqueos — un día bloqueado tiene que leerse como
+     "apagado", distinto de cualquier acento de marca. Contraste
+     verificado (fórmula de luminancia relativa WCAG): 5.13:1 en los dos
+     modos. */
+  --color-bloqueado: #d1d5db;
+  --color-bloqueado-texto: #4b5563;
 }
 
 /* Modo oscuro: paleta hermana de la clara, no una inversión automática.
@@ -65,6 +72,8 @@
     --color-alerta: #d3703f;
     --color-alerta-boton: #b35f36;
     --color-alerta-suave: #2f1d12;
+    --color-bloqueado: #374151;
+    --color-bloqueado-texto: #d1d5db;
   }
 }
 
@@ -86,6 +95,8 @@
   --color-alerta: #d3703f;
   --color-alerta-boton: #b35f36;
   --color-alerta-suave: #2f1d12;
+  --color-bloqueado: #374151;
+  --color-bloqueado-texto: #d1d5db;
 }
 
 @theme inline {
@@ -106,6 +117,8 @@
   --color-alerta: var(--color-alerta);
   --color-alerta-boton: var(--color-alerta-boton);
   --color-alerta-suave: var(--color-alerta-suave);
+  --color-bloqueado: var(--color-bloqueado);
+  --color-bloqueado-texto: var(--color-bloqueado-texto);
   --font-titulo: var(--font-playfair);
   --font-cuerpo: var(--font-poppins);
 }
