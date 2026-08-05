@@ -1,0 +1,249 @@
+<!-- @dsCard group="Fundamentos" -->
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Marca — Florece</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-fondo: #FBF7F4;
+    --color-superficie: #FFFFFF;
+    --color-borde: #EADDD7;
+    --color-texto-primario: #362A27;
+    --color-texto-secundario: #8C7871;
+    --color-rosado: #935060;
+    --color-rosado-suave: #F1DCDA;
+    --color-dorado: #B8935A;
+    --fuente-titulo: 'Playfair Display', Georgia, serif;
+    --fuente-cuerpo: 'Poppins', 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 48px;
+    background: var(--color-fondo);
+    color: var(--color-texto-primario);
+    font-family: var(--fuente-cuerpo);
+  }
+  h1 { font-size: 20px; margin: 0 0 6px; letter-spacing: 0.02em; }
+  .subtitulo { margin: 0 0 32px; font-size: 13px; color: var(--color-texto-secundario); }
+  section { margin-bottom: 40px; }
+  h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-texto-secundario);
+    margin: 0 0 14px;
+    font-weight: 600;
+  }
+
+  /* Lockup principal */
+  .lockup {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 40px;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: 20px;
+  }
+  .marca-svg { width: 72px; height: 72px; flex-shrink: 0; }
+  .nombre-marca {
+    font-family: var(--fuente-titulo);
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1;
+    margin: 0;
+  }
+  .tagline {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--color-texto-secundario);
+  }
+
+  /* Grilla de tamaños */
+  .grilla-tamanos {
+    display: flex;
+    align-items: flex-end;
+    gap: 28px;
+    padding: 32px;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: 20px;
+  }
+  .tamano { text-align: center; }
+  .tamano .etiqueta { margin-top: 10px; font-size: 12px; color: var(--color-texto-secundario); font-family: monospace; }
+
+  /* Uso sobre fondos */
+  .fondos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .fondo-card {
+    border-radius: 16px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--color-borde);
+  }
+  .fondo-card.fondo-claro { background: var(--color-fondo); }
+  .fondo-card.fondo-superficie { background: var(--color-superficie); }
+  .fondo-card.fondo-rosado { background: var(--color-rosado); }
+  .fondo-card .nombre-fondo { font-size: 12px; color: var(--color-texto-secundario); }
+  .fondo-card.fondo-rosado .nombre-fondo { color: rgba(255,255,255,0.85); }
+
+  /* Marca lineal (uso inline, como en la nav/header) */
+  .linea-mark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 24px;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: 14px;
+    width: fit-content;
+  }
+  .linea-mark svg { color: var(--color-rosado); }
+  .linea-mark span { font-family: var(--fuente-titulo); font-weight: 600; font-size: 18px; }
+
+  .nota {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--color-texto-secundario);
+    line-height: 1.6;
+    max-width: 640px;
+  }
+  code {
+    font-family: monospace;
+    background: var(--color-rosado-suave);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+  <h1>Marca — Florece</h1>
+  <p class="subtitulo">
+    Nombre elegido a partir del criterio "spa, belleza y organización" al generalizar
+    el producto de uñas a un spa multi-servicio. El logo/paleta acá reflejan esa
+    dirección — la sesión de identidad visual definitiva sigue siendo el próximo paso
+    natural cuando el dueño quiera profundizarla.
+  </p>
+
+  <section>
+    <h2>Isotipo + wordmark</h2>
+    <div class="lockup">
+      <svg class="marca-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="112" fill="#935060" />
+        <g fill="#ffffff">
+          <ellipse cx="256" cy="156" rx="46" ry="100" />
+          <ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)" />
+          <ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)" />
+          <ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)" />
+          <ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)" />
+        </g>
+        <circle cx="256" cy="256" r="32" fill="#B8935A" />
+      </svg>
+      <div>
+        <p class="nombre-marca">Florece</p>
+        <p class="tagline">Reservas y gestión para spas, peluquerías y estudios de belleza</p>
+      </div>
+    </div>
+    <p class="nota">
+      Un mónogram floral de 5 pétalos: representa el negocio de la clienta (y el de
+      cada profesional) floreciendo. Pétalos blancos sobre <code>--color-rosado</code>,
+      centro en <code>--color-dorado</code> — los dos acentos que ya sostienen el resto
+      del sistema. Deliberadamente geométrico y simple: se mantiene legible incluso a
+      tamaño de favicon (16–32px), donde un trazo fino desaparece.
+    </p>
+  </section>
+
+  <section>
+    <h2>Tamaños de referencia</h2>
+    <div class="grilla-tamanos">
+      <div class="tamano">
+        <svg width="16" height="16" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <div class="etiqueta">16px</div>
+      </div>
+      <div class="tamano">
+        <svg width="32" height="32" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <div class="etiqueta">32px</div>
+      </div>
+      <div class="tamano">
+        <svg width="48" height="48" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <div class="etiqueta">48px</div>
+      </div>
+      <div class="tamano">
+        <svg width="96" height="96" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <div class="etiqueta">96px</div>
+      </div>
+      <div class="tamano">
+        <svg width="160" height="160" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <div class="etiqueta">160px</div>
+      </div>
+    </div>
+    <p class="nota">
+      Usado como <code>public/icono-app.svg</code> del panel (favicon, ícono de PWA en
+      180/192/512px, generados con Python + Pillow) — el respaldo genérico cuando una
+      cuenta todavía no subió su propio logo en "Mi negocio".
+    </p>
+  </section>
+
+  <section>
+    <h2>Marca lineal (uso inline)</h2>
+    <div class="linea-mark">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5"/>
+        <path d="M12 7.5V9"/><path d="M7.5 12H9"/><path d="M16.5 12H15"/><path d="M12 16.5V15"/>
+        <path d="m8 8 1.88 1.88"/><path d="M14.12 9.88 16 8"/><path d="m8 16 1.88-1.88"/><path d="M14.12 14.12 16 16"/>
+      </svg>
+      <span>Florece</span>
+    </div>
+    <p class="nota">
+      Ícono <code>Flower</code> de lucide-react (ya instalada en el proyecto, mismo
+      lenguaje visual que el resto de la interfaz) en <code>--color-rosado-texto</code>,
+      sin fondo — reemplaza el genérico <code>Sparkles</code> que se usaba antes como
+      placeholder de marca en el header público, las pantallas de login/registro, el
+      recibo y la portada del dominio raíz. Los usos puramente decorativos de
+      <code>Sparkles</code> (ícono de categoría "uñas", tour guiado, estados vacíos)
+      no cambiaron — no son la marca, son iconografía de contenido.
+    </p>
+  </section>
+
+  <section>
+    <h2>Sobre distintos fondos</h2>
+    <div class="fondos">
+      <div class="fondo-card fondo-claro">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#935060" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5"/>
+          <path d="M12 7.5V9"/><path d="M7.5 12H9"/><path d="M16.5 12H15"/><path d="M12 16.5V15"/>
+          <path d="m8 8 1.88 1.88"/><path d="M14.12 9.88 16 8"/><path d="m8 16 1.88-1.88"/><path d="M14.12 14.12 16 16"/>
+        </svg>
+        <div class="nombre-fondo">--color-fondo</div>
+      </div>
+      <div class="fondo-card fondo-superficie">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#935060" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5"/>
+          <path d="M12 7.5V9"/><path d="M7.5 12H9"/><path d="M16.5 12H15"/><path d="M12 16.5V15"/>
+          <path d="m8 8 1.88 1.88"/><path d="M14.12 9.88 16 8"/><path d="m8 16 1.88-1.88"/><path d="M14.12 14.12 16 16"/>
+        </svg>
+        <div class="nombre-fondo">--color-superficie</div>
+      </div>
+      <div class="fondo-card fondo-rosado">
+        <svg width="40" height="40" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="none"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <div class="nombre-fondo">--color-rosado (isotipo completo)</div>
+      </div>
+    </div>
+    <p class="nota">
+      El isotipo con fondo (cuadrado redondeado) solo se usa sobre superficies neutras
+      (blanco/fondo) o como ícono independiente (favicon, PWA) — nunca sobre
+      <code>--color-rosado</code> sólido, ya que el fondo del propio isotipo es ese
+      mismo tono. La versión lineal (sin fondo) es la que se usa inline, en rosado
+      sobre superficies claras.
+    </p>
+  </section>
+</body>
+</html>

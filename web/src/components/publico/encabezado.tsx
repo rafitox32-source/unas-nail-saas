@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Menu, X } from "lucide-react";
+import { Flower, Menu, X } from "lucide-react";
 
 export function Encabezado({
   nombreNegocio,
@@ -30,7 +30,7 @@ export function Encabezado({
               className="h-6 w-6 shrink-0 rounded-full object-cover"
             />
           ) : (
-            <Sparkles className="h-5 w-5 shrink-0 text-rosado-texto" strokeWidth={1.75} />
+            <Flower className="h-5 w-5 shrink-0 text-rosado-texto" strokeWidth={1.75} />
           )}
           <span className="truncate">{nombreNegocio}</span>
         </span>
