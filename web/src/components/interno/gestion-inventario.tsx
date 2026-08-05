@@ -25,10 +25,10 @@ const VACIO: ValoresFormulario = {
 };
 
 export function GestionInventario({
-  idManicurista,
+  idNegocio,
   insumosIniciales,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   insumosIniciales: InsumoInventario[];
 }) {
   const [insumos, setInsumos] = useState(insumosIniciales);
@@ -93,7 +93,7 @@ export function GestionInventario({
     } else {
       const { data, error: errorGuardar } = await supabase
         .from("inventario")
-        .insert({ ...payload, id_manicurista: idManicurista })
+        .insert({ ...payload, id_negocio: idNegocio })
         .select(columnas)
         .single<InsumoInventario>();
 

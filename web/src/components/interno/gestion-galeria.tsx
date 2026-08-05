@@ -6,10 +6,10 @@ import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import type { FotoGaleriaAdmin } from "@/lib/tipos";
 
 export function GestionGaleria({
-  idManicurista,
+  idNegocio,
   fotosIniciales,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   fotosIniciales: FotoGaleriaAdmin[];
 }) {
   const [fotos, setFotos] = useState(fotosIniciales);
@@ -25,7 +25,7 @@ export function GestionGaleria({
     const nuevas: FotoGaleriaAdmin[] = [];
 
     for (const archivo of Array.from(archivos)) {
-      const ruta = `${idManicurista}/${crypto.randomUUID()}-${archivo.name}`;
+      const ruta = `${idNegocio}/${crypto.randomUUID()}-${archivo.name}`;
       const { error: errorSubir } = await supabase.storage
         .from("fotos-galeria")
         .upload(ruta, archivo);
@@ -37,7 +37,7 @@ export function GestionGaleria({
 
       const { data: fila, error: errorFila } = await supabase
         .from("fotos_galeria")
-        .insert({ id_manicurista: idManicurista, ruta_archivo: ruta, orden: siguienteOrden })
+        .insert({ id_negocio: idNegocio, ruta_archivo: ruta, orden: siguienteOrden })
         .select("id, ruta_archivo, orden")
         .single<{ id: string; ruta_archivo: string; orden: number }>();
 

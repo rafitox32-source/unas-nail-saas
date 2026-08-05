@@ -25,14 +25,14 @@ const ICONO_CATEGORIA: Record<CategoriaServicio, typeof Sparkles> = {
 export function SeccionServicios({
   servicios,
   personal,
-  idManicurista,
+  idNegocio,
   nombreNegocio,
   urlWhatsapp,
   politicaCancelacion,
 }: {
   servicios: Servicio[];
   personal: Personal[];
-  idManicurista: string;
+  idNegocio: string;
   nombreNegocio: string;
   urlWhatsapp: string | null;
   politicaCancelacion: string | null;
@@ -97,7 +97,7 @@ export function SeccionServicios({
       {servicioSeleccionado && (
         <ModalReserva
           servicio={servicioSeleccionado}
-          idManicurista={idManicurista}
+          idNegocio={idNegocio}
           nombreNegocio={nombreNegocio}
           urlWhatsapp={urlWhatsapp}
           politicaCancelacion={politicaCancelacion}

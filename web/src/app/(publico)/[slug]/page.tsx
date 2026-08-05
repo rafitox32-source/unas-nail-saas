@@ -6,25 +6,25 @@ import { Encabezado } from "@/components/publico/encabezado";
 import { SeccionServicios } from "@/components/publico/seccion-servicios";
 import { SeccionEquipo } from "@/components/publico/seccion-equipo";
 import { SeccionResenas } from "@/components/publico/seccion-resenas";
-import type { Manicurista, Servicio, FotoGaleria, ResenaPublica, Personal } from "@/lib/tipos";
+import type { Negocio, Servicio, FotoGaleria, ResenaPublica, Personal } from "@/lib/tipos";
 
-async function obtenerManicurista(slug: string) {
+async function obtenerNegocio(slug: string) {
   const supabase = await crearClienteServidor();
 
-  const { data: manicurista } = await supabase
-    .from("usuarios_manicuristas")
+  const { data: negocio } = await supabase
+    .from("usuarios_negocios")
     .select(
       "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion",
     )
     .eq("slug_publico", slug)
-    .maybeSingle<Manicurista>();
+    .maybeSingle<Negocio>();
 
-  if (!manicurista) return null;
+  if (!negocio) return null;
 
   const { data: servicios } = await supabase
     .from("servicios")
     .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado")
-    .eq("id_manicurista", manicurista.id)
+    .eq("id_negocio", negocio.id)
     .eq("activo", true)
     .order("precio", { ascending: true })
     .returns<Servicio[]>();
@@ -32,7 +32,7 @@ async function obtenerManicurista(slug: string) {
   const { data: personal } = await supabase
     .from("personal")
     .select("id, nombre, categoria, url_foto, activo")
-    .eq("id_negocio", manicurista.id)
+    .eq("id_negocio", negocio.id)
     .eq("activo", true)
     .order("creado_en", { ascending: true })
     .returns<Personal[]>();
@@ -40,7 +40,7 @@ async function obtenerManicurista(slug: string) {
   const { data: fotos } = await supabase
     .from("fotos_galeria")
     .select("id, ruta_archivo, orden")
-    .eq("id_manicurista", manicurista.id)
+    .eq("id_negocio", negocio.id)
     .order("orden", { ascending: true })
     .returns<FotoGaleria[]>();
 
@@ -51,13 +51,13 @@ async function obtenerManicurista(slug: string) {
   const { data: resenas } = await supabase
     .from("resenas")
     .select("id, nombre_clienta, calificacion, comentario")
-    .eq("id_manicurista", manicurista.id)
+    .eq("id_negocio", negocio.id)
     .eq("visible", true)
     .order("creado_en", { ascending: false })
     .returns<ResenaPublica[]>();
 
   return {
-    manicurista,
+    negocio,
     servicios: servicios ?? [],
     personal: personal ?? [],
     urlsGaleria,
@@ -89,47 +89,47 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const datos = await obtenerManicurista(slug);
+  const datos = await obtenerNegocio(slug);
   if (!datos) return { title: "Florece" };
   return {
-    title: datos.manicurista.nombre_negocio,
-    description: datos.manicurista.biografia ?? undefined,
+    title: datos.negocio.nombre_negocio,
+    description: datos.negocio.biografia ?? undefined,
   };
 }
 
-export default async function PaginaManicurista({
+export default async function PaginaNegocio({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const datos = await obtenerManicurista(slug);
+  const datos = await obtenerNegocio(slug);
   if (!datos) notFound();
 
-  const { manicurista, servicios, personal, urlsGaleria, resenas } = datos;
-  const enlaceWhatsapp = urlWhatsapp(manicurista.telefono, manicurista.nombre_negocio);
+  const { negocio, servicios, personal, urlsGaleria, resenas } = datos;
+  const enlaceWhatsapp = urlWhatsapp(negocio.telefono, negocio.nombre_negocio);
 
   return (
     <div
       className="flex flex-1 flex-col"
       style={
-        manicurista.color_marca
-          ? ({ "--color-rosado": manicurista.color_marca } as React.CSSProperties)
+        negocio.color_marca
+          ? ({ "--color-rosado": negocio.color_marca } as React.CSSProperties)
           : undefined
       }
     >
-      <Encabezado nombreNegocio={manicurista.nombre_negocio} urlAvatar={manicurista.url_avatar} />
+      <Encabezado nombreNegocio={negocio.nombre_negocio} urlAvatar={negocio.url_avatar} />
 
       <main className="flex-1">
         {/* Hero */}
         <section className="animar-aparecer flex flex-col items-center gap-6 px-6 py-24 text-center sm:py-32">
           <Sparkles className="h-8 w-8 text-rosado-texto" strokeWidth={1.5} />
           <h1 className="font-titulo max-w-2xl text-4xl font-semibold leading-tight text-texto-primario sm:text-5xl">
-            {manicurista.nombre_negocio}
+            {negocio.nombre_negocio}
           </h1>
-          {manicurista.biografia && (
+          {negocio.biografia && (
             <p className="max-w-md text-base text-texto-secundario">
-              {manicurista.biografia}
+              {negocio.biografia}
             </p>
           )}
           <a
@@ -144,10 +144,10 @@ export default async function PaginaManicurista({
         <SeccionServicios
           servicios={servicios}
           personal={personal}
-          idManicurista={manicurista.id}
-          nombreNegocio={manicurista.nombre_negocio}
+          idNegocio={negocio.id}
+          nombreNegocio={negocio.nombre_negocio}
           urlWhatsapp={enlaceWhatsapp}
-          politicaCancelacion={manicurista.politica_cancelacion}
+          politicaCancelacion={negocio.politica_cancelacion}
         />
 
         {/* Equipo */}
@@ -171,7 +171,7 @@ export default async function PaginaManicurista({
                     <img
                       key={url}
                       src={url}
-                      alt={`Trabajo de ${manicurista.nombre_negocio} ${indice + 1}`}
+                      alt={`Trabajo de ${negocio.nombre_negocio} ${indice + 1}`}
                       className="aspect-square w-full rounded-2xl object-cover shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md"
                     />
                   ))
@@ -197,12 +197,12 @@ export default async function PaginaManicurista({
       {/* Footer / Contacto */}
       <footer id="contacto" className="border-t border-borde bg-fondo px-6 py-10 text-center">
         <p className="font-titulo text-lg font-semibold text-texto-primario">
-          {manicurista.nombre_negocio}
+          {negocio.nombre_negocio}
         </p>
-        {manicurista.telefono && (
+        {negocio.telefono && (
           <p className="mt-1 flex items-center justify-center gap-1.5 text-sm text-texto-secundario">
             <Phone className="h-3.5 w-3.5" />
-            {manicurista.telefono}
+            {negocio.telefono}
           </p>
         )}
         {enlaceWhatsapp && (

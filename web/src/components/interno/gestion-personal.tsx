@@ -22,10 +22,10 @@ const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
 };
 
 export function GestionPersonal({
-  idManicurista,
+  idNegocio,
   personalInicial,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   personalInicial: Personal[];
 }) {
   const [personal, setPersonal] = useState(personalInicial);
@@ -73,7 +73,7 @@ export function GestionPersonal({
     } else {
       const { data, error: errorGuardar } = await supabase
         .from("personal")
-        .insert({ ...payload, id_negocio: idManicurista })
+        .insert({ ...payload, id_negocio: idNegocio })
         .select(columnas)
         .single<Personal>();
 

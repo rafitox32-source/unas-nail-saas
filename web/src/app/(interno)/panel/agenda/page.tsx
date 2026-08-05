@@ -21,14 +21,14 @@ export default async function PaginaAgenda() {
     .select(
       "id, fecha_hora_inicio, estado_cita, monto_total, monto_seña_pagado, monto_restante, id_empleado, clientas(nombre_completo, telefono), servicios(nombre), personal(nombre)",
     )
-    .eq("id_manicurista", usuario!.id)
+    .eq("id_negocio", usuario!.id)
     .order("fecha_hora_inicio", { ascending: true })
     .returns<CitaAgenda[]>();
 
   const { data: bloqueos } = await supabase
     .from("bloqueos_agenda")
     .select("id, fecha_hora_inicio, fecha_hora_fin, motivo, id_empleado")
-    .eq("id_manicurista", usuario!.id)
+    .eq("id_negocio", usuario!.id)
     .gte("fecha_hora_fin", new Date().toISOString())
     .order("fecha_hora_inicio", { ascending: true })
     .returns<BloqueoAgenda[]>();
@@ -37,7 +37,7 @@ export default async function PaginaAgenda() {
     <main className="mx-auto max-w-2xl flex-1 px-6 py-10">
       <GestionAgenda citasIniciales={citas ?? []} personal={personal ?? []} />
       <GestionBloqueos
-        idManicurista={usuario!.id}
+        idNegocio={usuario!.id}
         bloqueosIniciales={bloqueos ?? []}
         personal={personal ?? []}
       />

@@ -3,12 +3,12 @@ import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { enviarNotificaciones, type SuscripcionPush } from "@/lib/enviar-push";
 
 export async function POST(peticion: Request) {
-  const { idManicurista, nombreClienta, nombreServicio } = await peticion.json();
-  if (!idManicurista) return NextResponse.json({ ok: false }, { status: 400 });
+  const { idNegocio, nombreClienta, nombreServicio } = await peticion.json();
+  if (!idNegocio) return NextResponse.json({ ok: false }, { status: 400 });
 
   const supabase = await crearClienteServidor();
-  const { data } = await supabase.rpc("suscripciones_para_manicurista", {
-    p_id_manicurista: idManicurista,
+  const { data } = await supabase.rpc("suscripciones_para_negocio", {
+    p_id_negocio: idNegocio,
   });
   const suscripciones = data as SuscripcionPush[] | null;
 

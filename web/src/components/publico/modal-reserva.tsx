@@ -11,14 +11,14 @@ import type { Servicio, RangoOcupado } from "@/lib/tipos";
 
 export function ModalReserva({
   servicio,
-  idManicurista,
+  idNegocio,
   nombreNegocio,
   urlWhatsapp,
   politicaCancelacion,
   alCerrar,
 }: {
   servicio: Servicio;
-  idManicurista: string;
+  idNegocio: string;
   nombreNegocio: string;
   urlWhatsapp: string | null;
   politicaCancelacion: string | null;
@@ -53,7 +53,7 @@ export function ModalReserva({
     setHora("");
     supabase
       .rpc("horarios_ocupados", {
-        p_id_manicurista: idManicurista,
+        p_id_negocio: idNegocio,
         p_fecha: fecha,
         p_id_empleado: servicio.id_empleado,
       })
@@ -65,7 +65,7 @@ export function ModalReserva({
     return () => {
       cancelado = true;
     };
-  }, [fecha, idManicurista, servicio.id_empleado]);
+  }, [fecha, idNegocio, servicio.id_empleado]);
 
   useEffect(() => {
     const codigo = codigoPromocional.trim();
@@ -79,7 +79,7 @@ export function ModalReserva({
     setValidandoPromo(true);
     const temporizador = setTimeout(() => {
       supabase
-        .rpc("validar_codigo_promocional", { p_id_manicurista: idManicurista, p_codigo: codigo })
+        .rpc("validar_codigo_promocional", { p_id_negocio: idNegocio, p_codigo: codigo })
         .maybeSingle()
         .then(({ data, error: errorRpc }) => {
           if (cancelado) return;
@@ -97,7 +97,7 @@ export function ModalReserva({
       cancelado = true;
       clearTimeout(temporizador);
     };
-  }, [codigoPromocional, idManicurista]);
+  }, [codigoPromocional, idNegocio]);
 
   const horariosDisponibles = generarHorariosDisponibles(
     fecha,
@@ -129,7 +129,7 @@ export function ModalReserva({
     const supabase = crearClienteNavegador();
     const { data, error: errorRpc } = await supabase
       .rpc("crear_apartado", {
-        p_id_manicurista: idManicurista,
+        p_id_negocio: idNegocio,
         p_id_servicio: servicio.id,
         p_nombre_clienta: nombre,
         p_telefono_clienta: telefono,
@@ -151,7 +151,7 @@ export function ModalReserva({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        idManicurista,
+        idNegocio,
         nombreClienta: nombre,
         nombreServicio: servicio.nombre,
       }),
@@ -257,7 +257,7 @@ export function ModalReserva({
                 <p className="text-sm text-texto-secundario">Elegí el día</p>
                 <div className="mt-1 rounded-xl border border-borde bg-fondo p-3">
                   <CalendarioDisponibilidad
-                    idManicurista={idManicurista}
+                    idNegocio={idNegocio}
                     idEmpleado={servicio.id_empleado}
                     duracionMinutos={servicio.duracion_minutos}
                     fechaSeleccionada={fecha}

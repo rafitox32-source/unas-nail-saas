@@ -23,7 +23,7 @@ export async function notificacionesActivas() {
   return !!suscripcion;
 }
 
-export async function suscribirNotificaciones(idManicurista: string) {
+export async function suscribirNotificaciones(idNegocio: string) {
   const registro = await navigator.serviceWorker.register("/sw.js");
   await navigator.serviceWorker.ready;
 
@@ -41,7 +41,7 @@ export async function suscribirNotificaciones(idManicurista: string) {
   const supabase = crearClienteNavegador();
   const { error } = await supabase.from("suscripciones_push").upsert(
     {
-      id_manicurista: idManicurista,
+      id_negocio: idNegocio,
       endpoint: json.endpoint!,
       p256dh: json.keys!.p256dh,
       auth: json.keys!.auth,

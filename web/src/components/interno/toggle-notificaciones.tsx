@@ -11,7 +11,7 @@ import {
 
 type Estado = "cargando" | "sin-soporte" | "inactivo" | "activo";
 
-export function ToggleNotificaciones({ idManicurista }: { idManicurista: string }) {
+export function ToggleNotificaciones({ idNegocio }: { idNegocio: string }) {
   const [estado, setEstado] = useState<Estado>("cargando");
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +34,7 @@ export function ToggleNotificaciones({ idManicurista }: { idManicurista: string 
     if (estado === "inactivo") {
       setEstado("cargando");
       try {
-        await suscribirNotificaciones(idManicurista);
+        await suscribirNotificaciones(idNegocio);
         setEstado("activo");
       } catch {
         setError("No se pudieron activar. Revisá el permiso de notificaciones del navegador.");

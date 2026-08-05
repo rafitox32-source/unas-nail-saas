@@ -37,12 +37,12 @@ const columnas =
   "id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, activo";
 
 export function GestionServicios({
-  idManicurista,
+  idNegocio,
   serviciosIniciales,
   personal,
   tipoNegocio,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   serviciosIniciales: ServicioAdmin[];
   personal: Personal[];
   tipoNegocio: TipoNegocio;
@@ -118,7 +118,7 @@ export function GestionServicios({
     } else {
       const { data, error: errorGuardar } = await supabase
         .from("servicios")
-        .insert({ ...payload, id_manicurista: idManicurista })
+        .insert({ ...payload, id_negocio: idNegocio })
         .select(columnas)
         .single<ServicioAdmin>();
 

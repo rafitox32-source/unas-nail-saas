@@ -3,7 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { BotonCerrarSesion } from "@/components/interno/cerrar-sesion";
 import { GestionCuentas } from "@/components/admin/gestion-cuentas";
-import type { SesionManicurista, CuentaAdmin } from "@/lib/tipos";
+import type { SesionNegocio, CuentaAdmin } from "@/lib/tipos";
 
 export default async function PaginaAdmin() {
   const supabase = await crearClienteServidor();
@@ -14,15 +14,15 @@ export default async function PaginaAdmin() {
   if (!usuario) redirect("/ingresar");
 
   const { data: sesion } = await supabase
-    .from("usuarios_manicuristas")
+    .from("usuarios_negocios")
     .select("estado_cuenta, es_admin, nombre_negocio")
     .eq("id", usuario.id)
-    .maybeSingle<SesionManicurista>();
+    .maybeSingle<SesionNegocio>();
 
   if (!sesion?.es_admin) redirect("/panel");
 
   const { data: cuentas } = await supabase
-    .from("usuarios_manicuristas")
+    .from("usuarios_negocios")
     .select("id, usuario, nombre_negocio, nombre_completo, telefono, estado_cuenta, creado_en")
     .neq("id", usuario.id)
     .order("creado_en", { ascending: false })

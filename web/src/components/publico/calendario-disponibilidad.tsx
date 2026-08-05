@@ -18,13 +18,13 @@ function fechaISOLocal(anio: number, mes: number, dia: number) {
 }
 
 export function CalendarioDisponibilidad({
-  idManicurista,
+  idNegocio,
   idEmpleado,
   duracionMinutos,
   fechaSeleccionada,
   onSeleccionar,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   idEmpleado?: string | null;
   duracionMinutos: number;
   fechaSeleccionada: string;
@@ -41,7 +41,7 @@ export function CalendarioDisponibilidad({
     const supabase = crearClienteNavegador();
     supabase
       .rpc("horarios_ocupados_mes", {
-        p_id_manicurista: idManicurista,
+        p_id_negocio: idNegocio,
         p_anio: mesVisible.getFullYear(),
         p_mes: mesVisible.getMonth() + 1,
         p_id_empleado: idEmpleado ?? null,
@@ -54,7 +54,7 @@ export function CalendarioDisponibilidad({
     return () => {
       cancelado = true;
     };
-  }, [idManicurista, idEmpleado, mesVisible]);
+  }, [idNegocio, idEmpleado, mesVisible]);
 
   const anio = mesVisible.getFullYear();
   const mes = mesVisible.getMonth();

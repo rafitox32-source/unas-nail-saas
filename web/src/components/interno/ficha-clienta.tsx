@@ -30,13 +30,13 @@ const ETIQUETA_ESTADO: Record<EstadoCita, string> = {
 
 export function FichaClienta({
   clienta,
-  idManicurista,
+  idNegocio,
   historial,
   notasPorCita,
   lealtad,
 }: {
   clienta: ClientaAdmin;
-  idManicurista: string;
+  idNegocio: string;
   historial: CitaHistorial[];
   notasPorCita: Record<string, { nota: TipoNotaVisita | null; fotos: FotoFirmada[] }>;
   lealtad: ProgramaLealtad;
@@ -197,7 +197,7 @@ export function FichaClienta({
               </div>
               <NotaVisita
                 idCita={cita.id}
-                idManicurista={idManicurista}
+                idNegocio={idNegocio}
                 notaInicial={infoNota.nota}
                 fotosIniciales={infoNota.fotos}
               />

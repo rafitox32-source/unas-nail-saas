@@ -10,10 +10,10 @@ import type { ClientaAdmin } from "@/lib/tipos";
 
 export function ListaClientas({
   clientas: clientasIniciales,
-  idManicurista,
+  idNegocio,
 }: {
   clientas: ClientaAdmin[];
-  idManicurista: string;
+  idNegocio: string;
 }) {
   const [clientas, setClientas] = useState(clientasIniciales);
   const [busqueda, setBusqueda] = useState("");
@@ -41,7 +41,7 @@ export function ListaClientas({
     const { data, error: errorGuardar } = await supabase
       .from("clientas")
       .insert({
-        id_manicurista: idManicurista,
+        id_negocio: idNegocio,
         nombre_completo: nombre,
         telefono: telefono || null,
       })

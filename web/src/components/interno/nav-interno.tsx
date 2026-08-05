@@ -19,10 +19,10 @@ const enlaces = [
 ];
 
 export function NavInterno({
-  idManicurista,
+  idNegocio,
   nombreNegocio,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   nombreNegocio?: string;
 }) {
   const ruta = usePathname();
@@ -61,7 +61,7 @@ export function NavInterno({
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <BotonAyuda nombreNegocio={nombreNegocio} />
-          <ToggleNotificaciones idManicurista={idManicurista} />
+          <ToggleNotificaciones idNegocio={idNegocio} />
           <ToggleTema />
           <BotonCerrarSesion />
         </div>

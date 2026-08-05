@@ -15,12 +15,12 @@ import type { FotoFirmada, NotaVisita as TipoNotaVisita } from "@/lib/tipos";
 
 export function NotaVisita({
   idCita,
-  idManicurista,
+  idNegocio,
   notaInicial,
   fotosIniciales,
 }: {
   idCita: string;
-  idManicurista: string;
+  idNegocio: string;
   notaInicial: TipoNotaVisita | null;
   fotosIniciales: FotoFirmada[];
 }) {
@@ -44,7 +44,7 @@ export function NotaVisita({
     const { error: errorGuardar } = await supabase.from("notas_visita").upsert(
       {
         id_cita: idCita,
-        id_manicurista: idManicurista,
+        id_negocio: idNegocio,
         formula_color: formulaColor || null,
         notas: notas || null,
       },
@@ -62,7 +62,7 @@ export function NotaVisita({
     const nuevasRutas: string[] = [];
 
     for (const archivo of Array.from(archivos)) {
-      const ruta = `${idManicurista}/${idCita}/${crypto.randomUUID()}-${archivo.name}`;
+      const ruta = `${idNegocio}/${idCita}/${crypto.randomUUID()}-${archivo.name}`;
       const { error: errorSubir } = await supabase.storage
         .from("fotos-clientas")
         .upload(ruta, archivo);
@@ -77,7 +77,7 @@ export function NotaVisita({
     if (nuevasRutas.length > 0) {
       const rutasActuales = [...fotos.map((f) => f.ruta), ...nuevasRutas];
       await supabase.from("notas_visita").upsert(
-        { id_cita: idCita, id_manicurista: idManicurista, rutas_fotos: rutasActuales },
+        { id_cita: idCita, id_negocio: idNegocio, rutas_fotos: rutasActuales },
         { onConflict: "id_cita" },
       );
 
@@ -105,7 +105,7 @@ export function NotaVisita({
     await supabase
       .from("notas_visita")
       .upsert(
-        { id_cita: idCita, id_manicurista: idManicurista, rutas_fotos: rutasRestantes },
+        { id_cita: idCita, id_negocio: idNegocio, rutas_fotos: rutasRestantes },
         { onConflict: "id_cita" },
       );
     setFotos((actual) => actual.filter((f) => f.ruta !== foto.ruta));

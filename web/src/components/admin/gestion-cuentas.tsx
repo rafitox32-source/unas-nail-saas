@@ -31,7 +31,7 @@ export function GestionCuentas({ cuentasIniciales }: { cuentasIniciales: CuentaA
     setActualizando(cuenta.id);
     const supabase = crearClienteNavegador();
     const { error } = await supabase
-      .from("usuarios_manicuristas")
+      .from("usuarios_negocios")
       .update({ estado_cuenta: estado })
       .eq("id", cuenta.id);
     if (!error) {

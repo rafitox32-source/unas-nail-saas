@@ -5,7 +5,7 @@ import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { NavInterno } from "@/components/interno/nav-interno";
 import { BotonCerrarSesion } from "@/components/interno/cerrar-sesion";
 import { urlWhatsappSoporte } from "@/lib/soporte";
-import type { SesionManicurista } from "@/lib/tipos";
+import type { SesionNegocio } from "@/lib/tipos";
 
 // Nombre dinámico según la sesión: si Aurora instala el panel como app
 // desde su celular ("Agregar a inicio"), el ícono queda con "Aurora Nails
@@ -25,12 +25,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
   let nombre = "Mi negocio";
   if (user) {
-    const { data: manicurista } = await supabase
-      .from("usuarios_manicuristas")
+    const { data: negocio } = await supabase
+      .from("usuarios_negocios")
       .select("nombre_negocio")
       .eq("id", user.id)
       .maybeSingle<{ nombre_negocio: string }>();
-    if (manicurista?.nombre_negocio) nombre = manicurista.nombre_negocio;
+    if (negocio?.nombre_negocio) nombre = negocio.nombre_negocio;
   }
 
   return {
@@ -63,10 +63,10 @@ export default async function LayoutInterno({
   if (!usuario) redirect("/ingresar");
 
   const { data: cuenta } = await supabase
-    .from("usuarios_manicuristas")
+    .from("usuarios_negocios")
     .select("estado_cuenta, es_admin, nombre_negocio")
     .eq("id", usuario.id)
-    .maybeSingle<SesionManicurista>();
+    .maybeSingle<SesionNegocio>();
 
   if (cuenta && cuenta.estado_cuenta !== "aprobada") {
     const pendiente = cuenta.estado_cuenta === "pendiente";
@@ -105,7 +105,7 @@ export default async function LayoutInterno({
 
   return (
     <>
-      <NavInterno idManicurista={usuario.id} nombreNegocio={cuenta?.nombre_negocio} />
+      <NavInterno idNegocio={usuario.id} nombreNegocio={cuenta?.nombre_negocio} />
       {children}
     </>
   );

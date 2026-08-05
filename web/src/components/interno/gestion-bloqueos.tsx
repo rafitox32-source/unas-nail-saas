@@ -20,11 +20,11 @@ function hoyISO() {
 }
 
 export function GestionBloqueos({
-  idManicurista,
+  idNegocio,
   bloqueosIniciales,
   personal,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   bloqueosIniciales: BloqueoAgenda[];
   personal: Personal[];
 }) {
@@ -61,7 +61,7 @@ export function GestionBloqueos({
     const { data, error: errorGuardar } = await supabase
       .from("bloqueos_agenda")
       .insert({
-        id_manicurista: idManicurista,
+        id_negocio: idNegocio,
         fecha_hora_inicio: new Date(inicio).toISOString(),
         fecha_hora_fin: new Date(fin).toISOString(),
         motivo: motivo || null,

@@ -6,7 +6,7 @@ import { ReportesIngresos } from "@/components/interno/reportes-ingresos";
 import { TourBienvenida } from "@/components/interno/tour-bienvenida";
 import { BotonInstalarApp } from "@/components/interno/boton-instalar-app";
 import { EnlacePublico } from "@/components/interno/enlace-publico";
-import type { Manicurista, CitaReporte } from "@/lib/tipos";
+import type { Negocio, CitaReporte } from "@/lib/tipos";
 
 export default async function PaginaPanel() {
   const supabase = await crearClienteServidor();
@@ -14,17 +14,17 @@ export default async function PaginaPanel() {
     data: { user: usuario },
   } = await supabase.auth.getUser();
 
-  const { data: manicurista } = await supabase
-    .from("usuarios_manicuristas")
+  const { data: negocio } = await supabase
+    .from("usuarios_negocios")
     .select(
       "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion, es_admin, tour_completado",
     )
     .eq("id", usuario!.id)
-    .maybeSingle<Manicurista & { es_admin: boolean; tour_completado: boolean }>();
+    .maybeSingle<Negocio & { es_admin: boolean; tour_completado: boolean }>();
 
-  const { count: pendientesDeAprobar } = manicurista?.es_admin
+  const { count: pendientesDeAprobar } = negocio?.es_admin
     ? await supabase
-        .from("usuarios_manicuristas")
+        .from("usuarios_negocios")
         .select("id", { count: "exact", head: true })
         .eq("estado_cuenta", "pendiente")
     : { count: 0 };
@@ -76,12 +76,12 @@ export default async function PaginaPanel() {
 
   return (
     <main className="flex-1 px-6 py-10">
-      {manicurista && !manicurista.tour_completado && (
-        <TourBienvenida idManicurista={manicurista.id} slugPublico={manicurista.slug_publico} />
+      {negocio && !negocio.tour_completado && (
+        <TourBienvenida idNegocio={negocio.id} slugPublico={negocio.slug_publico} />
       )}
       <div className="mx-auto max-w-2xl">
         <h1 className="font-titulo text-2xl font-semibold text-texto-primario">
-          Hola{manicurista?.nombre_completo ? `, ${manicurista.nombre_completo}` : ""}
+          Hola{negocio?.nombre_completo ? `, ${negocio.nombre_completo}` : ""}
         </h1>
 
         <BotonInstalarApp />
@@ -112,7 +112,7 @@ export default async function PaginaPanel() {
 
         <ReportesIngresos citas={citasCompletadas ?? []} />
 
-        {manicurista?.es_admin && (
+        {negocio?.es_admin && (
           <Link
             href="/admin"
             className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-rosado/30 bg-rosado-suave p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
@@ -131,10 +131,10 @@ export default async function PaginaPanel() {
           </Link>
         )}
 
-        {manicurista ? (
+        {negocio ? (
           <>
-            {manicurista.slug_publico && <EnlacePublico slug={manicurista.slug_publico} />}
-            <ConfiguracionNegocio manicurista={manicurista} />
+            {negocio.slug_publico && <EnlacePublico slug={negocio.slug_publico} />}
+            <ConfiguracionNegocio negocio={negocio} />
           </>
         ) : (
           <p className="mt-8 text-sm text-texto-secundario">

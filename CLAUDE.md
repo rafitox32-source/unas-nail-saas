@@ -547,12 +547,50 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         `/terminos`/`/privacidad`/`/registro`, y confirmado que
         `manejar_nuevo_usuario` sigue sin `EXECUTE` para `anon`/
         `authenticated` después del `create or replace` (trampa #3).
-      - **Pendiente, no es código**: manual PDF (`Manual para
-        Manicuristas.pdf`) todavía dice "manicuristas" de punta a
-        punta — no se tocó en esta fase (no es parte del build, es un
-        documento generado aparte, ver la nota en "Cómo probar"). Logo
-        y paleta definitivos: arrancar en claude.ai/design cuando el
-        dueño tenga tiempo para esa sesión.
+      - **Manual PDF actualizado en una pasada posterior** (a pedido del
+        dueño, no en esta misma sesión de Fase 3): "Guía para
+        manicuristas" → "Florece · Guía para profesionales de belleza",
+        20 → 22 páginas — se sumaron "Tu equipo" (cargar personal) y
+        "Categorías y equipo, para tus clientas" (cómo se ve la
+        agrupación por categoría + "Nuestro equipo" en la carta
+        pública), más el paso del selector "¿A qué te dedicás?" en el
+        registro y una pregunta nueva en el FAQ sobre tener empleadas.
+        Logo y paleta definitivos siguen pendientes: arrancar en
+        claude.ai/design cuando el dueño tenga tiempo para esa sesión.
+- [x] **Renombrar identificadores: manicurista → negocio**, para terminar
+      de alinear el código/base con el rebrand de Fase 3 (que a propósito
+      había dejado afuera los nombres internos, ver esa entrada). Tabla
+      `usuarios_manicuristas` → `usuarios_negocios`; columna
+      `id_manicurista` → `id_negocio` en las 9 tablas que la tenían
+      (incluida `fotos_galeria`, que se había pasado por alto en la
+      primera migración y se corrigió con una segunda); 13 políticas RLS
+      renombradas (`manicurista_*` → `negocio_*`); tipos TS `Manicurista`
+      → `Negocio`, `SesionManicurista` → `SesionNegocio`; ~215
+      reemplazos mecánicos de `idManicurista`/`obtenerManicurista`/
+      `PaginaManicurista`/etc. en 35 archivos de `web/src`. Las 6
+      políticas de Storage (`manicurista_sube_sus_fotos` y afines) se
+      dejaron con el nombre viejo — `alter policy ... rename` sobre
+      `storage.objects` tira `must be owner of table objects` con el rol
+      disponible acá, y es cosmético/interno, invisible para la app.
+      **Encontró un bug real de producción, no solo cosmético**: el
+      cuerpo de 6 funciones (`crear_apartado`, `horarios_ocupados`,
+      `horarios_ocupados_mes`, `validar_codigo_promocional`,
+      `suscripciones_para_manicurista`, `manejar_nuevo_usuario`) seguía
+      citando los nombres viejos después del rename de tabla/columnas —
+      reservas y altas de cuenta nuevas rotas en producción hasta
+      reescribir esas 6 funciones. Ver trampa #32 para el detalle
+      completo (por qué pasa, cómo se detecta, y las trampas anidadas de
+      grants/nombres de parámetro que salieron al arreglarlo).
+      `suscripciones_para_manicurista(uuid)` → `suscripciones_para_negocio(uuid)`
+      (cambio de nombre real, no solo de parámetro). Verificado de punta
+      a punta con Playwright real (no solo build limpio): registro nuevo
+      → cuenta `pendiente` en `usuarios_negocios` (cuenta de prueba
+      borrada después), reserva pública completa con calendario real
+      (`crear_apartado` interceptado a nivel de red, confirmado
+      `p_id_negocio` en el payload, cita creada y borrada después), login
+      + navegación de las 6 secciones del panel sin errores de consola,
+      `get_advisors(type: security)` sin hallazgos nuevos más allá de los
+      WARN ya aceptados de siempre (RPCs `security definer` públicas).
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -904,6 +942,46 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
     server-side/RPC por separado con datos de prueba en vez de asumir
     que un solo test end-to-end con Playwright va a poder cubrir todo,
     porque puede que estructuralmente no pueda.
+32. **`ALTER TABLE ... RENAME` (tabla o columna) NO actualiza el texto de
+    ninguna función `plpgsql`/`sql` que la referencie** — a diferencia de
+    las políticas RLS (que Postgres guarda como árbol de expresión atado
+    al OID de la columna, y por eso sobreviven un rename solas), el cuerpo
+    de una función es texto plano que se resuelve por nombre recién en
+    tiempo de ejecución. Al renombrar `usuarios_manicuristas` →
+    `usuarios_negocios` e `id_manicurista` → `id_negocio` en toda la base
+    (ver Progreso, "Renombrar identificadores: manicurista → negocio"),
+    las 10 políticas RLS siguieron andando solas, pero `crear_apartado`,
+    `horarios_ocupados`, `horarios_ocupados_mes`,
+    `validar_codigo_promocional`, `suscripciones_para_manicurista` y hasta
+    el trigger `manejar_nuevo_usuario` (¡el de cada registro nuevo!)
+    quedaron citando nombres que ya no existían — **producción rota**
+    (reservas y altas de cuenta ambas fallando con `relation ... does not
+    exist`) hasta que se reescribió el cuerpo de las 10 funciones que
+    tocaban esas tablas/columnas. Se detectó llamando a `crear_apartado`
+    por SQL directo inmediatamente después del rename, no leyendo el
+    código. **Fix**: tras cualquier `rename table`/`rename column`, buscar
+    con `select proname from pg_proc where prosrc ~* '<nombre_viejo>'`
+    (join a `pg_namespace` por `public`) para encontrar TODAS las
+    funciones afectadas, sin confiar en memoria ni en grep del repo — la
+    lógica de negocio de este proyecto vive tanto en `.sql` versionado
+    como en funciones aplicadas directo por migración, y solo la base
+    tiene la verdad de lo que hay ahora mismo. **Segunda trampa dentro de
+    la misma**: Postgres no permite cambiar el NOMBRE de un parámetro con
+    `create or replace function` si el resto de la firma (tipos/orden) no
+    cambia — tira `cannot change name of input parameter`, hay que hacer
+    `drop function` explícito primero (mismo criterio que la trampa #12,
+    pero disparado por un rename de parámetro, no de tipo). Y como
+    `supabase-js` manda los parámetros de un `.rpc()` como objeto JSON
+    por NOMBRE (no por posición), cualquier `p_id_manicurista` →
+    `p_id_negocio` en la base tiene que cambiar en el mismo commit que el
+    `.rpc("...", { p_id_negocio: ... })` del frontend — no hay forma de
+    hacerlo gradual sin romper la app en el medio. **Tercera**: `drop
+    function` + `create function` (a diferencia de `create or replace`)
+    resetea los `GRANT`/`REVOKE` al default de Postgres (`EXECUTE` a
+    `PUBLIC`), perdiendo cualquier `revoke ... from public` aplicado antes
+    (trampa #3) — hay que reaplicar los grants explícitos a mano después,
+    y `get_advisors(type: security)` es la forma de confirmar que no
+    quedó una función más permisiva de lo que estaba.
 
 ## Pulido 1 — accesibilidad, mobile, contraste
 
@@ -1010,11 +1088,19 @@ usuario, ver trampa #23. El email interno real de esta cuenta ahora es
 `aurora@usuarios.uas-login.com`, pero eso ya no hace falta escribirlo en
 ningún lado.)
 
-**No existe ninguna cuenta admin todavía, ni en local ni en producción.**
-Para crear la primera: registrarse normal por `/registro` (cualquier
-usuario/negocio sirve, es una cuenta del dueño de la plataforma, no de una
-manicurista real) y despues correr
-`update usuarios_manicuristas set es_admin = true, estado_cuenta = 'aprobada' where usuario = '<lo que eligió>';`
+Personal de demo (permanente, igual criterio que las clientas Camila
+Rodríguez/Valentina Suárez — no es data de prueba para borrar): **Sofía**
+(uñas, asignada a "Semipermanente + Diseño") y **Fernanda** (pestañas,
+asignada a "Lifting de pestañas" — este servicio también se agregó de
+forma permanente). Sirven para que la carta pública muestre algo real en
+"Nuestro equipo" y en la agrupación por categoría sin tener que explicarle
+al dueño que arme datos de prueba él mismo.
+
+Ya existe una cuenta admin (`usuario: admin`) en producción. Para crear
+otra: registrarse normal por `/registro` (cualquier usuario/negocio sirve,
+es una cuenta del dueño de la plataforma, no de un negocio real de la
+plataforma) y despues correr
+`update usuarios_negocios set es_admin = true, estado_cuenta = 'aprobada' where usuario = '<lo que eligió>';`
 por SQL una sola vez. De ahí en más esa cuenta ve la tarjeta de
 "Administración" en `/panel` y puede aprobar el resto desde `/admin`.
 
@@ -1055,7 +1141,7 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   `NEXT_PUBLIC_SUPABASE_ANON_KEY`) cargadas en Production/Preview/
   Development vía `vercel env add`. URL de producción:
   `https://unas-nail-saas.vercel.app` — este es el link real para pasarle
-  a manicuristas nuevas (`/registro`) y a sus clientas (`/<slug>`).
+  a negocios nuevos (`/registro`) y a sus clientas (`/<slug>`).
 - **GitHub**: `https://github.com/rafitox32-source/unas-nail-saas`, rama
   `main`. El repo se creó recién en esta sesión — antes el proyecto no
   tenía control de versiones. `web/` tenía su propio `.git` suelto (residuo
@@ -1063,33 +1149,33 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
 - **Supabase**: proyecto `nail-artist-saas`, id `iaqubsplqtlhzalodnlk`, región
   `sa-east-1`, org `rafitox32-source's Org`. Plan free ($0/mes).
   URL: `https://iaqubsplqtlhzalodnlk.supabase.co`
-- **Tablas** (`supabase/esquema_inicial.sql`): `usuarios_manicuristas`,
+- **Tablas** (`supabase/esquema_inicial.sql`): `usuarios_negocios`,
   `clientas`, `servicios`, `promociones`, `citas_apartados`, `inventario`.
-  Todas con RLS: la manicurista solo ve/edita lo suyo
-  (`auth.uid() = id_manicurista`); hay políticas públicas de solo lectura para
-  el portal (`usuarios_manicuristas` por slug **y** `estado_cuenta =
+  Todas con RLS: la dueña del negocio solo ve/edita lo suyo
+  (`auth.uid() = id_negocio`); hay políticas públicas de solo lectura para
+  el portal (`usuarios_negocios` por slug **y** `estado_cuenta =
   'aprobada'`, `servicios` activos, `promociones` vigentes).
 - **`bloqueos_agenda`**: `fecha_hora_inicio`/`fecha_hora_fin` (un día
   completo o un rango de horas) + `motivo` opcional. RLS igual que el
-  resto (`manicurista_administra_sus_bloqueos`, `for all`). No es pública
+  resto (`negocio_administra_sus_bloqueos`, `for all`). No es pública
   — la clienta nunca la consulta directo, solo indirectamente a través de
   `horarios_ocupados`/`horarios_ocupados_mes`, que ya mezclan bloqueos con
   citas reales.
-- **`usuarios_manicuristas.estado_cuenta`** (`pendiente`/`aprobada`/
+- **`usuarios_negocios.estado_cuenta`** (`pendiente`/`aprobada`/
   `rechazada`) y **`.es_admin`**: ver la entrada de Progreso sobre
   aprobación de cuentas y trampa #24. Función `es_admin_actual()`
   (security definer) es la única forma correcta de chequear el admin
   desde una política RLS sobre esta misma tabla — nunca una subconsulta
   directa (recursión infinita, trampa #24).
 - **`resenas`**: `nombre_clienta`, `calificacion` (1-5), `comentario`,
-  `visible`. Sin formulario público todavía — la manicurista las carga a
+  `visible`. Sin formulario público todavía — la dueña del negocio las carga a
   mano en `/panel/promociones`. RLS calcada de `servicios`/`promociones`:
   dueña administra todo, público solo ve `visible = true` (sin re-chequear
   `estado_cuenta`, ver Progreso y trampa #30 sobre el bug de contraste que
   se encontró de paso construyendo esto).
-- **`personal`**: `id_negocio` (FK a `usuarios_manicuristas`), `nombre`,
+- **`personal`**: `id_negocio` (FK a `usuarios_negocios`), `nombre`,
   `categoria` (`cabello`/`pestañas`/`uñas`/`otro`), `url_foto`, `activo`.
-  RLS: `manicurista_administra_su_personal` (dueña, `auth.uid() =
+  RLS: `negocio_administra_su_personal` (dueña, `auth.uid() =
   id_negocio`) **y** `publico_ve_personal_activo` (select, anon,
   `activo = true` — agregada en la Fase 2, no en la 1). `servicios.
   id_empleado`, `citas_apartados.id_empleado` y `bloqueos_agenda.
@@ -1097,19 +1183,19 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   "Spa multi-servicio, Fase 1" y "Fase 2", y el plan completo en
   `C:\Users\BLACK HOUSE\.claude\plans\snug-dazzling-thompson.md`.
 - **`suscripciones_push`**: `endpoint` (único), `p256dh`, `auth`,
-  `id_manicurista`. RLS normal (dueña administra las suyas). Leídas desde
+  `id_negocio`. RLS normal (dueña administra las suyas). Leídas desde
   el servidor sin clave `service_role` vía 3 RPC `security definer`
   expuestas a `anon`: `suscripciones_para_admins()`,
-  `suscripciones_para_manicurista(uuid)`, `eliminar_suscripcion_push(text)`
+  `suscripciones_para_negocio(uuid)`, `eliminar_suscripcion_push(text)`
   — ver Progreso "Fase 3" y trampa #31.
 - **`notas_visita`** (`supabase/historial_fotografico.sql`): una fila por
   cita (`id_cita` unique), `formula_color` + `notas` + `rutas_fotos text[]`.
   Bucket privado `fotos-clientas` en Storage, políticas por carpeta
-  (`{id_manicurista}/{id_cita}/...`).
+  (`{id_negocio}/{id_cita}/...`).
 - **`fotos_galeria`**: una fila por foto de la galería pública, `ruta_archivo`
   + `orden` (reordenable desde el panel). Bucket **público** `fotos-galeria`
   en Storage (a diferencia de `fotos-clientas`, que es privado), ruta
-  `{id_manicurista}/{archivo}`. Tres políticas de Storage: insert/delete
+  `{id_negocio}/{archivo}`. Tres políticas de Storage: insert/delete
   acotadas a la propia carpeta (`to authenticated`), **y una de select
   también acotada a la propia carpeta** — necesaria para que `remove()`
   encuentre el archivo a borrar, ver trampa #22 (no confundir con una
@@ -1128,11 +1214,11 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   `slug_disponible`, `validar_codigo_promocional`,
   `usuario_disponible` (chequeo en vivo del nombre de usuario de login,
   mismo patrón que `slug_disponible`).
-- **`usuarios_manicuristas.usuario`**: columna única, es el nombre de
+- **`usuarios_negocios.usuario`**: columna única, es el nombre de
   usuario de login (no confundir con `slug_publico`, que es la URL pública
   — pueden ser distintos). Ver trampa #23 y la entrada de Progreso sobre
   login sin email.
-- **`usuarios_manicuristas.tipo_negocio`**: `cabello`/`pestañas`/`uñas`/
+- **`usuarios_negocios.tipo_negocio`**: `cabello`/`pestañas`/`uñas`/
   `spa_completo`, default `'uñas'`, declarado al registrarse (ver Progreso
   "Spa multi-servicio, Fase 3"). Informativo — no restringe categorías de
   servicio, solo sugiere la categoría por defecto al cargar el primer
@@ -1143,20 +1229,20 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   `actualizar_metricas_clienta` (antes `actualizar_ltv_clienta`; al completar
   una cita suma LTV **y** incrementa `clientas.visitas_completadas` en el
   mismo `UPDATE`, ver trampa #20).
-- **Columnas de lealtad**: `usuarios_manicuristas.lealtad_activo` /
+- **Columnas de lealtad**: `usuarios_negocios.lealtad_activo` /
   `lealtad_visitas_objetivo` / `lealtad_premio_descripcion` (config, una fila
-  por manicurista); `clientas.visitas_completadas` / `premios_canjeados`
+  por negocio); `clientas.visitas_completadas` / `premios_canjeados`
   (contadores). Premios disponibles = `floor(visitas_completadas /
   lealtad_visitas_objetivo) - premios_canjeados`, calculado en el frontend,
   no guardado.
 - **Frontend** (`web/`, Next.js 16 App Router + Tailwind v4):
-  - `(publico)/[slug]` — carta pública por manicurista
+  - `(publico)/[slug]` — carta pública por negocio
   - `(auth)/registro`, `(auth)/ingresar` — alta y login
   - `(interno)/panel`, `/panel/servicios`, `/panel/agenda`, `/panel/clientas`,
     `/panel/clientas/[id]`, `/panel/inventario`, `/panel/recibo/[id]`,
     `/panel/promociones` — back-office, protegido en `(interno)/layout.tsx`
     (que también bloquea el acceso si `estado_cuenta != 'aprobada'`)
-  - `/admin` (fuera de `(interno)`, sin la nav de manicurista) —
+  - `/admin` (fuera de `(interno)`, sin la nav interna) —
     aprobar/rechazar cuentas nuevas, protegido por `es_admin` en el propio
     `page.tsx`. `src/components/admin/gestion-cuentas.tsx` es la única
     pieza de UI ahí.
@@ -1164,7 +1250,7 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   - `src/lib/tipos.ts` — tipos TS de las entidades
   - `src/lib/autenticacion.ts` — `emailInternoDesdeUsuario()`, construye el
     email sintético que Supabase Auth exige por dentro a partir del
-    "usuario" que la manicurista escribe (ver trampa #23)
+    "usuario" que la dueña del negocio escribe (ver trampa #23)
   - `src/components/interno/nota-visita.tsx` — fórmula/notas/fotos por cita,
     se integra dentro de `ficha-clienta.tsx` (historial expandible)
   - `src/components/interno/configuracion-lealtad.tsx` — toggle + config del
@@ -1180,7 +1266,7 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
     la carta pública pisando `--color-rosado` en un wrapper de
     `[slug]/page.tsx` (Tailwind v4 ya usa esa variable en sus clases, no
     hace falta tocar componente por componente). Solo se persiste
-    `color_marca` si la manicurista tocó el selector de color en esta
+    `color_marca` si la dueña del negocio tocó el selector de color en esta
     sesión o ya tenía uno guardado (`colorTocado`, ver trampa #27) — si
     no, guardar cualquier otro campo del formulario dejaría un color por
     defecto fijo sin que lo haya elegido, pisando el acento adaptado al
@@ -1188,7 +1274,7 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   - `app/(interno)/panel/manifest.webmanifest/route.ts` — manifest de PWA
     dinámico por sesión, ver Progreso y trampa #25. `public/icono-app.svg`
     + `icono-app-{180,192,512}.png` son el ícono genérico de respaldo
-    cuando la manicurista no subió logo propio.
+    cuando la dueña del negocio no subió logo propio.
   - `src/lib/disponibilidad.ts` — `generarHorariosDisponibles()` y
     constantes de horario de atención, compartido entre
     `calendario-disponibilidad.tsx` (calendario del mes) y el selector de
@@ -1233,7 +1319,7 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   - `src/lib/soporte.ts` — número de WhatsApp de soporte de la
     plataforma (`WHATSAPP_SOPORTE`, hoy `+51912382709`) y
     `urlWhatsappSoporte()`. No confundir con el teléfono de cada
-    manicurista, que es de su propio negocio.
+    negocio registrado, que es el suyo propio.
   - `src/lib/csv.ts` — `descargarCSV()`, exportación genérica usada por
     Clientas y Agenda (ver Progreso, "Fase 1 de auditoría premium").
   - `(publico)/terminos`, `(publico)/privacidad` — páginas legales
@@ -1269,7 +1355,7 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
     multi-servicio, Fase 2".
   - `src/components/interno/tour-bienvenida.tsx` — modal de bienvenida de
     5 pasos en `/panel`, ver Progreso Fase 2 ítem 4. Se muestra solo si
-    `usuarios_manicuristas.tour_completado` es `false` (estado de cuenta
+    `usuarios_negocios.tour_completado` es `false` (estado de cuenta
     en la base, no `localStorage` — a propósito, ver esa misma entrada de
     Progreso).
   - Notificaciones push (Fase 3): `public/sw.js` (service worker, nuevo),

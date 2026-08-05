@@ -6,10 +6,10 @@ import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import type { ProgramaLealtad } from "@/lib/tipos";
 
 export function ConfiguracionLealtad({
-  idManicurista,
+  idNegocio,
   configuracionInicial,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   configuracionInicial: ProgramaLealtad;
 }) {
   const [activo, setActivo] = useState(configuracionInicial.lealtad_activo);
@@ -33,13 +33,13 @@ export function ConfiguracionLealtad({
 
     const supabase = crearClienteNavegador();
     const { error: errorGuardar } = await supabase
-      .from("usuarios_manicuristas")
+      .from("usuarios_negocios")
       .update({
         lealtad_activo: activo,
         lealtad_visitas_objetivo: Number(visitasObjetivo),
         lealtad_premio_descripcion: premioDescripcion || null,
       })
-      .eq("id", idManicurista);
+      .eq("id", idNegocio);
 
     setGuardando(false);
     if (errorGuardar) setError(errorGuardar.message);

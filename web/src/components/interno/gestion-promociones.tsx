@@ -47,10 +47,10 @@ function etiquetaDescuento(promo: PromocionAdmin) {
 }
 
 export function GestionPromociones({
-  idManicurista,
+  idNegocio,
   promocionesIniciales,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   promocionesIniciales: PromocionAdmin[];
 }) {
   const [promociones, setPromociones] = useState(promocionesIniciales);
@@ -112,7 +112,7 @@ export function GestionPromociones({
     } else {
       const { data, error: errorGuardar } = await supabase
         .from("promociones")
-        .insert({ ...payload, id_manicurista: idManicurista })
+        .insert({ ...payload, id_negocio: idNegocio })
         .select(columnas)
         .single<PromocionAdmin>();
 

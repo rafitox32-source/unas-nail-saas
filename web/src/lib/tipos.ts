@@ -5,7 +5,7 @@ export type EstadoCuenta = "pendiente" | "aprobada" | "rechazada";
 // servicio puede cargar después.
 export type TipoNegocio = "cabello" | "pestañas" | "uñas" | "spa_completo";
 
-export interface Manicurista {
+export interface Negocio {
   id: string;
   nombre_negocio: string;
   nombre_completo: string;
@@ -17,7 +17,7 @@ export interface Manicurista {
   politica_cancelacion: string | null;
 }
 
-export interface SesionManicurista {
+export interface SesionNegocio {
   estado_cuenta: EstadoCuenta;
   es_admin: boolean;
   nombre_negocio: string;
@@ -168,7 +168,7 @@ export interface ReciboDatos {
   monto_seña_pagado: number;
   clientas: { nombre_completo: string; telefono: string | null } | null;
   servicios: { nombre: string } | null;
-  usuarios_manicuristas: { nombre_negocio: string; telefono: string | null } | null;
+  usuarios_negocios: { nombre_negocio: string; telefono: string | null } | null;
 }
 
 export interface FotoGaleria {

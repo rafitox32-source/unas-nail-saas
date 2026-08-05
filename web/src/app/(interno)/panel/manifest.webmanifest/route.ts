@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 
-// Manifest de PWA por sesión: cada manicurista que instala el panel desde
+// Manifest de PWA por sesión: cada cuenta que instala el panel desde
 // su celular ("Agregar a inicio") ve el nombre y el logo de SU negocio en
 // el ícono, no uno genérico — se lee el perfil de la sesión activa en el
 // momento en que el navegador pide este archivo.
@@ -27,14 +27,14 @@ export async function GET() {
   let logoPropio: string | null = null;
 
   if (user) {
-    const { data: manicurista } = await supabase
-      .from("usuarios_manicuristas")
+    const { data: negocio } = await supabase
+      .from("usuarios_negocios")
       .select("nombre_negocio, url_avatar")
       .eq("id", user.id)
       .maybeSingle<{ nombre_negocio: string; url_avatar: string | null }>();
 
-    if (manicurista?.nombre_negocio) nombre = manicurista.nombre_negocio;
-    if (manicurista?.url_avatar) logoPropio = manicurista.url_avatar;
+    if (negocio?.nombre_negocio) nombre = negocio.nombre_negocio;
+    if (negocio?.url_avatar) logoPropio = negocio.url_avatar;
   }
 
   const manifest = {

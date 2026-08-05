@@ -11,13 +11,13 @@ export default async function PaginaInventario() {
   const { data: insumos } = await supabase
     .from("inventario")
     .select("id, nombre_insumo, categoria, cantidad_actual, unidad_medida, cantidad_minima_alerta, costo_unitario")
-    .eq("id_manicurista", usuario!.id)
+    .eq("id_negocio", usuario!.id)
     .order("nombre_insumo", { ascending: true })
     .returns<InsumoInventario[]>();
 
   return (
     <main className="mx-auto max-w-2xl flex-1 px-6 py-10">
-      <GestionInventario idManicurista={usuario!.id} insumosIniciales={insumos ?? []} />
+      <GestionInventario idNegocio={usuario!.id} insumosIniciales={insumos ?? []} />
     </main>
   );
 }

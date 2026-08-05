@@ -4,25 +4,25 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, CheckCircle2, XCircle, ImagePlus, Palette } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { generarSlug } from "@/lib/slug";
-import type { Manicurista } from "@/lib/tipos";
+import type { Negocio } from "@/lib/tipos";
 
 const COLOR_POR_DEFECTO = "#935060";
 
-export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista }) {
-  const [nombreNegocio, setNombreNegocio] = useState(manicurista.nombre_negocio);
-  const [telefono, setTelefono] = useState(manicurista.telefono ?? "");
-  const [biografia, setBiografia] = useState(manicurista.biografia ?? "");
-  const [colorMarca, setColorMarca] = useState(manicurista.color_marca ?? COLOR_POR_DEFECTO);
+export function ConfiguracionNegocio({ negocio }: { negocio: Negocio }) {
+  const [nombreNegocio, setNombreNegocio] = useState(negocio.nombre_negocio);
+  const [telefono, setTelefono] = useState(negocio.telefono ?? "");
+  const [biografia, setBiografia] = useState(negocio.biografia ?? "");
+  const [colorMarca, setColorMarca] = useState(negocio.color_marca ?? COLOR_POR_DEFECTO);
   // Si nunca tocó el selector, no queremos persistir el color por defecto
   // como si lo hubiera elegido — eso la dejaría "pegada" a ese color para
   // siempre en vez de seguir el acento del tema (claro u oscuro) de quien
   // visite su página. Solo se guarda un color si ya tenía uno antes o si
   // lo cambia en esta sesión.
-  const [colorTocado, setColorTocado] = useState(manicurista.color_marca !== null);
-  const [slug, setSlug] = useState(manicurista.slug_publico ?? "");
-  const [urlAvatar, setUrlAvatar] = useState(manicurista.url_avatar);
+  const [colorTocado, setColorTocado] = useState(negocio.color_marca !== null);
+  const [slug, setSlug] = useState(negocio.slug_publico ?? "");
+  const [urlAvatar, setUrlAvatar] = useState(negocio.url_avatar);
   const [politicaCancelacion, setPoliticaCancelacion] = useState(
-    manicurista.politica_cancelacion ?? "",
+    negocio.politica_cancelacion ?? "",
   );
 
   const [slugDisponible, setSlugDisponible] = useState<boolean | null>(null);
@@ -33,7 +33,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
   const inputArchivo = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!slug || slug === manicurista.slug_publico) {
+    if (!slug || slug === negocio.slug_publico) {
       setSlugDisponible(null);
       return;
     }
@@ -48,7 +48,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
       cancelado = true;
       clearTimeout(temporizador);
     };
-  }, [slug, manicurista.slug_publico]);
+  }, [slug, negocio.slug_publico]);
 
   async function guardar(evento: React.FormEvent) {
     evento.preventDefault();
@@ -63,7 +63,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
     setGuardando(true);
     const supabase = crearClienteNavegador();
     const { error: errorGuardar } = await supabase
-      .from("usuarios_manicuristas")
+      .from("usuarios_negocios")
       .update({
         nombre_negocio: nombreNegocio,
         telefono: telefono || null,
@@ -72,7 +72,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
         slug_publico: slug || null,
         politica_cancelacion: politicaCancelacion || null,
       })
-      .eq("id", manicurista.id);
+      .eq("id", negocio.id);
 
     setGuardando(false);
     if (errorGuardar) {
@@ -90,7 +90,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
     setSubiendoLogo(true);
     setError(null);
     const supabase = crearClienteNavegador();
-    const ruta = `${manicurista.id}/logo-${crypto.randomUUID()}-${archivo.name}`;
+    const ruta = `${negocio.id}/logo-${crypto.randomUUID()}-${archivo.name}`;
 
     const { error: errorSubir } = await supabase.storage.from("fotos-galeria").upload(ruta, archivo);
     if (errorSubir) {
@@ -104,9 +104,9 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
     } = supabase.storage.from("fotos-galeria").getPublicUrl(ruta);
 
     const { error: errorGuardar } = await supabase
-      .from("usuarios_manicuristas")
+      .from("usuarios_negocios")
       .update({ url_avatar: publicUrl })
-      .eq("id", manicurista.id);
+      .eq("id", negocio.id);
 
     setSubiendoLogo(false);
     if (errorGuardar) setError(errorGuardar.message);
@@ -181,7 +181,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
             className="w-full rounded-xl border border-borde bg-fondo py-2.5 pl-7 pr-4 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
           />
         </div>
-        {slug !== manicurista.slug_publico && slugDisponible === true && (
+        {slug !== negocio.slug_publico && slugDisponible === true && (
           <span className="animar-aparecer mt-1 flex items-center gap-1 text-xs text-exito">
             <CheckCircle2 className="h-3.5 w-3.5" /> Disponible
           </span>
@@ -191,7 +191,7 @@ export function ConfiguracionNegocio({ manicurista }: { manicurista: Manicurista
             <XCircle className="h-3.5 w-3.5" /> Ya está en uso
           </span>
         )}
-        {slug !== manicurista.slug_publico && (
+        {slug !== negocio.slug_publico && (
           <span className="mt-1 block text-xs text-texto-secundario">
             Si la cambiás, los links viejos con la dirección anterior dejan de funcionar.
           </span>

@@ -44,10 +44,10 @@ function Estrellas({
 }
 
 export function GestionResenas({
-  idManicurista,
+  idNegocio,
   resenasIniciales,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   resenasIniciales: ResenaAdmin[];
 }) {
   const [resenas, setResenas] = useState(resenasIniciales);
@@ -103,7 +103,7 @@ export function GestionResenas({
     } else {
       const { data, error: errorGuardar } = await supabase
         .from("resenas")
-        .insert({ ...payload, id_manicurista: idManicurista })
+        .insert({ ...payload, id_negocio: idNegocio })
         .select(columnas)
         .single<ResenaAdmin>();
 

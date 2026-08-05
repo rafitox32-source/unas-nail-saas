@@ -55,10 +55,10 @@ function pasos(slugPublico: string | null): Paso[] {
 }
 
 export function TourBienvenida({
-  idManicurista,
+  idNegocio,
   slugPublico,
 }: {
-  idManicurista: string;
+  idNegocio: string;
   slugPublico: string | null;
 }) {
   const [visible, setVisible] = useState(true);
@@ -71,9 +71,9 @@ export function TourBienvenida({
     setGuardando(true);
     const supabase = crearClienteNavegador();
     await supabase
-      .from("usuarios_manicuristas")
+      .from("usuarios_negocios")
       .update({ tour_completado: true })
-      .eq("id", idManicurista);
+      .eq("id", idNegocio);
     setGuardando(false);
     setVisible(false);
   }

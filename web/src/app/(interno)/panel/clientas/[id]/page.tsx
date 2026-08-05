@@ -31,7 +31,7 @@ export default async function PaginaClienta({
   if (!clienta) notFound();
 
   const { data: lealtad } = await supabase
-    .from("usuarios_manicuristas")
+    .from("usuarios_negocios")
     .select("lealtad_activo, lealtad_visitas_objetivo, lealtad_premio_descripcion")
     .eq("id", usuario!.id)
     .maybeSingle<ProgramaLealtad>();
@@ -74,7 +74,7 @@ export default async function PaginaClienta({
     <main className="mx-auto max-w-2xl flex-1 px-6 py-10">
       <FichaClienta
         clienta={clienta}
-        idManicurista={usuario!.id}
+        idNegocio={usuario!.id}
         historial={historial ?? []}
         notasPorCita={notasPorCita}
         lealtad={

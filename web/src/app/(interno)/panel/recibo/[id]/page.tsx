@@ -22,14 +22,14 @@ export default async function PaginaRecibo({
   const { data: cita } = await supabase
     .from("citas_apartados")
     .select(
-      "id, fecha_hora_inicio, monto_total, monto_seña_pagado, clientas(nombre_completo, telefono), servicios(nombre), usuarios_manicuristas(nombre_negocio, telefono)",
+      "id, fecha_hora_inicio, monto_total, monto_seña_pagado, clientas(nombre_completo, telefono), servicios(nombre), usuarios_negocios(nombre_negocio, telefono)",
     )
     .eq("id", id)
     .maybeSingle<ReciboDatos>();
 
   if (!cita) notFound();
 
-  const negocio = cita.usuarios_manicuristas;
+  const negocio = cita.usuarios_negocios;
   const enlaceWhatsapp = cita.clientas?.telefono
     ? `https://wa.me/${cita.clientas.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(
         `Hola ${cita.clientas.nombre_completo}! Te paso el recibo de tu visita a ${negocio?.nombre_negocio ?? ""}.`,
