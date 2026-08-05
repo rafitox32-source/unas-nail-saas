@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Phone, MessageCircle, Music2, Image as ImageIcon } from "lucide-react";
+import Link from "next/link";
+import { Phone, MessageCircle, Music2, Image as ImageIcon, Users } from "lucide-react";
 import { IconoMarca } from "@/components/icono-marca";
 import { IconoPosteBarbero, IconoBigote } from "@/components/iconos-barberia";
 import { IconoInstagram, IconoFacebook } from "@/components/iconos-redes";
@@ -157,12 +158,23 @@ export default async function PaginaNegocio({
               {negocio.biografia}
             </p>
           )}
-          <a
-            href="#servicios"
-            className="rounded-full bg-rosado px-8 py-3.5 text-sm font-semibold uppercase tracking-wide text-white shadow-[0_6px_16px_rgba(147,80,96,0.4)] transition-transform hover:-translate-y-0.5"
-          >
-            Ver servicios
-          </a>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="#servicios"
+              className="rounded-full bg-rosado px-8 py-3.5 text-sm font-semibold uppercase tracking-wide text-white shadow-[0_6px_16px_rgba(147,80,96,0.4)] transition-transform hover:-translate-y-0.5"
+            >
+              Ver servicios
+            </a>
+            {esBarberia && (
+              <Link
+                href={`/${slug}/fila`}
+                className="flex items-center gap-1.5 rounded-full border border-rosado px-8 py-3.5 text-sm font-semibold uppercase tracking-wide text-rosado-texto transition-transform hover:-translate-y-0.5"
+              >
+                <Users className="h-4 w-4" />
+                Unite a la fila
+              </Link>
+            )}
+          </div>
         </section>
 
         {esBarberia && (

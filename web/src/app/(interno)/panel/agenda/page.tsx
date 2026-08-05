@@ -1,13 +1,20 @@
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { GestionAgenda } from "@/components/interno/gestion-agenda";
 import { GestionBloqueos } from "@/components/interno/gestion-bloqueos";
-import type { CitaAgenda, BloqueoAgenda, Personal } from "@/lib/tipos";
+import { ColaEspera } from "@/components/interno/cola-espera";
+import type { CitaAgenda, BloqueoAgenda, Personal, TipoNegocio, TurnoFila } from "@/lib/tipos";
 
 export default async function PaginaAgenda() {
   const supabase = await crearClienteServidor();
   const {
     data: { user: usuario },
   } = await supabase.auth.getUser();
+
+  const { data: negocio } = await supabase
+    .from("usuarios_negocios")
+    .select("tipo_negocio, slug_publico")
+    .eq("id", usuario!.id)
+    .maybeSingle<{ tipo_negocio: TipoNegocio; slug_publico: string | null }>();
 
   const { data: personal } = await supabase
     .from("personal")
@@ -33,6 +40,20 @@ export default async function PaginaAgenda() {
     .order("fecha_hora_inicio", { ascending: true })
     .returns<BloqueoAgenda[]>();
 
+  const esBarberia = negocio?.tipo_negocio === "barberia";
+  const inicioDeHoy = new Date();
+  inicioDeHoy.setHours(0, 0, 0, 0);
+
+  const { data: turnosFila } = esBarberia
+    ? await supabase
+        .from("cola_espera")
+        .select("id, id_negocio, nombre_cliente, telefono, estado, creado_en")
+        .eq("id_negocio", usuario!.id)
+        .gte("creado_en", inicioDeHoy.toISOString())
+        .order("creado_en", { ascending: true })
+        .returns<TurnoFila[]>()
+    : { data: [] as TurnoFila[] };
+
   return (
     <main className="mx-auto max-w-2xl flex-1 px-6 py-10">
       <GestionAgenda citasIniciales={citas ?? []} personal={personal ?? []} />
@@ -41,6 +62,13 @@ export default async function PaginaAgenda() {
         bloqueosIniciales={bloqueos ?? []}
         personal={personal ?? []}
       />
+      {esBarberia && (
+        <ColaEspera
+          idNegocio={usuario!.id}
+          turnosIniciales={turnosFila ?? []}
+          slugPublico={negocio?.slug_publico ?? null}
+        />
+      )}
     </main>
   );
 }

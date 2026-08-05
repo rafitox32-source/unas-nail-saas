@@ -225,3 +225,16 @@ export interface PromocionAdmin {
   usos_actuales: number;
   activo: boolean;
 }
+
+// Cola de espera para walk-ins de barbería — no es una cita con horario,
+// es una fila en vivo. Ver CLAUDE.md.
+export type EstadoTurnoFila = "esperando" | "atendiendo" | "atendido" | "cancelado";
+
+export interface TurnoFila {
+  id: string;
+  id_negocio: string;
+  nombre_cliente: string;
+  telefono: string | null;
+  estado: EstadoTurnoFila;
+  creado_en: string;
+}
