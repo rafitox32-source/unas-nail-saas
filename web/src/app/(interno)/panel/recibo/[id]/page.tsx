@@ -4,6 +4,7 @@ import { IconoMarca } from "@/components/icono-marca";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { BotonImprimir } from "@/components/interno/boton-imprimir";
 import { formateadorPrecio } from "@/lib/formato";
+import { ETIQUETA_METODO_PAGO, ICONO_METODO_PAGO } from "@/lib/metodo-pago";
 import type { ReciboDatos } from "@/lib/tipos";
 
 const formateadorFecha = new Intl.DateTimeFormat("es-AR", {
@@ -23,7 +24,7 @@ export default async function PaginaRecibo({
   const { data: cita } = await supabase
     .from("citas_apartados")
     .select(
-      "id, fecha_hora_inicio, monto_total, monto_seña_pagado, clientas(nombre_completo, telefono), servicios(nombre), usuarios_negocios(nombre_negocio, telefono)",
+      "id, fecha_hora_inicio, monto_total, monto_seña_pagado, metodo_pago, clientas(nombre_completo, telefono), servicios(nombre), usuarios_negocios(nombre_negocio, telefono)",
     )
     .eq("id", id)
     .maybeSingle<ReciboDatos>();
@@ -77,6 +78,15 @@ export default async function PaginaRecibo({
               {formateadorPrecio.format(cita.monto_seña_pagado)}
             </span>
           </div>
+          {cita.metodo_pago && (
+            <div className="mt-2 flex items-center justify-end gap-1.5 text-xs text-texto-secundario">
+              {(() => {
+                const IconoMetodo = ICONO_METODO_PAGO[cita.metodo_pago];
+                return <IconoMetodo className="h-3.5 w-3.5" />;
+              })()}
+              Pagado con {ETIQUETA_METODO_PAGO[cita.metodo_pago]}
+            </div>
+          )}
         </div>
 
         <p className="mt-6 flex items-center justify-center gap-1.5 rounded-full bg-exito-suave py-2 text-center text-xs font-semibold text-exito">

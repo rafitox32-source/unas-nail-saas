@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, User, Phone, Tag, Loader2, CheckCircle2, MessageCircle, Clock, Info } from "lucide-react";
+import { X, User, Phone, Tag, Loader2, CheckCircle2, MessageCircle, Clock, Info, Wallet } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { CampoConIcono } from "@/components/campo-con-icono";
 import { CalendarioDisponibilidad } from "@/components/publico/calendario-disponibilidad";
 import { formateadorPrecio } from "@/lib/formato";
 import { generarHorariosDisponibles, hoyISO } from "@/lib/disponibilidad";
-import type { Servicio, RangoOcupado } from "@/lib/tipos";
+import { ETIQUETA_METODO_PAGO, ICONO_METODO_PAGO, CLASES_METODO_PAGO } from "@/lib/metodo-pago";
+import type { Servicio, RangoOcupado, MetodoPago } from "@/lib/tipos";
+
+const METODOS_PAGO: MetodoPago[] = ["yape", "plin", "efectivo"];
 
 export function ModalReserva({
   servicio,
@@ -26,6 +29,7 @@ export function ModalReserva({
 }) {
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [metodoPago, setMetodoPago] = useState<MetodoPago | "">("");
   const [fecha, setFecha] = useState(hoyISO());
   const [hora, setHora] = useState("");
   const [horariosOcupados, setHorariosOcupados] = useState<RangoOcupado[]>([]);
@@ -123,6 +127,11 @@ export function ModalReserva({
       return;
     }
 
+    if (!metodoPago) {
+      setError("Elegí cómo vas a pagar.");
+      return;
+    }
+
     const fechaHoraInicio = new Date(`${fecha}T${hora}:00`);
     setEnviando(true);
 
@@ -135,6 +144,7 @@ export function ModalReserva({
         p_telefono_clienta: telefono,
         p_fecha_hora_inicio: fechaHoraInicio.toISOString(),
         p_codigo_promocional: codigoPromocional.trim() || null,
+        p_metodo_pago: metodoPago,
       })
       .single();
 
@@ -158,9 +168,14 @@ export function ModalReserva({
     }).catch(() => {});
   }
 
+  const esEfectivo = metodoPago === "efectivo";
+  const requiereComprobante = resultado != null && resultado.monto_seña > 0 && !esEfectivo;
+
   const urlWhatsappConfirmacion =
     resultado && urlWhatsapp
-      ? `${urlWhatsapp}%0AServicio: ${encodeURIComponent(servicio.nombre)}%0AFecha: ${fecha} ${hora}%0AAdjunto el comprobante del abono (${formateadorPrecio.format(resultado.monto_seña)}).`
+      ? requiereComprobante
+        ? `${urlWhatsapp}%0AServicio: ${encodeURIComponent(servicio.nombre)}%0AFecha: ${fecha} ${hora}%0AAdjunto el comprobante del abono (${formateadorPrecio.format(resultado.monto_seña)}).`
+        : `${urlWhatsapp}%0AServicio: ${encodeURIComponent(servicio.nombre)}%0AFecha: ${fecha} ${hora}%0AConfirmo mi cita${esEfectivo ? ", pago en efectivo" : ""}.`
       : urlWhatsapp;
 
   return (
@@ -186,13 +201,24 @@ export function ModalReserva({
             )}
             <p className="mt-3 text-sm text-texto-secundario">
               {resultado.monto_seña > 0 ? (
-                <>
-                  Quedó pendiente de confirmar el abono de{" "}
-                  <strong className="text-texto-primario">
-                    {formateadorPrecio.format(resultado.monto_seña)}
-                  </strong>
-                  . Mandá el comprobante para confirmarlo.
-                </>
+                esEfectivo ? (
+                  <>
+                    Vas a abonar{" "}
+                    <strong className="text-texto-primario">
+                      {formateadorPrecio.format(resultado.monto_seña)}
+                    </strong>{" "}
+                    en efectivo. ¡Te esperamos!
+                  </>
+                ) : (
+                  <>
+                    Quedó pendiente de confirmar el abono de{" "}
+                    <strong className="text-texto-primario">
+                      {formateadorPrecio.format(resultado.monto_seña)}
+                    </strong>{" "}
+                    por {ETIQUETA_METODO_PAGO[metodoPago as MetodoPago]}. Mandá el comprobante para
+                    confirmarlo.
+                  </>
+                )
               ) : (
                 "Este servicio no requiere abono. ¡Te esperamos!"
               )}
@@ -203,7 +229,7 @@ export function ModalReserva({
                 className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-rosado py-3 text-sm font-semibold uppercase tracking-wide text-white transition-transform hover:-translate-y-0.5"
               >
                 <MessageCircle className="h-4 w-4" />
-                Enviar comprobante por WhatsApp
+                {requiereComprobante ? "Enviar comprobante por WhatsApp" : "Avisar por WhatsApp"}
               </a>
             )}
             <button
@@ -253,6 +279,34 @@ export function ModalReserva({
                   onChange={(e) => setTelefono(e.target.value)}
                 />
               </label>
+
+              <div>
+                <p className="flex items-center gap-1.5 text-sm text-texto-secundario">
+                  <Wallet className="h-3.5 w-3.5" /> ¿Cómo vas a pagar?
+                </p>
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  {METODOS_PAGO.map((metodo) => {
+                    const Icono = ICONO_METODO_PAGO[metodo];
+                    const clases = CLASES_METODO_PAGO[metodo];
+                    const seleccionado = metodoPago === metodo;
+                    return (
+                      <button
+                        key={metodo}
+                        type="button"
+                        onClick={() => setMetodoPago(metodo)}
+                        className={`flex flex-col items-center gap-1 rounded-xl border-2 py-2.5 text-xs font-semibold transition-colors ${
+                          seleccionado
+                            ? `${clases.borde} ${clases.fondoSuave} ${clases.texto}`
+                            : "border-borde bg-fondo text-texto-secundario hover:border-texto-secundario"
+                        }`}
+                      >
+                        <Icono className="h-4 w-4" />
+                        {ETIQUETA_METODO_PAGO[metodo]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               <div>
                 <p className="text-sm text-texto-secundario">Elegí el día</p>
                 <div className="mt-1 rounded-xl border border-borde bg-fondo p-3">

@@ -18,6 +18,7 @@ import {
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { formateadorPrecio } from "@/lib/formato";
 import { descargarCSV } from "@/lib/csv";
+import { ETIQUETA_METODO_PAGO, ICONO_METODO_PAGO, CLASES_METODO_PAGO } from "@/lib/metodo-pago";
 import type { CitaAgenda, EstadoCita, Personal } from "@/lib/tipos";
 
 const formateadorFecha = new Intl.DateTimeFormat("es-AR", {
@@ -98,7 +99,7 @@ export function GestionAgenda({
   function exportar() {
     descargarCSV(
       "agenda.csv",
-      ["Clienta", "Teléfono", "Servicio", "Fecha y hora", "Estado", "Total", "Pagado"],
+      ["Clienta", "Teléfono", "Servicio", "Fecha y hora", "Estado", "Total", "Pagado", "Método de pago"],
       citas.map((c) => [
         c.clientas?.nombre_completo ?? "",
         c.clientas?.telefono ?? "",
@@ -107,6 +108,7 @@ export function GestionAgenda({
         ETIQUETA_ESTADO[c.estado_cita],
         c.monto_total,
         c.monto_seña_pagado,
+        c.metodo_pago ? ETIQUETA_METODO_PAGO[c.metodo_pago] : "",
       ]),
     );
   }
@@ -193,9 +195,22 @@ export function GestionAgenda({
               </div>
 
               <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-                <span className="text-texto-secundario">
-                  Total {formateadorPrecio.format(cita.monto_total)} · Pagado{" "}
-                  {formateadorPrecio.format(cita.monto_seña_pagado)}
+                <span className="flex min-w-0 flex-wrap items-center gap-x-2 text-texto-secundario">
+                  <span>
+                    Total {formateadorPrecio.format(cita.monto_total)} · Pagado{" "}
+                    {formateadorPrecio.format(cita.monto_seña_pagado)}
+                  </span>
+                  {cita.metodo_pago && (
+                    <span
+                      className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${CLASES_METODO_PAGO[cita.metodo_pago].fondoSuave} ${CLASES_METODO_PAGO[cita.metodo_pago].texto}`}
+                    >
+                      {(() => {
+                        const IconoMetodo = ICONO_METODO_PAGO[cita.metodo_pago];
+                        return <IconoMetodo className="h-3 w-3" />;
+                      })()}
+                      {ETIQUETA_METODO_PAGO[cita.metodo_pago]}
+                    </span>
+                  )}
                 </span>
                 {cita.clientas?.telefono && (
                   <a

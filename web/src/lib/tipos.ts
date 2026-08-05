@@ -91,6 +91,8 @@ export type EstadoCita =
   | "cancelada"
   | "no_asistio";
 
+export type MetodoPago = "yape" | "plin" | "efectivo";
+
 export interface BloqueoAgenda {
   id: string;
   fecha_hora_inicio: string;
@@ -112,6 +114,7 @@ export interface CitaAgenda {
   monto_seña_pagado: number;
   monto_restante: number;
   id_empleado: string | null;
+  metodo_pago: MetodoPago | null;
   clientas: { nombre_completo: string; telefono: string | null } | null;
   servicios: { nombre: string } | null;
   personal: { nombre: string } | null;
@@ -186,6 +189,7 @@ export interface ReciboDatos {
   fecha_hora_inicio: string;
   monto_total: number;
   monto_seña_pagado: number;
+  metodo_pago: MetodoPago | null;
   clientas: { nombre_completo: string; telefono: string | null } | null;
   servicios: { nombre: string } | null;
   usuarios_negocios: { nombre_negocio: string; telefono: string | null } | null;

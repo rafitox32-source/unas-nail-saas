@@ -28,6 +28,13 @@
      modos. */
   --color-bloqueado: #d1d5db;
   --color-bloqueado-texto: #4b5563;
+  /* Yape/Plin: colores propios de esos métodos de pago (no hay violeta ni
+     turquesa en el resto de la paleta) — efectivo reusa --color-exito, el
+     verde ya existente encaja bien con "billete/plata en mano". */
+  --color-yape: #7c3aed;
+  --color-yape-suave: #ede9fe;
+  --color-plin: #0f766e;
+  --color-plin-suave: #ccfbf1;
 }
 
 /* Modo oscuro: paleta hermana de la clara, no una inversión automática.
@@ -74,6 +81,10 @@
     --color-alerta-suave: #2f1d12;
     --color-bloqueado: #374151;
     --color-bloqueado-texto: #d1d5db;
+    --color-yape: #c4b5fd;
+    --color-yape-suave: #2e1a47;
+    --color-plin: #5eead4;
+    --color-plin-suave: #0f2926;
   }
 }
 
@@ -97,6 +108,10 @@
   --color-alerta-suave: #2f1d12;
   --color-bloqueado: #374151;
   --color-bloqueado-texto: #d1d5db;
+  --color-yape: #c4b5fd;
+  --color-yape-suave: #2e1a47;
+  --color-plin: #5eead4;
+  --color-plin-suave: #0f2926;
 }
 
 @theme inline {
@@ -119,6 +134,10 @@
   --color-alerta-suave: var(--color-alerta-suave);
   --color-bloqueado: var(--color-bloqueado);
   --color-bloqueado-texto: var(--color-bloqueado-texto);
+  --color-yape: var(--color-yape);
+  --color-yape-suave: var(--color-yape-suave);
+  --color-plin: var(--color-plin);
+  --color-plin-suave: var(--color-plin-suave);
   --font-titulo: var(--font-playfair);
   --font-cuerpo: var(--font-poppins);
 }
