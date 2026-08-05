@@ -939,6 +939,71 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       axe-core (0 violaciones, claro y oscuro) sobre la ficha de Camila
       Rodríguez con `tipo_negocio` de la cuenta demo cambiado
       temporalmente por SQL y revertido después.
+- [x] **Barbería — cola de espera en vivo (walk-ins, no citas)**: la
+      misma entrada que dejó afuera odontología también había dejado
+      esto afuera, con el motivo explicado antes de tocar código: es un
+      tipo de funcionalidad distinto (tiempo real, no agenda con
+      horario). Esta pasada sí lo construye. Sección nueva "Cola de
+      espera" en `/panel/agenda` (solo si `tipo_negocio` es
+      `'barberia'`, debajo de "Bloquear horarios" — sin ruta ni ítem de
+      nav nuevo, trampa #8), y una vista pública nueva `/[slug]/fila`
+      (con un botón "Unite a la fila" en el hero de la carta pública,
+      también solo para barberías) donde el cliente se suma sin
+      registrarse y ve su posición en vivo.
+      - **Tabla `cola_espera`** (`id_negocio`, `nombre_cliente`,
+        `telefono`, `estado` — `esperando`/`atendiendo`/`atendido`/
+        `cancelado` —, `creado_en`): deliberadamente **sin**
+        `id_empleado` — a diferencia de `servicios`/`citas_apartados`/
+        `bloqueos_agenda`, una fila de espera de barbería típica es una
+        sola cola compartida ("el que sigue, con el primer barbero que
+        se libera"), no una cola por profesional; sumar esa columna sin
+        ninguna UI que la use hubiera sido diseñar para un futuro
+        hipotético, no para lo pedido. RLS de siempre
+        (`negocio_administra_su_cola`, `auth.uid() = id_negocio`) — sin
+        política pública de SELECT a propósito, para no exponer
+        nombres/teléfonos de toda la fila a cualquier visitante; todo
+        el acceso público pasa por RPC `security definer`.
+      - **Primer uso de Supabase Realtime en este proyecto** (hasta
+        ahora todo era polling manual o recarga). El panel de la dueña
+        se suscribe a `postgres_changes` sobre `cola_espera` filtrado
+        por `id_negocio` — como es una conexión autenticada y la fila
+        pertenece a su propia cuenta, la misma política RLS que ya
+        protege la tabla también protege el canal en vivo, sin política
+        nueva. Necesitó `alter table cola_espera replica identity full`
+        + `alter publication supabase_realtime add table cola_espera`
+        en la migración — sin esto el canal no manda nada.
+      - **Tres RPC `security definer` nuevas**, mismo patrón que
+        `crear_apartado`: `unirse_a_fila` (resuelve el negocio por
+        slug, valida `estado_cuenta = 'aprobada'` y `tipo_negocio =
+        'barberia'`, inserta y calcula la posición contando filas
+        `esperando` con `creado_en` menor o igual), `posicion_en_fila`
+        (consultada por **polling cada 5 segundos** desde la vista
+        pública — a propósito no es Realtime ahí: el cliente anónimo no
+        tiene ninguna política de SELECT sobre la tabla, así que un
+        canal en vivo no le serviría de nada sin agregar una política
+        pública que expondría la fila entera a cualquiera) y
+        `cancelar_mi_turno`. Las tres con el mismo WARN aceptado de
+        siempre en `get_advisors` (RPC pública por diseño).
+      - El cliente guarda su `id` de turno en `localStorage` (clave
+        `florece_fila_{slug}`) para sobrevivir un refresh de página —
+        mismo espíritu que otros flujos públicos sin cuenta de este
+        proyecto.
+      - **Trampa nueva, #33** (ver más abajo): verificar Realtime con
+        dos pestañas de Playwright en simultáneo dio falsos negativos
+        por timing del propio script, no del producto — quedó
+        documentado en detalle ahí porque puede repetirse con cualquier
+        feature futura que use Realtime o canales en vivo.
+      - Verificado en capas, no con un solo test de punta a punta
+        (aprendizaje de la trampa #31 aplicado de nuevo): la RPC
+        `unirse_a_fila` y el cálculo de posición, el canal Realtime del
+        panel recibiendo altas sin recargar, el `UPDATE` de estado
+        persistiendo de verdad en la base, y el polling del cliente
+        recogiendo un cambio de estado hecho por fuera (por SQL directo,
+        para aislar el polling del resto de la cadena) — cada pieza
+        confirmada por separado antes de confiar en la cadena completa.
+        0 violaciones axe-core en panel y vista pública, claro y oscuro.
+        Datos de prueba (turnos de prueba, `tipo_negocio` de la cuenta
+        demo) limpiados/revertidos después.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -1330,6 +1395,36 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
     (trampa #3) — hay que reaplicar los grants explícitos a mano después,
     y `get_advisors(type: security)` es la forma de confirmar que no
     quedó una función más permisiva de lo que estaba.
+33. **Probar Supabase Realtime con dos pestañas de Playwright en
+    simultáneo puede dar falsos negativos por timing del propio script,
+    no del producto.** Al verificar la cola de espera de barbería (ver
+    Progreso), un script que hacía "cliente se suma → dueña hace clic
+    en Atender casi enseguida (800ms de espera) → cliente revisa su
+    posición" mostraba que el cliente nunca se enteraba del cambio de
+    estado. Se sospechó primero *throttling* de temporizadores de
+    Chrome en pestañas no enfocadas (`setInterval` se frena en tabs de
+    fondo) — se descartó con `page.bringToFront()` antes de cada
+    espera, sin cambiar el resultado. La causa real: el evento
+    `postgres_changes` de alta (INSERT) tarda un instante en propagarse
+    del cliente que se suma hasta el canal suscripto del panel de la
+    dueña, y el script hacía clic en "Empezar a atender" **antes** de
+    que esa fila apareciera de verdad — el `UPDATE` que disparaba el
+    clic simplemente no encontraba nada nuevo que actualizar a tiempo.
+    Se aisló el problema en tres pasos separados en vez de seguir
+    depurando el flujo completo: (1) confirmar por SQL directo que el
+    `UPDATE` desde el panel sí persiste cuando se le da tiempo de sobra
+    (funcionó), (2) confirmar que el polling del cliente (cada 5s) por
+    sí solo detecta un cambio de estado hecho por fuera —
+    actualizando la fila directo por SQL mientras la página del cliente
+    dormía, sin ningún panel de por medio— (funcionó, capturado con
+    marcas de tiempo en consola), con lo cual la única pieza que fallaba
+    era la ventana de tiempo del script de prueba, no la app. **Lección**:
+    frente a un resultado "no funciona" en una feature de tiempo real,
+    aislar cada eslabón de la cadena (escritura → propagación del canal →
+    lectura) en pruebas separadas antes de asumir un bug de producto —
+    y en cualquier prueba con dos actores de Realtime, dejar pasar al
+    menos 1-2 segundos después de la acción que dispara el evento antes
+    de que el otro actor reaccione, no encadenar acciones inmediatas.
 
 ## Pulido 1 — accesibilidad, mobile, contraste
 
@@ -1537,6 +1632,18 @@ página al array `paginas`, actualizar el índice (página 2), la lista de
   expuestas a `anon`: `suscripciones_para_admins()`,
   `suscripciones_para_negocio(uuid)`, `eliminar_suscripcion_push(text)`
   — ver Progreso "Fase 3" y trampa #31.
+- **`cola_espera`**: `id_negocio`, `nombre_cliente`, `telefono`,
+  `estado` (`esperando`/`atendiendo`/`atendido`/`cancelado`),
+  `creado_en`. RLS normal (`negocio_administra_su_cola`, dueña). Sin
+  `id_empleado` a propósito (cola única por negocio, no por
+  profesional) y sin política pública de SELECT (todo acceso anónimo
+  pasa por RPC). Primera tabla del proyecto con Supabase Realtime
+  habilitado (`replica identity full` + alta en la publicación
+  `supabase_realtime`). Tres RPC `security definer` públicas:
+  `unirse_a_fila(slug, nombre, telefono)`, `posicion_en_fila(id)`
+  (consultada por polling, no por Realtime, desde la vista pública) y
+  `cancelar_mi_turno(id)`. Ver Progreso "Barbería — cola de espera en
+  vivo" y trampa #33.
 - **`notas_visita`** (`supabase/historial_fotografico.sql`): una fila por
   cita (`id_cita` unique), `formula_color` + `notas` + `rutas_fotos text[]`.
   Bucket privado `fotos-clientas` en Storage, políticas por carpeta
@@ -1733,5 +1840,11 @@ página al array `paginas`, actualizar el índice (página 2), la lista de
     `VAPID_SUBJECT` en `.env.local` y Vercel (las tres). Ver Progreso
     "Fase 3" y trampa #31 (limitación de Playwright/Chromium headless
     para probar el flujo 100% real).
+  - `src/components/interno/cola-espera.tsx` — cola de espera de
+    barbería en `/panel/agenda`, suscripta a Supabase Realtime.
+    `src/components/publico/unirse-fila.tsx` — vista del cliente en
+    `(publico)/[slug]/fila/page.tsx`, con polling cada 5s en vez de
+    Realtime (ver por qué en la entrada de `cola_espera` de arriba).
+    Ver Progreso "Barbería — cola de espera en vivo" y trampa #33.
 - **.env.local** de `web/` ya apunta al proyecto real (`NEXT_PUBLIC_SUPABASE_URL`
   + clave pública `sb_publishable_...`, no es secreta).
