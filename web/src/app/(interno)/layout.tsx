@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { Clock3, XCircle, MessageCircle } from "lucide-react";
+import { Clock3, XCircle, MessageCircle, Lock } from "lucide-react";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { NavInterno } from "@/components/interno/nav-interno";
 import { BotonCerrarSesion } from "@/components/interno/cerrar-sesion";
@@ -64,7 +64,9 @@ export default async function LayoutInterno({
 
   const { data: cuenta } = await supabase
     .from("usuarios_negocios")
-    .select("estado_cuenta, es_admin, nombre_negocio, tipo_negocio, color_marca")
+    .select(
+      "estado_cuenta, es_admin, nombre_negocio, tipo_negocio, color_marca, creado_en, activacion_completa",
+    )
     .eq("id", usuario.id)
     .maybeSingle<SesionNegocio>();
 
@@ -97,6 +99,44 @@ export default async function LayoutInterno({
         >
           <MessageCircle className="h-3.5 w-3.5" />
           ¿Algo no anda bien? Escribinos por WhatsApp
+        </a>
+        <BotonCerrarSesion />
+      </main>
+    );
+  }
+
+  // Prueba gratis de 7 días desde el registro (creado_en). Si nadie la
+  // activó a mano desde /admin (activacion_completa) y ya pasaron los 7
+  // días, se bloquea el panel — mismo patrón visual que pendiente/rechazada
+  // arriba, no un estado nuevo de estado_cuenta (la cuenta sigue "aprobada",
+  // solo que la prueba venció).
+  const SIETE_DIAS_MS = 7 * 24 * 60 * 60 * 1000;
+  const pruebaVencida =
+    cuenta &&
+    !cuenta.activacion_completa &&
+    Date.now() - new Date(cuenta.creado_en).getTime() > SIETE_DIAS_MS;
+
+  if (pruebaVencida) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24 text-center">
+        <Lock className="h-10 w-10 text-dorado" strokeWidth={1.5} />
+        <h1 className="font-titulo text-2xl font-semibold text-texto-primario">
+          Tu período de prueba terminó
+        </h1>
+        <p className="max-w-sm text-sm text-texto-secundario">
+          Usaste gratis {cuenta!.nombre_negocio} durante 7 días. Para seguir usando tu panel,
+          escribinos por WhatsApp y activamos tu cuenta completa.
+        </p>
+        <a
+          href={urlWhatsappSoporte(
+            `Hola! Se venció mi período de prueba (${cuenta!.nombre_negocio}) y quiero activar mi cuenta.`,
+          )}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-1.5 rounded-full bg-rosado px-6 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(147,80,96,0.4)] transition-transform hover:-translate-y-0.5"
+        >
+          <MessageCircle className="h-4 w-4" />
+          Activar mi cuenta por WhatsApp
         </a>
         <BotonCerrarSesion />
       </main>

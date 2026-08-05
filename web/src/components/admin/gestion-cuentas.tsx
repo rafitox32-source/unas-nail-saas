@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, XCircle, Clock3, Phone, Inbox } from "lucide-react";
+import { CheckCircle2, XCircle, Clock3, Phone, Inbox, Unlock } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import type { CuentaAdmin, EstadoCuenta } from "@/lib/tipos";
+
+const SIETE_DIAS_MS = 7 * 24 * 60 * 60 * 1000;
 
 const formateadorFecha = new Intl.DateTimeFormat("es-AR", {
   day: "2-digit",
@@ -23,6 +25,16 @@ const ESTILO_INSIGNIA: Record<EstadoCuenta, string> = {
   rechazada: "bg-alerta-suave text-alerta",
 };
 
+function estadoPrueba(cuenta: CuentaAdmin): { texto: string; estilo: string } | null {
+  if (cuenta.estado_cuenta !== "aprobada" || cuenta.activacion_completa) return null;
+  const transcurridoMs = Date.now() - new Date(cuenta.creado_en).getTime();
+  if (transcurridoMs > SIETE_DIAS_MS) {
+    return { texto: "Prueba vencida", estilo: "bg-alerta-suave text-alerta" };
+  }
+  const diaActual = Math.min(7, Math.floor(transcurridoMs / 86400000) + 1);
+  return { texto: `Prueba: día ${diaActual}/7`, estilo: "bg-dorado-suave text-dorado" };
+}
+
 export function GestionCuentas({ cuentasIniciales }: { cuentasIniciales: CuentaAdmin[] }) {
   const [cuentas, setCuentas] = useState(cuentasIniciales);
   const [actualizando, setActualizando] = useState<string | null>(null);
@@ -37,6 +49,21 @@ export function GestionCuentas({ cuentasIniciales }: { cuentasIniciales: CuentaA
     if (!error) {
       setCuentas((actual) =>
         actual.map((c) => (c.id === cuenta.id ? { ...c, estado_cuenta: estado } : c)),
+      );
+    }
+    setActualizando(null);
+  }
+
+  async function activarCompleta(cuenta: CuentaAdmin) {
+    setActualizando(cuenta.id);
+    const supabase = crearClienteNavegador();
+    const { error } = await supabase
+      .from("usuarios_negocios")
+      .update({ activacion_completa: true })
+      .eq("id", cuenta.id);
+    if (!error) {
+      setCuentas((actual) =>
+        actual.map((c) => (c.id === cuenta.id ? { ...c, activacion_completa: true } : c)),
       );
     }
     setActualizando(null);
@@ -119,24 +146,51 @@ export function GestionCuentas({ cuentasIniciales }: { cuentasIniciales: CuentaA
             Ya revisadas
           </h2>
           <div className="mt-3 flex flex-col gap-2">
-            {resueltas.map((cuenta) => (
-              <div
-                key={cuenta.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-borde bg-superficie px-4 py-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-texto-primario">
-                    {cuenta.nombre_negocio}
-                  </p>
-                  <p className="truncate text-xs text-texto-secundario">@{cuenta.usuario}</p>
-                </div>
-                <span
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${ESTILO_INSIGNIA[cuenta.estado_cuenta]}`}
+            {resueltas.map((cuenta) => {
+              const prueba = estadoPrueba(cuenta);
+              return (
+                <div
+                  key={cuenta.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-borde bg-superficie px-4 py-3"
                 >
-                  {ETIQUETA_ESTADO[cuenta.estado_cuenta]}
-                </span>
-              </div>
-            ))}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-texto-primario">
+                      {cuenta.nombre_negocio}
+                    </p>
+                    <p className="truncate text-xs text-texto-secundario">@{cuenta.usuario}</p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {prueba && (
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${prueba.estilo}`}
+                      >
+                        {prueba.texto}
+                      </span>
+                    )}
+                    {cuenta.estado_cuenta === "aprobada" && !cuenta.activacion_completa && (
+                      <button
+                        type="button"
+                        onClick={() => activarCompleta(cuenta)}
+                        disabled={actualizando === cuenta.id}
+                        className="flex items-center gap-1 text-xs font-semibold text-exito transition-colors hover:text-texto-primario disabled:opacity-50"
+                      >
+                        {actualizando === cuenta.id ? (
+                          <Clock3 className="h-3.5 w-3.5" />
+                        ) : (
+                          <Unlock className="h-3.5 w-3.5" />
+                        )}
+                        Activar completo
+                      </button>
+                    )}
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${ESTILO_INSIGNIA[cuenta.estado_cuenta]}`}
+                    >
+                      {ETIQUETA_ESTADO[cuenta.estado_cuenta]}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </>
       )}

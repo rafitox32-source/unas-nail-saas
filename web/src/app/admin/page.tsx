@@ -23,7 +23,9 @@ export default async function PaginaAdmin() {
 
   const { data: cuentas } = await supabase
     .from("usuarios_negocios")
-    .select("id, usuario, nombre_negocio, nombre_completo, telefono, estado_cuenta, creado_en")
+    .select(
+      "id, usuario, nombre_negocio, nombre_completo, telefono, estado_cuenta, creado_en, activacion_completa",
+    )
     .neq("id", usuario.id)
     .order("creado_en", { ascending: false })
     .returns<CuentaAdmin[]>();

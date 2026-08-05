@@ -35,6 +35,8 @@ export interface SesionNegocio {
   nombre_negocio: string;
   tipo_negocio: TipoNegocio;
   color_marca: string | null;
+  creado_en: string;
+  activacion_completa: boolean;
 }
 
 export interface CuentaAdmin {
@@ -45,6 +47,7 @@ export interface CuentaAdmin {
   telefono: string | null;
   estado_cuenta: EstadoCuenta;
   creado_en: string;
+  activacion_completa: boolean;
 }
 
 export interface ProgramaLealtad {
