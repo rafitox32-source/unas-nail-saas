@@ -595,30 +595,14 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       `get_advisors(type: security)` sin hallazgos nuevos más allá de los
       WARN ya aceptados de siempre (RPCs `security definer` públicas).
 - [x] **Marca Florece — isotipo + paleta sincronizada**: primer isotipo
-      real para la plataforma, un mónogram floral de 5 pétalos (blanco
-      sobre `--color-rosado`, centro en `--color-dorado`) — deliberadamente
-      geométrico y simple para seguir siendo legible a tamaño de favicon
-      (16–32px), donde un trazo fino desaparece. **No es la decisión de
-      branding definitiva del dueño** (ver nota al principio de este
-      archivo) — es un punto de partida coherente con la paleta que ya
-      existía, no un rediseño desde cero.
+      real para la plataforma. **No es la decisión de branding definitiva
+      del dueño** (ver nota al principio de este archivo) — es un punto
+      de partida coherente con la paleta que ya existía, no un rediseño
+      desde cero.
       - `public/icono-app.svg` + los 3 PNG (180/192/512, regenerados con
         Python + Pillow, mismo método que la vez anterior) usan el
         isotipo nuevo — es el respaldo genérico del favicon/PWA cuando
         una cuenta no subió su propio logo.
-      - El ícono `Sparkles` (genérico, placeholder) se reemplazó por
-        `Flower` de lucide-react (misma librería ya instalada, mismo
-        lenguaje visual del resto de la interfaz) en los lugares donde
-        de verdad funciona como marca de la plataforma:
-        `encabezado.tsx` (header público), `[slug]/page.tsx` (hero),
-        `registro/page.tsx` e `ingresar/page.tsx` (pantallas de auth),
-        `recibo/[id]/page.tsx`, y la portada del dominio raíz
-        (`(publico)/page.tsx`, que antes era texto solo). Los usos
-        decorativos/de categoría de `Sparkles` (ícono de categoría
-        "uñas" en `seccion-servicios.tsx`/`seccion-equipo.tsx`, paso del
-        tour guiado, estados vacíos, nav de "Servicios", generador de
-        estados) **no cambiaron** — no son la marca, es iconografía de
-        contenido.
       - **Sistema de diseño sincronizado** (claude.ai/design, proyecto
         "Nail Artist SaaS — Sistema de Diseño", ver Referencia técnica):
         página nueva `fundamentos/marca.html` con el isotipo, tamaños de
@@ -631,11 +615,46 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         oscuro, con un toggle para alternar). `fundamentos/tipografia.html`
         actualizada de "Uñas con carácter"/`$500` a "Florece"/`S/ 50`
         (moneda real del proyecto, soles, no pesos).
+      - **Segunda vuelta, a pedido del dueño ("ve al punto 2" —
+        profundizar el logo)**: la primera versión (flor geométrica de 5
+        pétalos) se reemplazó por un **monograma**: la inicial "F" en
+        trazo grueso con un pétalo dorado brotando de la esquina. Antes
+        de decidir se exploraron 4 direcciones (flor simétrica, flor
+        orgánica, ramita botánica de trazo lineal, monograma),
+        renderizadas y comparadas **a tamaño real de favicon (16–32px)**,
+        no solo a tamaño grande — ahí se vio que la flor orgánica era
+        casi indistinguible de la simétrica y que la ramita de trazo
+        fino perdía legibilidad. El dueño eligió el monograma vía
+        `AskUserQuestion` después de ver la comparación. Detalle real
+        encontrado al aplicarlo: la versión inline monocromática
+        (`currentColor` para toda la "F", sin acento) se veía como una
+        simple letra suelta, sin nada que la distinga como marca — el
+        fix fue mantener el pétalo en el dorado fijo (`#B8935A`) incluso
+        en el uso inline/monocromático, solo la "F" toma `currentColor`.
+        Componente propio `src/components/icono-marca.tsx` (no un ícono
+        de lucide-react — es la marca, no iconografía genérica).
+        `fundamentos/marca.html` reescrita con el monograma + una
+        sección "Direcciones descartadas" mostrando las 3 alternativas y
+        por qué no se eligieron, para que quede el criterio documentado
+        y no haya que rehacer la comparación si se retoma el tema.
+      - El ícono `Sparkles` (genérico, placeholder) se reemplazó por
+        `IconoMarca` en los lugares donde de verdad funciona como marca
+        de la plataforma: `encabezado.tsx` (header público),
+        `[slug]/page.tsx` (hero), `registro/page.tsx` e
+        `ingresar/page.tsx` (pantallas de auth), `recibo/[id]/page.tsx`,
+        y la portada del dominio raíz (`(publico)/page.tsx`, que antes
+        era texto solo). Los usos decorativos/de categoría de `Sparkles`
+        (ícono de categoría "uñas" en
+        `seccion-servicios.tsx`/`seccion-equipo.tsx`, paso del tour
+        guiado, estados vacíos, nav de "Servicios", generador de
+        estados) **no cambiaron** — no son la marca, es iconografía de
+        contenido.
       - Verificado con capturas reales (Playwright) del isotipo a varios
-        tamaños, de las dos páginas del sistema de diseño en ambos temas,
-        y de la app real con el mark nuevo en el header público, login y
-        la portada del dominio raíz — build y typecheck limpios,
-        desplegado a producción.
+        tamaños (incluida la comparación de las 4 direcciones a 32px), de
+        la página de marca del sistema de diseño, y de la app real con
+        el mark nuevo en el header público, login y la portada del
+        dominio raíz — build y typecheck limpios, desplegado a
+        producción.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -1334,6 +1353,12 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   - `src/components/campo-con-icono.tsx` — input con ícono a la izquierda,
     compartido entre `modal-reserva.tsx`, `registro/page.tsx` e
     `ingresar/page.tsx`. **No usar en `type="date"`/`type="time"`** (trampa #16).
+  - `src/components/icono-marca.tsx` — el monograma "F" de Florece
+    (componente propio, no un ícono de lucide-react), usado donde el
+    ícono funciona como marca de la plataforma: `encabezado.tsx`,
+    `[slug]/page.tsx`, `registro/page.tsx`, `ingresar/page.tsx`,
+    `recibo/[id]/page.tsx`, `(publico)/page.tsx`. El pétalo va siempre
+    en dorado fijo (no `currentColor`) — ver Progreso, "Marca Florece".
   - `src/lib/formato.ts` — `formateadorPrecio` compartido (`Intl.NumberFormat`
     es-PE / soles, símbolo `S/`). Estaba duplicado igual en 9 archivos; se
     extrajo acá al cambiar de ARS a PEN para no tener que tocar los 9 de
