@@ -9,6 +9,7 @@ export type TipoNegocio =
   | "uñas"
   | "costura"
   | "barberia"
+  | "postres"
   | "spa_completo";
 
 export interface Negocio {
@@ -31,6 +32,8 @@ export interface SesionNegocio {
   estado_cuenta: EstadoCuenta;
   es_admin: boolean;
   nombre_negocio: string;
+  tipo_negocio: TipoNegocio;
+  color_marca: string | null;
 }
 
 export interface CuentaAdmin {
@@ -55,6 +58,7 @@ export type CategoriaServicio =
   | "uñas"
   | "costura"
   | "barberia"
+  | "postres"
   | "otro";
 
 export interface Personal {

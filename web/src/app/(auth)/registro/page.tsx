@@ -26,6 +26,7 @@ const ETIQUETA_TIPO_NEGOCIO: Record<TipoNegocio, string> = {
   cabello: "Peluquería",
   barberia: "Barbería",
   costura: "Costura",
+  postres: "Postres",
   spa_completo: "Spa completo (de todo un poco)",
 };
 

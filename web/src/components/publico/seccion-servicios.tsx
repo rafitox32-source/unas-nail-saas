@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Scissors, Eye, Shirt } from "lucide-react";
+import { Sparkles, Scissors, Eye, Shirt, CakeSlice } from "lucide-react";
 import { IconoPosteBarbero } from "@/components/iconos-barberia";
 import { TarjetaServicio } from "@/components/publico/tarjeta-servicio";
 import { ModalReserva } from "@/components/publico/modal-reserva";
@@ -13,6 +13,7 @@ const ORDEN_CATEGORIAS: CategoriaServicio[] = [
   "pestañas",
   "uñas",
   "costura",
+  "postres",
   "otro",
 ];
 
@@ -22,6 +23,7 @@ const ETIQUETA_CATEGORIA: Record<CategoriaServicio, string> = {
   pestañas: "Pestañas",
   uñas: "Uñas",
   costura: "Costura",
+  postres: "Postres",
   otro: "Otros servicios",
 };
 
@@ -31,6 +33,7 @@ const ICONO_CATEGORIA: Record<CategoriaServicio, React.ComponentType<{ className
   pestañas: Eye,
   uñas: Sparkles,
   costura: Shirt,
+  postres: CakeSlice,
   otro: Sparkles,
 };
 

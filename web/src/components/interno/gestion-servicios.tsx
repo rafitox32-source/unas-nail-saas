@@ -22,6 +22,7 @@ const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
   pestañas: "Pestañas",
   uñas: "Uñas",
   costura: "Costura",
+  postres: "Postres",
   otro: "Otro",
 };
 
@@ -34,7 +35,8 @@ function categoriaSugerida(tipoNegocio: TipoNegocio): CategoriaServicio {
     tipoNegocio === "barberia" ||
     tipoNegocio === "pestañas" ||
     tipoNegocio === "uñas" ||
-    tipoNegocio === "costura"
+    tipoNegocio === "costura" ||
+    tipoNegocio === "postres"
   ) {
     return tipoNegocio;
   }

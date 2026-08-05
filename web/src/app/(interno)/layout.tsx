@@ -64,7 +64,7 @@ export default async function LayoutInterno({
 
   const { data: cuenta } = await supabase
     .from("usuarios_negocios")
-    .select("estado_cuenta, es_admin, nombre_negocio")
+    .select("estado_cuenta, es_admin, nombre_negocio, tipo_negocio, color_marca")
     .eq("id", usuario.id)
     .maybeSingle<SesionNegocio>();
 
@@ -103,10 +103,20 @@ export default async function LayoutInterno({
     );
   }
 
+  // Mismo mecanismo que la carta pública (ver [slug]/page.tsx): pisar
+  // --color-rosado hereda el tema a todo el panel (nav, botones, links) sin
+  // tocar componente por componente. `color_marca` de la dueña siempre
+  // gana; el rojo de barbería es solo el punto de partida si no eligió uno.
+  const colorAcento =
+    cuenta?.color_marca ?? (cuenta?.tipo_negocio === "barberia" ? "#9c2b2b" : null);
+
   return (
-    <>
+    <div
+      className="contents"
+      style={colorAcento ? ({ "--color-rosado": colorAcento } as React.CSSProperties) : undefined}
+    >
       <NavInterno idNegocio={usuario.id} nombreNegocio={cuenta?.nombre_negocio} />
       {children}
-    </>
+    </div>
   );
 }

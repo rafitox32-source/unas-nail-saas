@@ -1,4 +1,4 @@
-import { Sparkles, Scissors, Eye, Shirt, User } from "lucide-react";
+import { Sparkles, Scissors, Eye, Shirt, CakeSlice, User } from "lucide-react";
 import { IconoPosteBarbero } from "@/components/iconos-barberia";
 import type { Personal, CategoriaServicio } from "@/lib/tipos";
 
@@ -8,6 +8,7 @@ const ETIQUETA_CATEGORIA: Record<CategoriaServicio, string> = {
   pestañas: "Pestañas",
   uñas: "Uñas",
   costura: "Costura",
+  postres: "Postres",
   otro: "Otro",
 };
 
@@ -17,6 +18,7 @@ const ICONO_CATEGORIA: Record<CategoriaServicio, React.ComponentType<{ className
   pestañas: Eye,
   uñas: Sparkles,
   costura: Shirt,
+  postres: CakeSlice,
   otro: Sparkles,
 };
 

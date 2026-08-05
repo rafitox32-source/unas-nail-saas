@@ -20,6 +20,7 @@ const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
   pestañas: "Pestañas",
   uñas: "Uñas",
   costura: "Costura",
+  postres: "Postres",
   otro: "Otro",
 };
 
