@@ -1044,6 +1044,43 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         reales que ya estaban en producción) confirmadas sin ningún
         cambio de comportamiento tras la migración. Cuentas y sesiones
         de prueba borradas después (`delete from auth.users`, cascada).
+- [x] **Kit de ventas para el equipo comercial (PDF, 30 páginas)**, a
+      pedido puntual del dueño — no es documentación de uso como el
+      manual de arriba, es material de venta: pitch, 9 buyer personas
+      por rubro, recorrido del producto con capturas reales, tabla
+      comparativa vs. cuaderno/WhatsApp/plataformas caras, la tabla de
+      precio real (**S/100/mes + S/50/año de mantenimiento**, confirmada
+      por el dueño para este documento), cómo funciona la prueba de 7
+      días, objeciones comunes con respuesta lista, guiones de venta
+      completos (WhatsApp, en persona, demo, cierre), y estrategias de
+      marketing digital (contenido en redes, prospección activa,
+      alianzas con distribuidoras, plantillas de mensajes). **La
+      comisión de los vendedores quedó deliberadamente afuera** — el
+      dueño todavía no la definió, y el documento se lo dice explícito
+      al vendedor en vez de inventar un número.
+      - `C:\Users\BLACK HOUSE\Desktop\uñas\Kit de Ventas Florece.pdf`
+        (raíz del proyecto, mismo `.gitignore` de `*.pdf` que el manual
+        de uso — no es código fuente). Generado con el mismo método
+        (HTML + Playwright `page.pdf()`, sin librería de PDF), pero con
+        una plantilla y paleta de componentes propia (`plantilla-
+        ventas.html`, scratch) distinta a la del manual — es material
+        de venta, no una guía paso a paso: tarjetas de objeción/
+        respuesta, guiones estilo diálogo, tabla comparativa, checklist
+        del proceso de venta, callouts de precio grandes. Reutiliza
+        íntegramente las capturas de pantalla ya tomadas para el manual
+        v4 y para las features de esta sesión (cola de espera, nota de
+        odontología, pantalla de prueba vencida) — no hizo falta volver
+        a capturar nada.
+      - Verificado página por página con Playwright antes de darlo por
+        terminado (no solo generado y asumido): portada, índice,
+        recorrido del producto, comparativa, precio, objeciones, guion
+        y contraportada revisados uno por uno. Encontrado y corregido
+        un desfasaje real de numeración en el índice (las páginas
+        separadoras de cada Parte —portadillas— corren el número de
+        página real, pero el índice se había escrito antes de contar
+        esas portadillas) — mismo tipo de trampa que ya pasó con el
+        manual, la lección de "recalcular todos los `pie()` al cambiar
+        la estructura" aplica también acá.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
