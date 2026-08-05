@@ -19,7 +19,7 @@ export default async function PaginaAgenda() {
   const { data: citas } = await supabase
     .from("citas_apartados")
     .select(
-      "id, fecha_hora_inicio, estado_cita, monto_total, monto_seña_pagado, monto_restante, id_empleado, metodo_pago, clientas(nombre_completo, telefono), servicios(nombre), personal(nombre)",
+      "id, fecha_hora_inicio, estado_cita, monto_total, monto_seña_pagado, monto_restante, id_empleado, metodo_pago, notas_clienta, clientas(nombre_completo, telefono), servicios(nombre), personal(nombre)",
     )
     .eq("id_negocio", usuario!.id)
     .order("fecha_hora_inicio", { ascending: true })

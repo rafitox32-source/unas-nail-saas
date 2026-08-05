@@ -15,6 +15,8 @@ interface ValoresFormulario {
   categoria: CategoriaServicio;
   id_empleado: string;
   url_foto: string;
+  dias_para_retoque: string;
+  es_por_encargo: boolean;
 }
 
 const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
@@ -47,7 +49,7 @@ function categoriaSugerida(tipoNegocio: TipoNegocio): CategoriaServicio {
 }
 
 const columnas =
-  "id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, url_foto, activo";
+  "id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, url_foto, dias_para_retoque, es_por_encargo, activo";
 
 export function GestionServicios({
   idNegocio,
@@ -69,6 +71,8 @@ export function GestionServicios({
     categoria: categoriaSugerida(tipoNegocio),
     id_empleado: "",
     url_foto: "",
+    dias_para_retoque: "",
+    es_por_encargo: false,
   };
   const [servicios, setServicios] = useState(serviciosIniciales);
   const [formularioAbierto, setFormularioAbierto] = useState(false);
@@ -97,6 +101,8 @@ export function GestionServicios({
       categoria: servicio.categoria,
       id_empleado: servicio.id_empleado ?? "",
       url_foto: servicio.url_foto ?? "",
+      dias_para_retoque: servicio.dias_para_retoque ? String(servicio.dias_para_retoque) : "",
+      es_por_encargo: servicio.es_por_encargo,
     });
     setFormularioAbierto(true);
     setError(null);
@@ -138,6 +144,8 @@ export function GestionServicios({
       categoria: valores.categoria,
       id_empleado: valores.id_empleado || null,
       url_foto: valores.url_foto || null,
+      dias_para_retoque: valores.dias_para_retoque ? Number(valores.dias_para_retoque) : null,
+      es_por_encargo: valores.es_por_encargo,
     };
 
     if (editandoId) {
@@ -344,6 +352,39 @@ export function GestionServicios({
             )}
           </div>
 
+          <div className="flex flex-col gap-3 rounded-xl border border-borde bg-fondo p-4">
+            <label className="flex items-start gap-2 text-sm text-texto-secundario">
+              <input
+                type="checkbox"
+                checked={valores.es_por_encargo}
+                onChange={(e) => setValores({ ...valores, es_por_encargo: e.target.checked })}
+                className="mt-0.5 h-4 w-4 accent-rosado"
+              />
+              <span>
+                <span className="font-semibold text-texto-primario">Es por encargo</span>
+                <br />
+                La clienta elige una fecha de entrega en vez de un horario — pensado para
+                pedidos (costura, postres) donde podés tomar varios el mismo día, no un turno
+                exclusivo.
+              </span>
+            </label>
+
+            <label className="text-sm text-texto-secundario">
+              Sugerir retoque después de (días, opcional)
+              <input
+                type="number"
+                min={1}
+                value={valores.dias_para_retoque}
+                onChange={(e) => setValores({ ...valores, dias_para_retoque: e.target.value })}
+                placeholder="Ej: 21 para pestañas, 15 para semipermanente"
+                className="mt-1 w-full rounded-xl border border-borde bg-superficie px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+              />
+              <span className="mt-1 block text-xs text-texto-secundario">
+                Se muestra como aviso en la ficha de la clienta después de la última visita.
+              </span>
+            </label>
+          </div>
+
           {error && <p className="text-sm text-alerta">{error}</p>}
 
           <div className="flex items-center gap-3">
@@ -397,10 +438,17 @@ export function GestionServicios({
                       Inactivo
                     </span>
                   )}
+                  {servicio.es_por_encargo && (
+                    <span className="ml-2 rounded-full bg-dorado-suave px-2 py-0.5 text-[11px] font-semibold text-dorado">
+                      Por encargo
+                    </span>
+                  )}
                 </p>
                 <p className="text-sm text-texto-secundario">
-                  {formateadorPrecio.format(servicio.precio)} · {servicio.duracion_minutos} min
+                  {formateadorPrecio.format(servicio.precio)}
+                  {!servicio.es_por_encargo && ` · ${servicio.duracion_minutos} min`}
                   {servicio.monto_seña > 0 && ` · Abono ${formateadorPrecio.format(servicio.monto_seña)}`}
+                  {servicio.dias_para_retoque && ` · Retoque a los ${servicio.dias_para_retoque}d`}
                   {personal.length > 0 &&
                     ` · ${
                       personal.find((p) => p.id === servicio.id_empleado)?.nombre ?? "Sin asignar"

@@ -38,7 +38,7 @@ export default async function PaginaClienta({
 
   const { data: historial } = await supabase
     .from("citas_apartados")
-    .select("id, fecha_hora_inicio, estado_cita, monto_total, servicios(nombre)")
+    .select("id, fecha_hora_inicio, estado_cita, monto_total, servicios(nombre, dias_para_retoque)")
     .eq("id_clienta", id)
     .order("fecha_hora_inicio", { ascending: false })
     .returns<CitaHistorial[]>();

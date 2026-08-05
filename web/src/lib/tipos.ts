@@ -81,6 +81,8 @@ export interface Servicio {
   categoria: CategoriaServicio;
   id_empleado: string | null;
   url_foto: string | null;
+  dias_para_retoque: number | null;
+  es_por_encargo: boolean;
 }
 
 export interface ServicioAdmin extends Servicio {
@@ -118,6 +120,7 @@ export interface CitaAgenda {
   monto_restante: number;
   id_empleado: string | null;
   metodo_pago: MetodoPago | null;
+  notas_clienta: string | null;
   clientas: { nombre_completo: string; telefono: string | null } | null;
   servicios: { nombre: string } | null;
   personal: { nombre: string } | null;
@@ -140,7 +143,7 @@ export interface CitaHistorial {
   fecha_hora_inicio: string;
   estado_cita: EstadoCita;
   monto_total: number;
-  servicios: { nombre: string } | null;
+  servicios: { nombre: string; dias_para_retoque: number | null } | null;
 }
 
 export interface CitaReporte {

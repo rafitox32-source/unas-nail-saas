@@ -14,6 +14,7 @@ import {
   CalendarX,
   Loader2,
   Download,
+  MessageSquareText,
 } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { formateadorPrecio } from "@/lib/formato";
@@ -99,7 +100,7 @@ export function GestionAgenda({
   function exportar() {
     descargarCSV(
       "agenda.csv",
-      ["Clienta", "Teléfono", "Servicio", "Fecha y hora", "Estado", "Total", "Pagado", "Método de pago"],
+      ["Clienta", "Teléfono", "Servicio", "Fecha y hora", "Estado", "Total", "Pagado", "Método de pago", "Notas"],
       citas.map((c) => [
         c.clientas?.nombre_completo ?? "",
         c.clientas?.telefono ?? "",
@@ -109,6 +110,7 @@ export function GestionAgenda({
         c.monto_total,
         c.monto_seña_pagado,
         c.metodo_pago ? ETIQUETA_METODO_PAGO[c.metodo_pago] : "",
+        c.notas_clienta ?? "",
       ]),
     );
   }
@@ -185,6 +187,12 @@ export function GestionAgenda({
                   <p className="mt-1 text-sm text-texto-secundario">
                     {formateadorFecha.format(new Date(cita.fecha_hora_inicio))}
                   </p>
+                  {cita.notas_clienta && (
+                    <p className="mt-1.5 flex items-start gap-1 rounded-lg bg-dorado-suave px-2.5 py-1.5 text-xs text-texto-primario">
+                      <MessageSquareText className="mt-0.5 h-3 w-3 shrink-0 text-dorado" />
+                      {cita.notas_clienta}
+                    </p>
+                  )}
                 </div>
                 <span
                   className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${ESTILO_INSIGNIA[cita.estado_cita]}`}

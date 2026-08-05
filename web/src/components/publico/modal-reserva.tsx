@@ -1,7 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, User, Phone, Tag, Loader2, CheckCircle2, MessageCircle, Clock, Info, Wallet } from "lucide-react";
+import {
+  X,
+  User,
+  Phone,
+  Tag,
+  Loader2,
+  CheckCircle2,
+  MessageCircle,
+  Clock,
+  Info,
+  Wallet,
+  MessageSquareText,
+  Package,
+} from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { CampoConIcono } from "@/components/campo-con-icono";
 import { CalendarioDisponibilidad } from "@/components/publico/calendario-disponibilidad";
@@ -27,8 +40,10 @@ export function ModalReserva({
   politicaCancelacion: string | null;
   alCerrar: () => void;
 }) {
+  const esPorEncargo = servicio.es_por_encargo;
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [notasClienta, setNotasClienta] = useState("");
   const [metodoPago, setMetodoPago] = useState<MetodoPago | "">("");
   const [fecha, setFecha] = useState(hoyISO());
   const [hora, setHora] = useState("");
@@ -53,7 +68,7 @@ export function ModalReserva({
   } | null>(null);
 
   useEffect(() => {
-    if (!fecha) return;
+    if (!fecha || esPorEncargo) return;
     let cancelado = false;
     const supabase = crearClienteNavegador();
     setCargandoHorarios(true);
@@ -132,7 +147,7 @@ export function ModalReserva({
     evento.preventDefault();
     setError(null);
 
-    if (!hora) {
+    if (!esPorEncargo && !hora) {
       irAError("hora", "Te faltó elegir un horario — mirá arriba ↑");
       return;
     }
@@ -142,7 +157,9 @@ export function ModalReserva({
       return;
     }
 
-    const fechaHoraInicio = new Date(`${fecha}T${hora}:00`);
+    const fechaHoraInicio = esPorEncargo
+      ? new Date(`${fecha}T12:00:00`)
+      : new Date(`${fecha}T${hora}:00`);
     setEnviando(true);
 
     const supabase = crearClienteNavegador();
@@ -155,6 +172,7 @@ export function ModalReserva({
         p_fecha_hora_inicio: fechaHoraInicio.toISOString(),
         p_codigo_promocional: codigoPromocional.trim() || null,
         p_metodo_pago: metodoPago,
+        p_notas_clienta: notasClienta.trim() || null,
       })
       .single();
 
@@ -297,71 +315,115 @@ export function ModalReserva({
                       onChange={(e) => setTelefono(e.target.value)}
                     />
                   </label>
+                  <label className="text-sm text-texto-secundario">
+                    <span className="flex items-center gap-1.5">
+                      <MessageSquareText className="h-3.5 w-3.5" /> Notas para el negocio (opcional)
+                    </span>
+                    <textarea
+                      value={notasClienta}
+                      onChange={(e) => setNotasClienta(e.target.value)}
+                      placeholder={
+                        esPorEncargo
+                          ? "Talla, sabor, diseño de referencia, etc."
+                          : "Algo que quieras avisar antes de tu cita"
+                      }
+                      rows={2}
+                      className="mt-1 w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-sm text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+                    />
+                  </label>
                 </div>
               </div>
 
-              <div>
-                <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
-                    2
-                  </span>
-                  Elegí el día
-                </p>
-                <div className="mt-2 rounded-xl border border-borde bg-fondo p-3 pl-3">
-                  <CalendarioDisponibilidad
-                    idNegocio={idNegocio}
-                    idEmpleado={servicio.id_empleado}
-                    duracionMinutos={servicio.duracion_minutos}
-                    fechaSeleccionada={fecha}
-                    onSeleccionar={setFecha}
-                  />
+              {esPorEncargo ? (
+                <div>
+                  <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
+                      2
+                    </span>
+                    <Package className="h-3.5 w-3.5 text-texto-secundario" /> ¿Para cuándo lo
+                    necesitás?
+                  </p>
+                  <div className="mt-2 pl-7">
+                    <input
+                      required
+                      type="date"
+                      min={hoyISO()}
+                      value={fecha}
+                      onChange={(e) => setFecha(e.target.value)}
+                      className="w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
+                    />
+                    <p className="mt-1.5 text-xs text-texto-secundario">
+                      Es un pedido por encargo — coordinamos el horario exacto de entrega por
+                      WhatsApp.
+                    </p>
+                  </div>
                 </div>
-              </div>
-
-              <div
-                ref={refHorario}
-                className={`rounded-xl transition-shadow ${
-                  seccionConError === "hora" ? "animar-aparecer ring-2 ring-alerta ring-offset-2" : ""
-                }`}
-              >
-                <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
-                    3
-                  </span>
-                  <Clock className="h-3.5 w-3.5 text-texto-secundario" /> Elegí el horario
-                </p>
-                <div className="pl-7">
-                  {cargandoHorarios ? (
-                    <p className="mt-2 flex items-center gap-1.5 text-xs text-texto-secundario">
-                      <Loader2 className="h-3 w-3 animate-spin" /> Consultando disponibilidad…
+              ) : (
+                <>
+                  <div>
+                    <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
+                        2
+                      </span>
+                      Elegí el día
                     </p>
-                  ) : horariosDisponibles.length === 0 ? (
-                    <p className="mt-2 text-xs text-alerta">
-                      No quedan turnos disponibles ese día, probá con otra fecha.
-                    </p>
-                  ) : (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {horariosDisponibles.map((horaDisponible) => (
-                        <button
-                          key={horaDisponible}
-                          type="button"
-                          onClick={() => {
-                            setHora(horaDisponible);
-                            setSeccionConError(null);
-                          }}
-                          className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-                            hora === horaDisponible
-                              ? "border-rosado bg-rosado text-white"
-                              : "border-borde bg-fondo text-texto-primario hover:border-rosado"
-                          }`}
-                        >
-                          {horaDisponible}
-                        </button>
-                      ))}
+                    <div className="mt-2 rounded-xl border border-borde bg-fondo p-3 pl-3">
+                      <CalendarioDisponibilidad
+                        idNegocio={idNegocio}
+                        idEmpleado={servicio.id_empleado}
+                        duracionMinutos={servicio.duracion_minutos}
+                        fechaSeleccionada={fecha}
+                        onSeleccionar={setFecha}
+                      />
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+
+                  <div
+                    ref={refHorario}
+                    className={`rounded-xl transition-shadow ${
+                      seccionConError === "hora" ? "animar-aparecer ring-2 ring-alerta ring-offset-2" : ""
+                    }`}
+                  >
+                    <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
+                        3
+                      </span>
+                      <Clock className="h-3.5 w-3.5 text-texto-secundario" /> Elegí el horario
+                    </p>
+                    <div className="pl-7">
+                      {cargandoHorarios ? (
+                        <p className="mt-2 flex items-center gap-1.5 text-xs text-texto-secundario">
+                          <Loader2 className="h-3 w-3 animate-spin" /> Consultando disponibilidad…
+                        </p>
+                      ) : horariosDisponibles.length === 0 ? (
+                        <p className="mt-2 text-xs text-alerta">
+                          No quedan turnos disponibles ese día, probá con otra fecha.
+                        </p>
+                      ) : (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {horariosDisponibles.map((horaDisponible) => (
+                            <button
+                              key={horaDisponible}
+                              type="button"
+                              onClick={() => {
+                                setHora(horaDisponible);
+                                setSeccionConError(null);
+                              }}
+                              className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+                                hora === horaDisponible
+                                  ? "border-rosado bg-rosado text-white"
+                                  : "border-borde bg-fondo text-texto-primario hover:border-rosado"
+                              }`}
+                            >
+                              {horaDisponible}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div
                 ref={refMetodoPago}
@@ -371,7 +433,7 @@ export function ModalReserva({
               >
                 <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
-                    4
+                    {esPorEncargo ? 3 : 4}
                   </span>
                   <Wallet className="h-3.5 w-3.5 text-texto-secundario" /> ¿Cómo vas a pagar?
                 </p>

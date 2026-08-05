@@ -1,4 +1,4 @@
-import { Sparkles, Clock, User } from "lucide-react";
+import { Sparkles, Clock, User, Package } from "lucide-react";
 import { formateadorPrecio } from "@/lib/formato";
 import type { Servicio } from "@/lib/tipos";
 
@@ -53,8 +53,17 @@ export function TarjetaServicio({
             {formateadorPrecio.format(servicio.precio)}
           </span>
           <span className="flex shrink-0 items-center gap-1 text-xs text-texto-secundario">
-            <Clock className="h-3.5 w-3.5" />
-            {servicio.duracion_minutos} min
+            {servicio.es_por_encargo ? (
+              <>
+                <Package className="h-3.5 w-3.5" />
+                Por encargo
+              </>
+            ) : (
+              <>
+                <Clock className="h-3.5 w-3.5" />
+                {servicio.duracion_minutos} min
+              </>
+            )}
           </span>
         </div>
         <button

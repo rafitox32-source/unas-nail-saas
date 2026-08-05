@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TrendingUp, Loader2, CheckCircle2, CalendarClock, Gift } from "lucide-react";
+import { TrendingUp, Loader2, CheckCircle2, CalendarClock, Gift, BellRing } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { NotaVisita } from "@/components/interno/nota-visita";
 import { formateadorPrecio } from "@/lib/formato";
@@ -67,6 +67,21 @@ export function FichaClienta({
       : 0;
   const visitasEnCicloActual = objetivo > 0 ? clienta.visitas_completadas % objetivo : 0;
 
+  // Retoque sugerido: última visita completada cuyo servicio tiene un ciclo
+  // de mantenimiento cargado (pestañas, semipermanente, color, etc.) — el
+  // historial ya viene ordenado del más nuevo al más viejo.
+  const ultimaConRetoque = historial.find(
+    (c) => c.estado_cita === "completada" && c.servicios?.dias_para_retoque,
+  );
+  const fechaRetoqueSugerido =
+    ultimaConRetoque?.servicios?.dias_para_retoque
+      ? new Date(
+          new Date(ultimaConRetoque.fecha_hora_inicio).getTime() +
+            ultimaConRetoque.servicios.dias_para_retoque * 86400000,
+        )
+      : null;
+  const retoqueVencido = fechaRetoqueSugerido ? fechaRetoqueSugerido < new Date() : false;
+
   async function canjearPremio() {
     setCanjeando(true);
     const supabase = crearClienteNavegador();
@@ -84,6 +99,23 @@ export function FichaClienta({
         {clienta.nombre_completo}
       </h1>
       <p className="text-sm text-texto-secundario">{clienta.telefono}</p>
+
+      {fechaRetoqueSugerido && (
+        <div
+          className={`mt-4 flex items-start gap-2 rounded-2xl border p-4 text-sm ${
+            retoqueVencido
+              ? "border-alerta/30 bg-alerta-suave text-alerta"
+              : "border-dorado/30 bg-dorado-suave text-texto-primario"
+          }`}
+        >
+          <BellRing className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            <strong>{retoqueVencido ? "Retoque atrasado" : "Retoque sugerido"}</strong> de{" "}
+            {ultimaConRetoque?.servicios?.nombre} —{" "}
+            {formateadorFecha.format(fechaRetoqueSugerido)}
+          </span>
+        </div>
+      )}
 
       <div className="mt-4 rounded-2xl border border-borde bg-superficie p-5 shadow-sm">
         <p className="flex items-center gap-1.5 text-sm text-texto-secundario">
