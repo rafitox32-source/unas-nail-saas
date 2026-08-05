@@ -689,6 +689,49 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
       select) para encontrar todos los lugares que arman el tipo
       `Negocio` completo antes de dar por terminada una columna nueva.
       0 violaciones axe-core en la carta pública con la sección nueva.
+- [x] **Calendario visual para bloquear horarios** (reemplaza el
+      formulario anterior de `gestion-bloqueos.tsx`, que pedía la fecha
+      en un input de texto sin contexto): ahora es un calendario
+      mensual navegable (mismo patrón que `calendario-disponibilidad.tsx`,
+      el público) — tocás el día directo. Días bloqueados enteros se ven
+      en gris; un horario puntual bloqueado (no todo el día) se marca
+      con un punto dorado/alerta. Tocar un día abre un panel con los
+      bloqueos que ya tiene ese día (cada uno con su botón de borrar), un
+      botón de un toque "Bloquear todo el día", y "Bloquear un horario
+      puntual" para cargar un rango de horas con motivo/empleada
+      opcional sin volver a elegir fecha (ya está fijada por el día
+      tocado). Mismas RPCs/tabla `bloqueos_agenda` de siempre, sin
+      cambios de esquema.
+      - **Token de color nuevo** `--color-bloqueado`/
+        `--color-bloqueado-texto` (gris neutro, no cálido como el resto
+        de la paleta — el pedido explícito era "gris" para que un día
+        bloqueado se lea claramente distinto de cualquier acento de
+        marca), definido en los tres lugares de siempre
+        (`:root`, `@media (prefers-color-scheme: dark)`, `[data-theme=
+        "dark"]`) + registrado en `@theme inline`. Contraste verificado
+        con la fórmula de luminancia WCAG: 5.13:1 en los dos modos.
+        **No se usaron las clases `dark:` de Tailwind** — este proyecto
+        no tiene el variant `dark` configurado contra `[data-theme]`
+        (no hay `@custom-variant` en `globals.css`), solo contra
+        `prefers-color-scheme` del sistema operativo vía el `@media`
+        nativo de Tailwind v4. Usar `dark:bg-gray-700` habría quedado
+        atado a la preferencia del sistema operativo en vez del toggle
+        manual de tema del panel — se probó, se vio el bug (el gris no
+        cambiaba al togglear tema a mano), y se corrigió con un token
+        propio antes de dar la feature por terminada.
+      - **Bug real de contraste encontrado de paso con axe-core**, no
+        relacionado al calendario: las pestañas de filtro por empleada
+        en `gestion-agenda.tsx` ("Todas"/nombre de cada una) fallaban
+        4.35:1 contra el 4.5:1 requerido en modo claro
+        (`text-texto-secundario` sobre `bg-borde/50`). Corregido
+        cambiando el texto del estado inactivo a `text-texto-primario`
+        (11.67:1, de sobra). Preexistente de la Fase 1 de spa
+        multi-servicio, no algo que rompiera esta sesión.
+      - Verificado de punta a punta con Playwright: bloquear un día
+        completo (aparece gris en el calendario), bloquear un horario
+        puntual con motivo (aparece el punto, el panel del día lista
+        ambos bloqueos), borrar bloqueos. 0 violaciones axe-core en
+        `/panel/agenda` con el calendario abierto, claro y oscuro.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
