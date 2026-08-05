@@ -655,6 +655,40 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         el mark nuevo en el header público, login y la portada del
         dominio raíz — build y typecheck limpios, desplegado a
         producción.
+- [x] **"Seña" → "Abono" en todo el copy visible**: "seña" es un término
+      argentino que no se usa en Perú (mercado real, moneda en soles) —
+      el dueño lo marcó porque sus clientas no lo iban a reconocer.
+      Cambiado en la insignia de servicio, el estado de agenda ("Pendiente
+      de abono"/"Confirmar abono"), el mensaje de WhatsApp post-reserva,
+      el tour guiado y Términos y condiciones. **Los identificadores
+      internos no se tocaron a propósito** (`monto_seña`,
+      `monto_seña_pagado`, `pendiente_seña` — columnas de la base y tipos
+      TS): son invisibles para la clienta y renombrarlos tiene el mismo
+      riesgo que ya costó caro en el rename manicurista→negocio (trampa
+      #32), sin ningún beneficio visible para nadie.
+- [x] **Redes sociales en la carta pública**: `usuarios_negocios` ganó
+      `url_instagram`/`url_tiktok`/`url_facebook` (las tres opcionales),
+      editables desde "Mi negocio" — acepta `@usuario` o URL completa
+      (`src/lib/redes-sociales.ts` normaliza cualquiera de las dos a un
+      link real). Se muestran en el footer de la carta pública con
+      "¡Seguinos en redes!", solo los íconos de las redes que la dueña
+      cargó (mismo patrón de auto-ocultado que reseñas/equipo). El QR
+      del generador de estados ya apunta a esa página, así que las
+      clientas las ven apenas escanean sin tocar ese componente.
+      `src/components/iconos-redes.tsx` — Instagram y Facebook hechos a
+      mano (lucide-react no trae íconos de marcas), TikTok usa el ícono
+      de nota musical de lucide con label de texto. `CampoConIcono` se
+      generalizó para aceptar cualquier componente de ícono, no solo
+      `LucideIcon`. **Bug real encontrado al verificar** (no leyendo el
+      código): `panel/page.tsx` tenía una lista explícita de columnas
+      para "Mi negocio" que no incluía las 3 nuevas — el formulario
+      guardaba bien pero mostraba los campos vacíos al recargar la
+      página. Mismo patrón que ya pasó antes con selects explícitos que
+      quedan desincronizados de un `alter table add column` — conviene
+      grepear `nombre_negocio, nombre_completo` (u otro fragmento del
+      select) para encontrar todos los lugares que arman el tipo
+      `Negocio` completo antes de dar por terminada una columna nueva.
+      0 violaciones axe-core en la carta pública con la sección nueva.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
