@@ -781,6 +781,45 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         mismo patrón simple que costura — categoría más, sin tema visual
         propio (a diferencia de barbería). Ícono `CakeSlice` de
         lucide-react.
+- [x] **Método de pago (Yape/Plin/Efectivo) en la reserva**: la clienta
+      elige cómo va a pagar el abono al reservar — no es un gateway de
+      pago real (la plataforma sigue sin procesar pagos en línea, ver
+      `/terminos`), es metadata que le dice a la dueña qué esperar.
+      `citas_apartados.metodo_pago` (nullable), `crear_apartado` ganó
+      `p_metodo_pago` (cambio de firma real → drop + create explícito,
+      grants reaplicados a mano, mismo criterio que trampa #12/#32).
+      `src/lib/metodo-pago.ts` centraliza etiqueta/ícono/clases,
+      compartido entre el modal de reserva, la agenda y el recibo.
+      Tokens nuevos `--color-yape`/`--color-plin` (+ "-suave") — no hay
+      violeta ni turquesa en el resto de la paleta; efectivo reusa
+      `--color-exito`. Visible como insignia en la agenda, en el CSV
+      exportado, y como "Pagado con X" en el recibo (el registro de
+      "orden ya pagada" que ya existía).
+      - **Bug real de producción encontrado en caliente, minutos
+        después de este deploy**: el dueño reportó "no me sale nada" al
+        intentar reservar. Los logs de Postgres estaban limpios (nada
+        llegaba a fallar ahí) — el problema era que el método de pago
+        es obligatorio, y si faltaba elegirlo el único indicio era un
+        renglón de texto chico arriba del botón de confirmar, sin
+        scroll ni resaltado. En un celular real, con el foco puesto en
+        el botón, pasaba completamente desapercibido — se sentía como
+        que "no pasaba nada". Reproducido en producción con Playwright
+        contra la URL real (no localhost) antes de dar el diagnóstico
+        por confirmado.
+      - **Fix, en la misma pasada** (respondiendo también al pedido de
+        que el flujo sea "más detallado" porque a los clientes les
+        cuesta): pasos numerados (1 Tus datos, 2 Elegí el día, 3 Elegí
+        el horario, 4 Cómo vas a pagar) en `modal-reserva.tsx`; si falta
+        el horario o el método de pago, scroll suave hasta esa sección
+        + anillo rojo de resaltado (se limpia solo al completarla) + el
+        mensaje de error pasa a ser un cartel naranja con ícono en vez
+        de una línea de texto suelta. Mismo patrón sirve para cualquier
+        campo obligatorio no-nativo que se agregue después (no depender
+        de un solo texto chico cerca del submit para avisar qué falta).
+      - De paso se corrigió un bug preexistente menor: el botón "Enviar
+        comprobante por WhatsApp" aparecía incluso cuando el servicio no
+        requería abono (nada que adjuntar) — ahora el CTA y su texto se
+        adaptan según si de verdad hay algo que confirmar.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
