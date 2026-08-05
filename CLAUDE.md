@@ -765,6 +765,22 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         captura real del hero/header/footer en claro y oscuro, 0
         violaciones axe-core en los dos. Selector "¿A qué te dedicás?"
         del registro muestra Barbería y Costura.
+      - **Extendido al panel interno en una pasada posterior** (a pedido
+        del dueño — "todo", respondiendo a si el tema debía llegar
+        también al back-office): mismo mecanismo de pisar
+        `--color-rosado`, esta vez en `(interno)/layout.tsx`, envolviendo
+        `<NavInterno/>{children}` en un `<div className="contents"
+        style={...}>` — `contents` lo saca de la caja del `flex` de
+        `<body>` (no rompe el layout de nav+main como hermanos) pero
+        una variable CSS personalizada igual se hereda por DOM, no por
+        caja, así que el color llega a todo el panel (nav, botones,
+        gráfico de ingresos, "Copiar", etc.) sin tocarlos uno por uno.
+        `SesionNegocio` ganó `tipo_negocio`/`color_marca`, que faltaban
+        (el layout solo pedía `estado_cuenta, es_admin, nombre_negocio`).
+      - **Postres agregado de paso** ("agregas algo de postres también"):
+        mismo patrón simple que costura — categoría más, sin tema visual
+        propio (a diferencia de barbería). Ícono `CakeSlice` de
+        lucide-react.
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -1393,15 +1409,17 @@ array `paginas`, actualizar el índice (página 2) y el `TOTAL_PAGINAS`.
   — pueden ser distintos). Ver trampa #23 y la entrada de Progreso sobre
   login sin email.
 - **`usuarios_negocios.tipo_negocio`**: `cabello`/`pestañas`/`uñas`/
-  `costura`/`barberia`/`spa_completo`, default `'uñas'`, declarado al
-  registrarse (ver Progreso "Spa multi-servicio, Fase 3" y "Rubros
-  nuevos: costura y barbería"). Informativo para el resto de las
-  cuentas — no restringe categorías de servicio, solo sugiere la
+  `costura`/`barberia`/`postres`/`spa_completo`, default `'uñas'`,
+  declarado al registrarse (ver Progreso "Spa multi-servicio, Fase 3" y
+  "Rubros nuevos: costura y barbería"). Informativo para el resto de
+  las cuentas — no restringe categorías de servicio, solo sugiere la
   categoría por defecto al cargar el primer servicio
   (`gestion-servicios.tsx`, función `categoriaSugerida()`). **Excepción:
   `'barberia'` sí tiene efecto real** — activa el tema visual propio en
-  `[slug]/page.tsx` (poste de barbero, encabezado en mayúsculas, marca
-  de agua de bigotes, color de acento por defecto), ver esa entrada de
+  `[slug]/page.tsx` **y** en `(interno)/layout.tsx` (poste de barbero,
+  encabezado en mayúsculas, marca de agua de bigotes, color de acento
+  por defecto — en el panel llega vía un wrapper `display:contents`
+  que hereda `--color-rosado` sin romper el layout), ver esa entrada de
   Progreso. `servicios.categoria`/`personal.categoria` tienen el mismo
   enum menos `spa_completo`, más `otro`.
 - **Triggers**: `actualizar_marca_de_tiempo` (todas las tablas con
