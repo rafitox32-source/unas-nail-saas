@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AtSign, Lock, Loader2, Flower, MessageCircle } from "lucide-react";
+import { AtSign, Lock, Loader2, MessageCircle } from "lucide-react";
+import { IconoMarca } from "@/components/icono-marca";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { emailInternoDesdeUsuario } from "@/lib/autenticacion";
 import { urlWhatsappSoporte } from "@/lib/soporte";
@@ -47,7 +48,7 @@ export default function PaginaIngresar() {
     <main className="flex flex-1 items-center justify-center px-6 py-16">
       <form onSubmit={alEnviar} className="animar-aparecer w-full max-w-sm">
         <div className="text-center">
-          <Flower className="mx-auto h-7 w-7 text-rosado-texto" strokeWidth={1.5} />
+          <IconoMarca className="mx-auto h-7 w-7 text-rosado-texto" />
           <h1 className="font-titulo mt-2 text-2xl font-semibold text-texto-primario">
             Iniciá sesión
           </h1>

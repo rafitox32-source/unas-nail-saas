@@ -76,6 +76,12 @@
   .tamano { text-align: center; }
   .tamano .etiqueta { margin-top: 10px; font-size: 12px; color: var(--color-texto-secundario); font-family: monospace; }
 
+  /* Descartadas */
+  .descartadas { display: flex; gap: 20px; }
+  .descartada { text-align: center; opacity: 0.75; }
+  .descartada svg { width: 56px; height: 56px; border-radius: 14px; }
+  .descartada .etiqueta { margin-top: 8px; font-size: 11px; color: var(--color-texto-secundario); }
+
   /* Uso sobre fondos */
   .fondos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .fondo-card {
@@ -104,7 +110,7 @@
     border-radius: 14px;
     width: fit-content;
   }
-  .linea-mark svg { color: var(--color-rosado); }
+  .linea-mark svg { width: 22px; height: 22px; color: var(--color-rosado); }
   .linea-mark span { font-family: var(--fuente-titulo); font-weight: 600; font-size: 18px; }
 
   .nota {
@@ -138,13 +144,11 @@
       <svg class="marca-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
         <rect width="512" height="512" rx="112" fill="#935060" />
         <g fill="#ffffff">
-          <ellipse cx="256" cy="156" rx="46" ry="100" />
-          <ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)" />
-          <ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)" />
-          <ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)" />
-          <ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)" />
+          <rect x="176" y="130" width="46" height="252" rx="16" />
+          <rect x="176" y="130" width="164" height="46" rx="16" />
+          <rect x="176" y="234" width="140" height="46" rx="16" />
         </g>
-        <circle cx="256" cy="256" r="32" fill="#B8935A" />
+        <ellipse cx="340" cy="146" rx="34" ry="20" fill="#B8935A" transform="rotate(28 340 146)" />
       </svg>
       <div>
         <p class="nombre-marca">Florece</p>
@@ -152,11 +156,11 @@
       </div>
     </div>
     <p class="nota">
-      Un mónogram floral de 5 pétalos: representa el negocio de la clienta (y el de
-      cada profesional) floreciendo. Pétalos blancos sobre <code>--color-rosado</code>,
-      centro en <code>--color-dorado</code> — los dos acentos que ya sostienen el resto
-      del sistema. Deliberadamente geométrico y simple: se mantiene legible incluso a
-      tamaño de favicon (16–32px), donde un trazo fino desaparece.
+      Monograma: la inicial "F" en trazo geométrico grueso, con un pétalo dorado
+      brotando de la esquina superior — la letra funciona sola como ícono (favicon,
+      PWA, avatar de negocio sin logo propio) y a la vez ancla el wordmark completo.
+      Blanco sobre <code>--color-rosado</code>, pétalo en <code>--color-dorado</code>
+      — los mismos dos acentos que ya sostienen el resto del sistema.
     </p>
   </section>
 
@@ -164,52 +168,58 @@
     <h2>Tamaños de referencia</h2>
     <div class="grilla-tamanos">
       <div class="tamano">
-        <svg width="16" height="16" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <svg width="16" height="16" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><rect x="176" y="130" width="46" height="252" rx="16"/><rect x="176" y="130" width="164" height="46" rx="16"/><rect x="176" y="234" width="140" height="46" rx="16"/></g><ellipse cx="340" cy="146" rx="34" ry="20" fill="#B8935A" transform="rotate(28 340 146)"/></svg>
         <div class="etiqueta">16px</div>
       </div>
       <div class="tamano">
-        <svg width="32" height="32" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <svg width="32" height="32" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><rect x="176" y="130" width="46" height="252" rx="16"/><rect x="176" y="130" width="164" height="46" rx="16"/><rect x="176" y="234" width="140" height="46" rx="16"/></g><ellipse cx="340" cy="146" rx="34" ry="20" fill="#B8935A" transform="rotate(28 340 146)"/></svg>
         <div class="etiqueta">32px</div>
       </div>
       <div class="tamano">
-        <svg width="48" height="48" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <svg width="48" height="48" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><rect x="176" y="130" width="46" height="252" rx="16"/><rect x="176" y="130" width="164" height="46" rx="16"/><rect x="176" y="234" width="140" height="46" rx="16"/></g><ellipse cx="340" cy="146" rx="34" ry="20" fill="#B8935A" transform="rotate(28 340 146)"/></svg>
         <div class="etiqueta">48px</div>
       </div>
       <div class="tamano">
-        <svg width="96" height="96" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <svg width="96" height="96" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><rect x="176" y="130" width="46" height="252" rx="16"/><rect x="176" y="130" width="164" height="46" rx="16"/><rect x="176" y="234" width="140" height="46" rx="16"/></g><ellipse cx="340" cy="146" rx="34" ry="20" fill="#B8935A" transform="rotate(28 340 146)"/></svg>
         <div class="etiqueta">96px</div>
       </div>
       <div class="tamano">
-        <svg width="160" height="160" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <svg width="160" height="160" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><rect x="176" y="130" width="46" height="252" rx="16"/><rect x="176" y="130" width="164" height="46" rx="16"/><rect x="176" y="234" width="140" height="46" rx="16"/></g><ellipse cx="340" cy="146" rx="34" ry="20" fill="#B8935A" transform="rotate(28 340 146)"/></svg>
         <div class="etiqueta">160px</div>
       </div>
     </div>
     <p class="nota">
       Usado como <code>public/icono-app.svg</code> del panel (favicon, ícono de PWA en
       180/192/512px, generados con Python + Pillow) — el respaldo genérico cuando una
-      cuenta todavía no subió su propio logo en "Mi negocio".
+      cuenta todavía no subió su propio logo en "Mi negocio". Se mantiene nítido incluso
+      a 16px, donde un trazo fino desaparecería.
     </p>
   </section>
 
   <section>
     <h2>Marca lineal (uso inline)</h2>
     <div class="linea-mark">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5"/>
-        <path d="M12 7.5V9"/><path d="M7.5 12H9"/><path d="M16.5 12H15"/><path d="M12 16.5V15"/>
-        <path d="m8 8 1.88 1.88"/><path d="M14.12 9.88 16 8"/><path d="m8 16 1.88-1.88"/><path d="M14.12 14.12 16 16"/>
+      <svg viewBox="0 0 512 512">
+        <g fill="currentColor">
+          <rect x="176" y="130" width="46" height="252" rx="16"/>
+          <rect x="176" y="130" width="164" height="46" rx="16"/>
+          <rect x="176" y="234" width="140" height="46" rx="16"/>
+        </g>
+        <ellipse cx="340" cy="146" rx="34" ry="20" fill="#B8935A" transform="rotate(28 340 146)"/>
       </svg>
       <span>Florece</span>
     </div>
     <p class="nota">
-      Ícono <code>Flower</code> de lucide-react (ya instalada en el proyecto, mismo
-      lenguaje visual que el resto de la interfaz) en <code>--color-rosado-texto</code>,
-      sin fondo — reemplaza el genérico <code>Sparkles</code> que se usaba antes como
-      placeholder de marca en el header público, las pantallas de login/registro, el
-      recibo y la portada del dominio raíz. Los usos puramente decorativos de
-      <code>Sparkles</code> (ícono de categoría "uñas", tour guiado, estados vacíos)
-      no cambiaron — no son la marca, son iconografía de contenido.
+      Mismo monograma, componente propio <code>src/components/icono-marca.tsx</code>
+      (no un ícono de lucide-react — es la marca, no iconografía genérica). La "F" toma
+      <code>currentColor</code> (se adapta al color del texto que la rodea, típicamente
+      <code>--color-rosado-texto</code>), pero el pétalo se mantiene siempre en el
+      dorado fijo — sin ese acento de color, a tamaño chico se pierde el detalle que
+      distingue la marca de una simple inicial. Reemplaza el genérico
+      <code>Sparkles</code> que se usaba antes como placeholder en el header público,
+      login/registro, el recibo y la portada del dominio raíz. Los usos puramente
+      decorativos de <code>Sparkles</code> (categoría "uñas", tour guiado, estados
+      vacíos) no cambiaron — no son la marca, son iconografía de contenido.
     </p>
   </section>
 
@@ -217,23 +227,24 @@
     <h2>Sobre distintos fondos</h2>
     <div class="fondos">
       <div class="fondo-card fondo-claro">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#935060" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/><path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5"/>
-          <path d="M12 7.5V9"/><path d="M7.5 12H9"/><path d="M16.5 12H15"/><path d="M12 16.5V15"/>
-          <path d="m8 8 1.88 1.88"/><path d="M14.12 9.88 16 8"/><path d="m8 16 1.88-1.88"/><path d="M14.12 14.12 16 16"/>
+        <svg width="40" height="40" viewBox="0 0 512 512">
+          <g fill="#935060"><rect x="176" y="130" width="46" height="252" rx="16"/><rect x="176" y="130" width="164" height="46" rx="16"/><rect x="176" y="234" width="140" height="46" rx="16"/></g>
+          <ellipse cx="340" cy="146" rx="34" ry="20" fill="#B8935A" transform="rotate(28 340 146)"/>
         </svg>
         <div class="nombre-fondo">--color-fondo</div>
       </div>
       <div class="fondo-card fondo-superficie">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#935060" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/><path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5"/>
-          <path d="M12 7.5V9"/><path d="M7.5 12H9"/><path d="M16.5 12H15"/><path d="M12 16.5V15"/>
-          <path d="m8 8 1.88 1.88"/><path d="M14.12 9.88 16 8"/><path d="m8 16 1.88-1.88"/><path d="M14.12 14.12 16 16"/>
+        <svg width="40" height="40" viewBox="0 0 512 512">
+          <g fill="#935060"><rect x="176" y="130" width="46" height="252" rx="16"/><rect x="176" y="130" width="164" height="46" rx="16"/><rect x="176" y="234" width="140" height="46" rx="16"/></g>
+          <ellipse cx="340" cy="146" rx="34" ry="20" fill="#B8935A" transform="rotate(28 340 146)"/>
         </svg>
         <div class="nombre-fondo">--color-superficie</div>
       </div>
       <div class="fondo-card fondo-rosado">
-        <svg width="40" height="40" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="none"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <svg width="40" height="40" viewBox="0 0 512 512">
+          <g fill="#fff"><rect x="176" y="130" width="46" height="252" rx="16"/><rect x="176" y="130" width="164" height="46" rx="16"/><rect x="176" y="234" width="140" height="46" rx="16"/></g>
+          <ellipse cx="340" cy="146" rx="34" ry="20" fill="#B8935A" transform="rotate(28 340 146)"/>
+        </svg>
         <div class="nombre-fondo">--color-rosado (isotipo completo)</div>
       </div>
     </div>
@@ -241,8 +252,33 @@
       El isotipo con fondo (cuadrado redondeado) solo se usa sobre superficies neutras
       (blanco/fondo) o como ícono independiente (favicon, PWA) — nunca sobre
       <code>--color-rosado</code> sólido, ya que el fondo del propio isotipo es ese
-      mismo tono. La versión lineal (sin fondo) es la que se usa inline, en rosado
-      sobre superficies claras.
+      mismo tono. La versión lineal (sin fondo, "F" en <code>currentColor</code>) es la
+      que se usa inline, sobre superficies claras.
+    </p>
+  </section>
+
+  <section>
+    <h2>Direcciones descartadas</h2>
+    <div class="descartadas">
+      <div class="descartada">
+        <svg viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="156" rx="46" ry="100"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(72 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(144 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(216 256 256)"/><ellipse cx="256" cy="156" rx="46" ry="100" transform="rotate(288 256 256)"/></g><circle cx="256" cy="256" r="32" fill="#B8935A"/></svg>
+        <div class="etiqueta">Flor simétrica<br>(1ª versión, en producción<br>hasta esta pasada)</div>
+      </div>
+      <div class="descartada">
+        <svg viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="#fff"><ellipse cx="256" cy="150" rx="50" ry="108" transform="rotate(-4 256 256)"/><ellipse cx="256" cy="158" rx="42" ry="92" transform="rotate(68 256 256)"/><ellipse cx="256" cy="162" rx="44" ry="96" transform="rotate(146 256 256)"/><ellipse cx="256" cy="156" rx="40" ry="88" transform="rotate(214 256 256)"/><ellipse cx="256" cy="160" rx="46" ry="98" transform="rotate(285 256 256)"/></g><circle cx="262" cy="250" r="30" fill="#B8935A"/></svg>
+        <div class="etiqueta">Flor orgánica —<br>casi idéntica a la<br>anterior a tamaño chico</div>
+      </div>
+      <div class="descartada">
+        <svg viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#935060"/><g fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round"><path d="M256 400 C 256 320, 230 300, 230 240 C 230 190, 256 160, 256 120"/><path d="M256 300 C 256 300, 200 280, 185 240"/><path d="M256 260 C 256 260, 312 245, 330 205"/></g><g fill="#ffffff"><circle cx="256" cy="112" r="20"/><circle cx="222" cy="128" r="16"/><circle cx="290" cy="128" r="16"/></g><circle cx="256" cy="118" r="10" fill="#B8935A"/></svg>
+        <div class="etiqueta">Ramita botánica —<br>más elegante, pero el<br>trazo se pierde a 16–32px</div>
+      </div>
+    </div>
+    <p class="nota">
+      Se probaron 4 direcciones a tamaño real de favicon (32px) antes de elegir el
+      monograma: la flor simétrica y su variante orgánica eran casi indistinguibles
+      entre sí a ese tamaño, y la ramita de trazo fino perdía legibilidad. El
+      monograma fue la única que se sostuvo nítida en todo el rango 16–160px y suma
+      identidad de marca real (la inicial), no solo un ícono decorativo genérico.
     </p>
   </section>
 </body>

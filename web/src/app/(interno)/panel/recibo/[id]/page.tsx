@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { CheckCircle2, MessageCircle, Flower } from "lucide-react";
+import { CheckCircle2, MessageCircle } from "lucide-react";
+import { IconoMarca } from "@/components/icono-marca";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { BotonImprimir } from "@/components/interno/boton-imprimir";
 import { formateadorPrecio } from "@/lib/formato";
@@ -40,7 +41,7 @@ export default async function PaginaRecibo({
     <main className="animar-aparecer mx-auto max-w-md flex-1 px-6 py-10">
       <div className="rounded-2xl border border-borde bg-superficie p-8 shadow-sm print:border-none print:p-0 print:shadow-none">
         <div className="text-center">
-          <Flower className="mx-auto h-6 w-6 text-rosado-texto" strokeWidth={1.5} />
+          <IconoMarca className="mx-auto h-6 w-6 text-rosado-texto" />
           <h1 className="font-titulo mt-2 text-2xl font-semibold text-texto-primario">
             {negocio?.nombre_negocio ?? "Recibo"}
           </h1>

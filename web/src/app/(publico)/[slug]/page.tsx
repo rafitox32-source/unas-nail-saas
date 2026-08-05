@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Flower, Phone, MessageCircle, Image as ImageIcon } from "lucide-react";
+import { Phone, MessageCircle, Image as ImageIcon } from "lucide-react";
+import { IconoMarca } from "@/components/icono-marca";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { Encabezado } from "@/components/publico/encabezado";
 import { SeccionServicios } from "@/components/publico/seccion-servicios";
@@ -123,7 +124,7 @@ export default async function PaginaNegocio({
       <main className="flex-1">
         {/* Hero */}
         <section className="animar-aparecer flex flex-col items-center gap-6 px-6 py-24 text-center sm:py-32">
-          <Flower className="h-8 w-8 text-rosado-texto" strokeWidth={1.5} />
+          <IconoMarca className="h-8 w-8 text-rosado-texto" />
           <h1 className="font-titulo max-w-2xl text-4xl font-semibold leading-tight text-texto-primario sm:text-5xl">
             {negocio.nombre_negocio}
           </h1>

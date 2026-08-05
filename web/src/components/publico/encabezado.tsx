@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Flower, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { IconoMarca } from "@/components/icono-marca";
 
 export function Encabezado({
   nombreNegocio,
@@ -30,7 +31,7 @@ export function Encabezado({
               className="h-6 w-6 shrink-0 rounded-full object-cover"
             />
           ) : (
-            <Flower className="h-5 w-5 shrink-0 text-rosado-texto" strokeWidth={1.75} />
+            <IconoMarca className="h-5 w-5 shrink-0 text-rosado-texto" />
           )}
           <span className="truncate">{nombreNegocio}</span>
         </span>
