@@ -3,7 +3,13 @@ export type EstadoCuenta = "pendiente" | "aprobada" | "rechazada";
 // Declarado al registrarse: en qué se especializa el negocio, o si ofrece
 // de todo (spa_completo). Informativo — no restringe qué categorías de
 // servicio puede cargar después.
-export type TipoNegocio = "cabello" | "pestañas" | "uñas" | "spa_completo";
+export type TipoNegocio =
+  | "cabello"
+  | "pestañas"
+  | "uñas"
+  | "costura"
+  | "barberia"
+  | "spa_completo";
 
 export interface Negocio {
   id: string;
@@ -18,6 +24,7 @@ export interface Negocio {
   url_instagram: string | null;
   url_tiktok: string | null;
   url_facebook: string | null;
+  tipo_negocio: TipoNegocio;
 }
 
 export interface SesionNegocio {
@@ -42,7 +49,13 @@ export interface ProgramaLealtad {
   lealtad_premio_descripcion: string | null;
 }
 
-export type CategoriaServicio = "cabello" | "pestañas" | "uñas" | "otro";
+export type CategoriaServicio =
+  | "cabello"
+  | "pestañas"
+  | "uñas"
+  | "costura"
+  | "barberia"
+  | "otro";
 
 export interface Personal {
   id: string;

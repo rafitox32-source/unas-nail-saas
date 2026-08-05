@@ -16,8 +16,10 @@ const columnas = "id, nombre, categoria, url_foto, activo";
 
 const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
   cabello: "Cabello",
+  barberia: "Barbería",
   pestañas: "Pestañas",
   uñas: "Uñas",
+  costura: "Costura",
   otro: "Otro",
 };
 

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Phone, MessageCircle, Music2, Image as ImageIcon } from "lucide-react";
 import { IconoMarca } from "@/components/icono-marca";
+import { IconoPosteBarbero, IconoBigote } from "@/components/iconos-barberia";
 import { IconoInstagram, IconoFacebook } from "@/components/iconos-redes";
 import { urlRedSocial } from "@/lib/redes-sociales";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
@@ -17,7 +18,7 @@ async function obtenerNegocio(slug: string) {
   const { data: negocio } = await supabase
     .from("usuarios_negocios")
     .select(
-      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion, url_instagram, url_tiktok, url_facebook",
+      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion, url_instagram, url_tiktok, url_facebook, tipo_negocio",
     )
     .eq("slug_publico", slug)
     .maybeSingle<Negocio>();
@@ -116,22 +117,39 @@ export default async function PaginaNegocio({
   const enlaceFacebook = urlRedSocial("facebook", negocio.url_facebook);
   const tieneRedes = enlaceInstagram || enlaceTiktok || enlaceFacebook;
 
+  // Barbería francesa: tema propio (más rudo/varonil) para negocios de ese
+  // rubro — poste de barbero en vez del isotipo floral, encabezado en
+  // mayúsculas, y un color de acento oscuro por defecto (rojo de barbería)
+  // cuando la dueña todavía no eligió su propio color de marca. Si ya
+  // personalizó un color, ese siempre gana — esto es solo el punto de
+  // partida para una cuenta nueva de barbería.
+  const esBarberia = negocio.tipo_negocio === "barberia";
+  const colorAcento = negocio.color_marca ?? (esBarberia ? "#9c2b2b" : null);
+
   return (
     <div
       className="flex flex-1 flex-col"
-      style={
-        negocio.color_marca
-          ? ({ "--color-rosado": negocio.color_marca } as React.CSSProperties)
-          : undefined
-      }
+      style={colorAcento ? ({ "--color-rosado": colorAcento } as React.CSSProperties) : undefined}
     >
-      <Encabezado nombreNegocio={negocio.nombre_negocio} urlAvatar={negocio.url_avatar} />
+      <Encabezado
+        nombreNegocio={negocio.nombre_negocio}
+        urlAvatar={negocio.url_avatar}
+        esBarberia={esBarberia}
+      />
 
       <main className="flex-1">
         {/* Hero */}
         <section className="animar-aparecer flex flex-col items-center gap-6 px-6 py-24 text-center sm:py-32">
-          <IconoMarca className="h-8 w-8 text-rosado-texto" />
-          <h1 className="font-titulo max-w-2xl text-4xl font-semibold leading-tight text-texto-primario sm:text-5xl">
+          {esBarberia ? (
+            <IconoPosteBarbero className="h-16 w-9" />
+          ) : (
+            <IconoMarca className="h-8 w-8 text-rosado-texto" />
+          )}
+          <h1
+            className={`font-titulo max-w-2xl text-4xl font-semibold leading-tight text-texto-primario sm:text-5xl ${
+              esBarberia ? "uppercase tracking-wide" : ""
+            }`}
+          >
             {negocio.nombre_negocio}
           </h1>
           {negocio.biografia && (
@@ -146,6 +164,17 @@ export default async function PaginaNegocio({
             Ver servicios
           </a>
         </section>
+
+        {esBarberia && (
+          <div
+            aria-hidden="true"
+            className="flex items-center justify-center gap-10 overflow-hidden py-2 text-rosado opacity-20"
+          >
+            {Array.from({ length: 7 }).map((_, i) => (
+              <IconoBigote key={i} className="h-5 w-12 shrink-0" />
+            ))}
+          </div>
+        )}
 
         {/* Servicios */}
         <SeccionServicios

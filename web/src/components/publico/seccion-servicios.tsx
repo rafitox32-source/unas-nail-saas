@@ -1,24 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Scissors, Eye } from "lucide-react";
+import { Sparkles, Scissors, Eye, Shirt } from "lucide-react";
+import { IconoPosteBarbero } from "@/components/iconos-barberia";
 import { TarjetaServicio } from "@/components/publico/tarjeta-servicio";
 import { ModalReserva } from "@/components/publico/modal-reserva";
 import type { Servicio, Personal, CategoriaServicio } from "@/lib/tipos";
 
-const ORDEN_CATEGORIAS: CategoriaServicio[] = ["cabello", "pestañas", "uñas", "otro"];
+const ORDEN_CATEGORIAS: CategoriaServicio[] = [
+  "cabello",
+  "barberia",
+  "pestañas",
+  "uñas",
+  "costura",
+  "otro",
+];
 
 const ETIQUETA_CATEGORIA: Record<CategoriaServicio, string> = {
   cabello: "Cabello",
+  barberia: "Barbería",
   pestañas: "Pestañas",
   uñas: "Uñas",
+  costura: "Costura",
   otro: "Otros servicios",
 };
 
-const ICONO_CATEGORIA: Record<CategoriaServicio, typeof Sparkles> = {
+const ICONO_CATEGORIA: Record<CategoriaServicio, React.ComponentType<{ className?: string }>> = {
   cabello: Scissors,
+  barberia: IconoPosteBarbero,
   pestañas: Eye,
   uñas: Sparkles,
+  costura: Shirt,
   otro: Sparkles,
 };
 
@@ -83,7 +95,7 @@ export function SeccionServicios({
           return (
             <div key={categoria} className="mt-12 first:mt-8">
               <h3 className="flex items-center justify-center gap-2 text-center text-xl font-semibold text-texto-primario">
-                <IconoCategoria className="h-5 w-5 text-rosado-texto" strokeWidth={1.75} />
+                <IconoCategoria className="h-5 w-5 text-rosado-texto" />
                 {ETIQUETA_CATEGORIA[categoria]}
               </h3>
               {grilla(servicios.filter((s) => s.categoria === categoria))}

@@ -1,17 +1,22 @@
-import { Sparkles, Scissors, Eye, User } from "lucide-react";
+import { Sparkles, Scissors, Eye, Shirt, User } from "lucide-react";
+import { IconoPosteBarbero } from "@/components/iconos-barberia";
 import type { Personal, CategoriaServicio } from "@/lib/tipos";
 
 const ETIQUETA_CATEGORIA: Record<CategoriaServicio, string> = {
   cabello: "Cabello",
+  barberia: "Barbería",
   pestañas: "Pestañas",
   uñas: "Uñas",
+  costura: "Costura",
   otro: "Otro",
 };
 
-const ICONO_CATEGORIA: Record<CategoriaServicio, typeof Sparkles> = {
+const ICONO_CATEGORIA: Record<CategoriaServicio, React.ComponentType<{ className?: string }>> = {
   cabello: Scissors,
+  barberia: IconoPosteBarbero,
   pestañas: Eye,
   uñas: Sparkles,
+  costura: Shirt,
   otro: Sparkles,
 };
 

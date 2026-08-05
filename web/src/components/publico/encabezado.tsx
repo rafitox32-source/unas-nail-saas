@@ -3,13 +3,16 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { IconoMarca } from "@/components/icono-marca";
+import { IconoBigote } from "@/components/iconos-barberia";
 
 export function Encabezado({
   nombreNegocio,
   urlAvatar,
+  esBarberia,
 }: {
   nombreNegocio: string;
   urlAvatar?: string | null;
+  esBarberia?: boolean;
 }) {
   const [menuAbierto, setMenuAbierto] = useState(false);
 
@@ -30,6 +33,8 @@ export function Encabezado({
               alt=""
               className="h-6 w-6 shrink-0 rounded-full object-cover"
             />
+          ) : esBarberia ? (
+            <IconoBigote className="h-4 w-7 shrink-0 text-rosado-texto" />
           ) : (
             <IconoMarca className="h-5 w-5 shrink-0 text-rosado-texto" />
           )}

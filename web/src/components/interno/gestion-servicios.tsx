@@ -18,8 +18,10 @@ interface ValoresFormulario {
 
 const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
   cabello: "Cabello",
+  barberia: "Barbería",
   pestañas: "Pestañas",
   uñas: "Uñas",
+  costura: "Costura",
   otro: "Otro",
 };
 
@@ -27,7 +29,13 @@ const ETIQUETAS_CATEGORIA: Record<CategoriaServicio, string> = {
 // equivalente en categoria de servicios — para spa_completo no hay una
 // categoría obvia por defecto, así que cae en "uñas" como el resto.
 function categoriaSugerida(tipoNegocio: TipoNegocio): CategoriaServicio {
-  if (tipoNegocio === "cabello" || tipoNegocio === "pestañas" || tipoNegocio === "uñas") {
+  if (
+    tipoNegocio === "cabello" ||
+    tipoNegocio === "barberia" ||
+    tipoNegocio === "pestañas" ||
+    tipoNegocio === "uñas" ||
+    tipoNegocio === "costura"
+  ) {
     return tipoNegocio;
   }
   return "uñas";
