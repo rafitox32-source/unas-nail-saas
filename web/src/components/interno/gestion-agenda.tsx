@@ -37,7 +37,7 @@ const ESTILO_INSIGNIA: Record<EstadoCita, string> = {
 };
 
 const ETIQUETA_ESTADO: Record<EstadoCita, string> = {
-  pendiente_seña: "Pendiente de seña",
+  pendiente_seña: "Pendiente de abono",
   confirmada: "Confirmada",
   completada: "Completada",
   cancelada: "Cancelada",
@@ -223,7 +223,7 @@ export function GestionAgenda({
                           className="flex items-center gap-1 text-xs font-semibold text-exito transition-colors hover:text-texto-primario"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          Confirmar seña
+                          Confirmar abono
                         </button>
                       )}
                       {cita.estado_cita === "confirmada" && (

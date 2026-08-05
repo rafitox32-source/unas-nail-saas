@@ -17,7 +17,7 @@ export default async function PaginaPanel() {
   const { data: negocio } = await supabase
     .from("usuarios_negocios")
     .select(
-      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion, es_admin, tour_completado",
+      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion, url_instagram, url_tiktok, url_facebook, es_admin, tour_completado",
     )
     .eq("id", usuario!.id)
     .maybeSingle<Negocio & { es_admin: boolean; tour_completado: boolean }>();

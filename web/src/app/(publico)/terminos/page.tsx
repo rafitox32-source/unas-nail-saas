@@ -48,10 +48,10 @@ export default function PaginaTerminos() {
 
         <section>
           <h2 className="font-titulo text-lg font-semibold text-texto-primario">
-            3. Reservas y señas
+            3. Reservas y abonos
           </h2>
           <p className="mt-2">
-            La plataforma no procesa pagos en línea. Cualquier seña o pago asociado a una
+            La plataforma no procesa pagos en línea. Cualquier abono o pago asociado a una
             reserva se coordina directamente entre la clienta y el negocio (por ejemplo, por
             WhatsApp). No somos parte de esa transacción ni responsables por disputas de pago,
             cancelaciones o reembolsos — eso queda a criterio de cada negocio y su propia

@@ -15,6 +15,9 @@ export interface Negocio {
   slug_publico: string | null;
   url_avatar: string | null;
   politica_cancelacion: string | null;
+  url_instagram: string | null;
+  url_tiktok: string | null;
+  url_facebook: string | null;
 }
 
 export interface SesionNegocio {

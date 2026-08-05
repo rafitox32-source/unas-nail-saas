@@ -160,7 +160,7 @@ export function ModalReserva({
 
   const urlWhatsappConfirmacion =
     resultado && urlWhatsapp
-      ? `${urlWhatsapp}%0AServicio: ${encodeURIComponent(servicio.nombre)}%0AFecha: ${fecha} ${hora}%0AAdjunto el comprobante de la seña (${formateadorPrecio.format(resultado.monto_seña)}).`
+      ? `${urlWhatsapp}%0AServicio: ${encodeURIComponent(servicio.nombre)}%0AFecha: ${fecha} ${hora}%0AAdjunto el comprobante del abono (${formateadorPrecio.format(resultado.monto_seña)}).`
       : urlWhatsapp;
 
   return (
@@ -187,14 +187,14 @@ export function ModalReserva({
             <p className="mt-3 text-sm text-texto-secundario">
               {resultado.monto_seña > 0 ? (
                 <>
-                  Quedó pendiente de confirmar la seña de{" "}
+                  Quedó pendiente de confirmar el abono de{" "}
                   <strong className="text-texto-primario">
                     {formateadorPrecio.format(resultado.monto_seña)}
                   </strong>
-                  . Mandá el comprobante para confirmarla.
+                  . Mandá el comprobante para confirmarlo.
                 </>
               ) : (
-                "Este servicio no requiere seña. ¡Te esperamos!"
+                "Este servicio no requiere abono. ¡Te esperamos!"
               )}
             </p>
             {urlWhatsappConfirmacion && (

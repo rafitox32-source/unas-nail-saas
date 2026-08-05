@@ -1,10 +1,10 @@
-import type { LucideIcon } from "lucide-react";
-
 export function CampoConIcono({
   icono: Icono,
   className,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { icono: LucideIcon }) {
+}: React.InputHTMLAttributes<HTMLInputElement> & {
+  icono: React.ComponentType<{ className?: string }>;
+}) {
   return (
     <div className="relative mt-1">
       <Icono className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-texto-secundario" />

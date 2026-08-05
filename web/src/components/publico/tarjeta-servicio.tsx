@@ -20,7 +20,7 @@ export function TarjetaServicio({
         />
         {servicio.monto_seña > 0 && (
           <span className="absolute right-3 top-3 rounded-full bg-superficie/90 px-2.5 py-1 text-xs font-semibold text-texto-primario">
-            Seña {formateadorPrecio.format(servicio.monto_seña)}
+            Abono {formateadorPrecio.format(servicio.monto_seña)}
           </span>
         )}
       </div>

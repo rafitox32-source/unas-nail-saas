@@ -36,7 +36,7 @@ function pasos(slugPublico: string | null): Paso[] {
       icono: Scissors,
       titulo: "Cargá tus servicios",
       texto:
-        "Agregá tus servicios con precio, duración y seña desde la sección \"Servicios\". Sin esto, tus clientas no van a poder reservar.",
+        "Agregá tus servicios con precio, duración y abono desde la sección \"Servicios\". Sin esto, tus clientas no van a poder reservar.",
     },
     {
       icono: Share2,

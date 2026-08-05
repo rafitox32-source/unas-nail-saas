@@ -216,7 +216,7 @@ export function GestionServicios({
               />
             </label>
             <label className="flex-1 text-sm text-texto-secundario">
-              Seña
+              Abono
               <input
                 type="number"
                 min={0}
@@ -310,7 +310,7 @@ export function GestionServicios({
               </p>
               <p className="text-sm text-texto-secundario">
                 {formateadorPrecio.format(servicio.precio)} · {servicio.duracion_minutos} min
-                {servicio.monto_seña > 0 && ` · Seña ${formateadorPrecio.format(servicio.monto_seña)}`}
+                {servicio.monto_seña > 0 && ` · Abono ${formateadorPrecio.format(servicio.monto_seña)}`}
                 {personal.length > 0 &&
                   ` · ${
                     personal.find((p) => p.id === servicio.id_empleado)?.nombre ?? "Sin asignar"

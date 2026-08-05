@@ -21,7 +21,7 @@ const formateadorFecha = new Intl.DateTimeFormat("es-AR", {
 });
 
 const ETIQUETA_ESTADO: Record<EstadoCita, string> = {
-  pendiente_seña: "Pendiente de seña",
+  pendiente_seña: "Pendiente de abono",
   confirmada: "Confirmada",
   completada: "Completada",
   cancelada: "Cancelada",

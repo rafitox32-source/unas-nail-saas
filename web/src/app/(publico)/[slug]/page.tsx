@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Phone, MessageCircle, Image as ImageIcon } from "lucide-react";
+import { Phone, MessageCircle, Music2, Image as ImageIcon } from "lucide-react";
 import { IconoMarca } from "@/components/icono-marca";
+import { IconoInstagram, IconoFacebook } from "@/components/iconos-redes";
+import { urlRedSocial } from "@/lib/redes-sociales";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { Encabezado } from "@/components/publico/encabezado";
 import { SeccionServicios } from "@/components/publico/seccion-servicios";
@@ -15,7 +17,7 @@ async function obtenerNegocio(slug: string) {
   const { data: negocio } = await supabase
     .from("usuarios_negocios")
     .select(
-      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion",
+      "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion, url_instagram, url_tiktok, url_facebook",
     )
     .eq("slug_publico", slug)
     .maybeSingle<Negocio>();
@@ -109,6 +111,10 @@ export default async function PaginaNegocio({
 
   const { negocio, servicios, personal, urlsGaleria, resenas } = datos;
   const enlaceWhatsapp = urlWhatsapp(negocio.telefono, negocio.nombre_negocio);
+  const enlaceInstagram = urlRedSocial("instagram", negocio.url_instagram);
+  const enlaceTiktok = urlRedSocial("tiktok", negocio.url_tiktok);
+  const enlaceFacebook = urlRedSocial("facebook", negocio.url_facebook);
+  const tieneRedes = enlaceInstagram || enlaceTiktok || enlaceFacebook;
 
   return (
     <div
@@ -215,6 +221,50 @@ export default async function PaginaNegocio({
             Escribinos por WhatsApp →
           </a>
         )}
+
+        {tieneRedes && (
+          <div className="mt-6">
+            <p className="text-sm font-semibold text-texto-primario">
+              ¡Seguinos en redes! ✨
+            </p>
+            <div className="mt-3 flex items-center justify-center gap-4">
+              {enlaceInstagram && (
+                <a
+                  href={enlaceInstagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="text-texto-secundario transition-colors hover:text-rosado-texto"
+                >
+                  <IconoInstagram className="h-6 w-6" />
+                </a>
+              )}
+              {enlaceTiktok && (
+                <a
+                  href={enlaceTiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="TikTok"
+                  className="text-texto-secundario transition-colors hover:text-rosado-texto"
+                >
+                  <Music2 className="h-6 w-6" strokeWidth={1.75} />
+                </a>
+              )}
+              {enlaceFacebook && (
+                <a
+                  href={enlaceFacebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="text-texto-secundario transition-colors hover:text-rosado-texto"
+                >
+                  <IconoFacebook className="h-6 w-6" />
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
         <p className="mt-6 flex items-center justify-center gap-3 text-xs text-texto-secundario">
           <a href="/terminos" className="hover:text-rosado-texto hover:underline">
             Términos

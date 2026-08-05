@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2, CheckCircle2, XCircle, ImagePlus, Palette } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, ImagePlus, Palette, Music2 } from "lucide-react";
 import { crearClienteNavegador } from "@/lib/supabase/cliente";
 import { generarSlug } from "@/lib/slug";
+import { CampoConIcono } from "@/components/campo-con-icono";
+import { IconoInstagram, IconoFacebook } from "@/components/iconos-redes";
 import type { Negocio } from "@/lib/tipos";
 
 const COLOR_POR_DEFECTO = "#935060";
@@ -24,6 +26,9 @@ export function ConfiguracionNegocio({ negocio }: { negocio: Negocio }) {
   const [politicaCancelacion, setPoliticaCancelacion] = useState(
     negocio.politica_cancelacion ?? "",
   );
+  const [urlInstagram, setUrlInstagram] = useState(negocio.url_instagram ?? "");
+  const [urlTiktok, setUrlTiktok] = useState(negocio.url_tiktok ?? "");
+  const [urlFacebook, setUrlFacebook] = useState(negocio.url_facebook ?? "");
 
   const [slugDisponible, setSlugDisponible] = useState<boolean | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -71,6 +76,9 @@ export function ConfiguracionNegocio({ negocio }: { negocio: Negocio }) {
         color_marca: colorTocado ? colorMarca : null,
         slug_publico: slug || null,
         politica_cancelacion: politicaCancelacion || null,
+        url_instagram: urlInstagram || null,
+        url_tiktok: urlTiktok || null,
+        url_facebook: urlFacebook || null,
       })
       .eq("id", negocio.id);
 
@@ -249,13 +257,41 @@ export function ConfiguracionNegocio({ negocio }: { negocio: Negocio }) {
         <textarea
           value={politicaCancelacion}
           onChange={(e) => setPoliticaCancelacion(e.target.value)}
-          placeholder="Ej: la seña no es reembolsable si cancelás con menos de 24hs de anticipación."
+          placeholder="Ej: el abono no es reembolsable si cancelás con menos de 24hs de anticipación."
           className="mt-1 w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
         />
         <span className="mt-1 block text-xs text-texto-secundario">
           Se muestra a la clienta antes de confirmar una reserva.
         </span>
       </label>
+
+      <div className="text-sm text-texto-secundario">
+        Redes sociales (opcional)
+        <p className="mt-0.5 text-xs text-texto-secundario">
+          Aparecen en tu página pública, con un "seguime" para que tus clientas te
+          encuentren.
+        </p>
+        <div className="mt-2 flex flex-col gap-2">
+          <CampoConIcono
+            icono={IconoInstagram}
+            value={urlInstagram}
+            onChange={(e) => setUrlInstagram(e.target.value)}
+            placeholder="Instagram — @tu_usuario"
+          />
+          <CampoConIcono
+            icono={Music2}
+            value={urlTiktok}
+            onChange={(e) => setUrlTiktok(e.target.value)}
+            placeholder="TikTok — @tu_usuario"
+          />
+          <CampoConIcono
+            icono={IconoFacebook}
+            value={urlFacebook}
+            onChange={(e) => setUrlFacebook(e.target.value)}
+            placeholder="Facebook — tu página"
+          />
+        </div>
+      </div>
 
       {error && <p className="animar-aparecer text-sm text-alerta">{error}</p>}
 
