@@ -820,6 +820,26 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         comprobante por WhatsApp" aparecía incluso cuando el servicio no
         requería abono (nada que adjuntar) — ahora el CTA y su texto se
         adaptan según si de verdad hay algo que confirmar.
+- [x] **Foto por servicio + rubro odontología**. `servicios.url_foto`
+      (nullable) — mismo bucket público `fotos-galeria` que ya usan el
+      logo del negocio y la galería, ruta
+      `{id_negocio}/servicio-{uuid}-{archivo}`, sin política de Storage
+      nueva (el patrón de carpeta por dueño ya cubre esto). Subida
+      inmediata al elegir el archivo en `gestion-servicios.tsx` (igual
+      que el logo en `configuracion-negocio.tsx`), con miniatura en el
+      formulario y en cada fila de la lista. En la carta pública,
+      `tarjeta-servicio.tsx` muestra la foto real si existe; si no,
+      sigue el placeholder de degradé + ícono de siempre (mismo patrón
+      de fallback que fotos de galería/logo — nunca un estado roto).
+      Odontología: mismo patrón simple que costura/postres, sin tema
+      visual propio. `src/components/icono-diente.tsx` a mano (lucide-
+      react no tiene ningún ícono de diente), mismo estilo de línea que
+      el resto de íconos de categoría — no dos tonos como el poste de
+      barbería, que sí es una marca. Verificado con Playwright de punta
+      a punta (subida real, miniatura en las tres pantallas, agrupación
+      por categoría con Odontología), 0 violaciones axe-core. Foto y
+      servicio de prueba borrados de Storage vía la API después
+      (`storage.objects.remove()`, no SQL directo — trampa #10).
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
