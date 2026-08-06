@@ -212,7 +212,7 @@ export function ModalReserva({
       onClick={alCerrar}
     >
       <div
-        className="animar-hoja-modal w-full max-w-md rounded-t-3xl bg-superficie p-6 shadow-2xl sm:animar-tarjeta-modal sm:rounded-3xl"
+        className="animar-hoja-modal max-h-[90dvh] w-full max-w-md overflow-y-auto overscroll-contain rounded-t-3xl bg-superficie p-6 shadow-2xl sm:animar-tarjeta-modal sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         {resultado ? (
