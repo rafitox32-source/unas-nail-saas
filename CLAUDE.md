@@ -1502,6 +1502,36 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
     y en cualquier prueba con dos actores de Realtime, dejar pasar al
     menos 1-2 segundos después de la acción que dispara el evento antes
     de que el otro actor reaccione, no encadenar acciones inmediatas.
+34. **Un modal tipo "bottom sheet" (`fixed inset-0` + `items-end`, sin
+    `max-height` ni `overflow-y-auto` en la tarjeta) no se recorta
+    visualmente cuando el contenido no entra en la pantalla — se
+    desborda por ARRIBA, fuera del viewport, sin scrollbar y sin que la
+    página de atrás pueda scrollear (está `fixed`).** Le pasó a
+    `modal-reserva.tsx`: el formulario fue creciendo con cada fase de
+    esta sesión (notas del cliente, calendario, horario, método de
+    pago, código promocional, política de cancelación) hasta no entrar
+    en pantallas cortas — y como el modal está anclado abajo
+    (`items-end`, para que se sienta como una hoja que sube desde el
+    borde inferior en mobile), el exceso de altura empujaba el
+    encabezado y "Tus datos" (nombre, teléfono) completamente fuera de
+    la pantalla, sin ninguna forma de volver arriba. Reportado por el
+    dueño ("se ve de la hora para abajo pero la parte alta donde va el
+    nombre ya no se ve"), reproducido con Playwright + `devices['iPhone
+    SE']` (320×568) y `devices['Galaxy S5']` (360×640) antes de tocar
+    código — en `devices['iPhone 13']`/`Pixel 7` (pantallas más altas)
+    no se notaba, por eso pasó inadvertido en las verificaciones
+    anteriores de esta sesión. **Fix**: `max-h-[90dvh] overflow-y-auto
+    overscroll-contain` en la tarjeta del modal (no en el overlay) —
+    `dvh` en vez de `vh` porque en mobile el navegador cambia la altura
+    visible según se muestre u oculte la barra de direcciones, y `vh`
+    se calcula contra la altura máxima, dejando margen de más que en la
+    práctica no existe. **Lección**: cualquier modal fijo de este
+    proyecto que pueda crecer con más campos en el futuro necesita este
+    mismo `max-h` + `overflow-y-auto` desde el principio, no solo
+    cuando ya se nota el corte — `tour-bienvenida.tsx` usa el mismo
+    patrón de overlay pero su contenido es corto y fijo (5 pasos, un
+    ícono y dos líneas de texto cada uno), así que no corre el mismo
+    riesgo y se dejó sin tocar.
 
 ## Pulido 1 — accesibilidad, mobile, contraste
 
