@@ -1081,6 +1081,65 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
         esas portadillas) — mismo tipo de trampa que ya pasó con el
         manual, la lección de "recalcular todos los `pie()` al cambiar
         la estructura" aplica también acá.
+- [x] **Cargo extra al cobrar una cita**: `citas_apartados` gana
+      `cargo_extra_monto`/`cargo_extra_descripcion` (nullable). En
+      "Cobrar resto y completar" (`gestion-agenda.tsx`, ahora con un
+      subcomponente `TarjetaCita` con estado propio por tarjeta en vez
+      de diccionarios en el padre) hay un link "Agregar cargo extra"
+      que abre una mini descripción + monto — se suma a `monto_total` y
+      a `monto_seña_pagado` (se liquida todo junto, igual que antes) en
+      el mismo `UPDATE`. Se ve como insignia dorada en la tarjeta de la
+      agenda y como línea aparte en el recibo (`recibo/[id]/page.tsx`),
+      restando el cargo extra de la línea del servicio para no
+      duplicar el monto. Sin cambios de RPC — es un `UPDATE` directo
+      del panel, mismo patrón que ya usaba `liquidarYCompletar`.
+- [x] **Selector real de profesional al reservar** (reemplaza el truco
+      de duplicar el servicio por cada empleada, ver Fase 2 de spa
+      multi-servicio más arriba): `servicios.id_empleado` (columna
+      vieja, un solo empleado) queda sin usarse en este flujo nuevo
+      pero **no se borra** — evita repetir la auditoría completa de la
+      trampa #32 sobre qué funciones la referencian. La fuente de
+      verdad pasa a ser `servicios.ids_empleados uuid[]` (default
+      `'{}'`, migrado desde `id_empleado` una sola vez). Sin empleadas
+      → sin restricción (como siempre); con una → automático, sin
+      pedirle nada a la clienta (mismo comportamiento de hoy); con dos
+      o más → la clienta ve un paso nuevo "¿Quién te va a atender?" en
+      `modal-reserva.tsx` (entre "Tus datos" y "Elegí el día", con la
+      numeración de los pasos siguientes calculada dinámicamente en vez
+      de hardcodeada) y elige.
+      - `crear_apartado` ganó `p_id_empleado uuid default null` —
+        cambio de firma real, `drop function` + `create function`
+        explícito (trampa #12/#32) porque agregar un parámetro cambia
+        la lista de tipos aunque tenga default. Server-side, si el
+        servicio tiene 2+ empleadas, valida que `p_id_empleado` venga y
+        que sea una de las asignadas (`raise exception 'Elegí quién te
+        va a atender.'` si no) — nunca confía ciegamente en lo que
+        manda el cliente. `horarios_ocupados`/`horarios_ocupados_mes`
+        **no cambiaron** — ya aceptaban `p_id_empleado` desde la Fase 1
+        de spa multi-servicio, solo hizo falta que el frontend les
+        pasara el empleado elegido en vez de `servicio.id_empleado`.
+      - `gestion-servicios.tsx`: el `<select>` de "Profesional
+        (opcional)" pasó a ser un grupo de chips (mismo patrón visual
+        que método de pago) donde se puede tocar más de una — con 2+
+        tocadas, un aviso les dice "la clienta va a poder elegir".
+      - Verificado con una batería de pruebas por RPC directo (más
+        preciso que clickear a ciegas) además de Playwright: mismo
+        horario con dos empleadas distintas del mismo servicio → **no**
+        choca; mismo horario con la misma empleada dos veces → choca;
+        sin elegir empleada en un servicio que la exige → rechazado con
+        el mensaje claro; un servicio sin ninguna empleada asignada
+        sigue reservando exactamente igual que antes (regresión). 0
+        violaciones axe-core en el paso nuevo del modal.
+- [x] **Actividad por profesional en los reportes de ingresos**:
+      extiende `reportes-ingresos.tsx` (Inicio) con una sección nueva
+      —oculta si no hay personal cargado, mismo patrón que el resto del
+      proyecto— que muestra, por cada empleada, cuántas citas completó
+      y cuánto facturó en los últimos 6 meses. `actividadPorEmpleado()`
+      en `reportes.ts`, calcada de `topServiciosPorIngreso()` (mismo
+      archivo, mismo criterio de agregación pura sin JSX). `CitaReporte`
+      ganó `id_empleado`/`personal(nombre)` en el `select` de `/panel`
+      (`page.tsx`), que también empezó a traer la lista de `personal`
+      completa (antes esa página no la necesitaba para nada).
 
 ## Decisiones y trampas (leer antes de tocar auth o RPCs)
 
@@ -1809,11 +1868,13 @@ página al array `paginas`, actualizar el índice (página 2), la lista de
   migraciones aplicadas directo): `horarios_ocupados`, `horarios_ocupados_mes`
   (mismo shape, un mes entero en una sola consulta — pinta el calendario sin
   pedir día por día; ambas aceptan `p_id_empleado` opcional desde la Fase 1
-  de spa multi-servicio, sin usar todavía desde el front — eso es Fase 2),
-  `crear_apartado` (reserva sin exponer INSERT directo a
-  `anon`; acepta `p_codigo_promocional` opcional; valida contra citas reales
-  **y** `bloqueos_agenda`; la colisión de horario se acota a
-  `servicios.id_empleado` cuando el servicio tiene una empleada asignada),
+  de spa multi-servicio), `crear_apartado` (reserva sin exponer INSERT
+  directo a `anon`; acepta `p_codigo_promocional` opcional; valida contra
+  citas reales **y** `bloqueos_agenda`; desde la entrada de Progreso
+  "Selector real de profesional al reservar" también acepta
+  `p_id_empleado uuid default null` — la colisión de horario se resuelve
+  contra `servicios.ids_empleados`, no contra la vieja `servicios.
+  id_empleado`, que quedó sin usar en este flujo pero no se borró),
   `slug_disponible`, `validar_codigo_promocional`,
   `usuario_disponible` (chequeo en vivo del nombre de usuario de login,
   mismo patrón que `slug_disponible`).
