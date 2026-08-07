@@ -6,6 +6,7 @@ import { IconoMarca } from "@/components/icono-marca";
 import { IconoPosteBarbero, IconoBigote } from "@/components/iconos-barberia";
 import { IconoInstagram, IconoFacebook } from "@/components/iconos-redes";
 import { urlRedSocial } from "@/lib/redes-sociales";
+import { generarSlug } from "@/lib/slug";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { Encabezado } from "@/components/publico/encabezado";
 import { SeccionServicios } from "@/components/publico/seccion-servicios";
@@ -16,12 +17,16 @@ import type { Negocio, Servicio, FotoGaleria, ResenaPublica, Personal } from "@/
 async function obtenerNegocio(slug: string) {
   const supabase = await crearClienteServidor();
 
+  // generarSlug() es la misma normalización que ya se aplica al guardar el
+  // slug (minúsculas, sin acentos, sin caracteres raros) — un link
+  // compartido con mayúsculas no puede dar 404 si el slug real existe,
+  // porque Postgres compara texto con distinción de mayúsculas por default.
   const { data: negocio } = await supabase
     .from("usuarios_negocios")
     .select(
       "id, nombre_negocio, nombre_completo, telefono, biografia, color_marca, slug_publico, url_avatar, politica_cancelacion, url_instagram, url_tiktok, url_facebook, tipo_negocio",
     )
-    .eq("slug_publico", slug)
+    .eq("slug_publico", generarSlug(slug))
     .maybeSingle<Negocio>();
 
   if (!negocio) return null;

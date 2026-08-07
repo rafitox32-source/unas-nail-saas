@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IconoBigote } from "@/components/iconos-barberia";
+import { generarSlug } from "@/lib/slug";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { UnirseFila } from "@/components/publico/unirse-fila";
 import type { Negocio } from "@/lib/tipos";
@@ -11,7 +12,7 @@ async function obtenerNegocio(slug: string) {
   const { data: negocio } = await supabase
     .from("usuarios_negocios")
     .select("nombre_negocio, color_marca, tipo_negocio, slug_publico")
-    .eq("slug_publico", slug)
+    .eq("slug_publico", generarSlug(slug))
     .eq("estado_cuenta", "aprobada")
     .maybeSingle<Pick<Negocio, "nombre_negocio" | "color_marca" | "tipo_negocio" | "slug_publico">>();
   return negocio;
@@ -45,20 +46,20 @@ export default async function PaginaFila({
       style={colorAcento ? ({ "--color-rosado": colorAcento } as React.CSSProperties) : undefined}
     >
       <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-8">
-        <Link href={`/${slug}`} className="flex items-center gap-2 text-texto-primario">
+        <Link href={`/${negocio.slug_publico}`} className="flex items-center gap-2 text-texto-primario">
           <IconoBigote className="h-4 w-7 text-rosado-texto" />
           <span className="font-titulo text-lg font-semibold">{negocio.nombre_negocio}</span>
         </Link>
 
         {negocio.tipo_negocio === "barberia" ? (
-          <UnirseFila slugPublico={slug} nombreNegocio={negocio.nombre_negocio} />
+          <UnirseFila slugPublico={negocio.slug_publico!} nombreNegocio={negocio.nombre_negocio} />
         ) : (
           <div className="rounded-3xl border border-borde bg-superficie p-8 text-center shadow-sm">
             <p className="text-sm text-texto-secundario">
               Este negocio no usa fila de espera en vivo — reservá tu turno desde su página.
             </p>
             <Link
-              href={`/${slug}`}
+              href={`/${negocio.slug_publico}`}
               className="mt-4 inline-block text-sm font-semibold text-rosado-texto hover:text-texto-primario"
             >
               Ir a la página de {negocio.nombre_negocio} →
