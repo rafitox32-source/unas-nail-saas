@@ -21,12 +21,13 @@ import { CalendarioDisponibilidad } from "@/components/publico/calendario-dispon
 import { formateadorPrecio } from "@/lib/formato";
 import { generarHorariosDisponibles, hoyISO } from "@/lib/disponibilidad";
 import { ETIQUETA_METODO_PAGO, ICONO_METODO_PAGO, CLASES_METODO_PAGO } from "@/lib/metodo-pago";
-import type { Servicio, RangoOcupado, MetodoPago } from "@/lib/tipos";
+import type { Servicio, RangoOcupado, MetodoPago, Personal } from "@/lib/tipos";
 
 const METODOS_PAGO: MetodoPago[] = ["yape", "plin", "efectivo"];
 
 export function ModalReserva({
   servicio,
+  personal,
   idNegocio,
   nombreNegocio,
   urlWhatsapp,
@@ -34,6 +35,7 @@ export function ModalReserva({
   alCerrar,
 }: {
   servicio: Servicio;
+  personal: Personal[];
   idNegocio: string;
   nombreNegocio: string;
   urlWhatsapp: string | null;
@@ -41,10 +43,15 @@ export function ModalReserva({
   alCerrar: () => void;
 }) {
   const esPorEncargo = servicio.es_por_encargo;
+  const empleadosDelServicio = personal.filter((p) => servicio.ids_empleados.includes(p.id));
+  const requiereElegirProfesional = empleadosDelServicio.length > 1;
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
   const [notasClienta, setNotasClienta] = useState("");
   const [metodoPago, setMetodoPago] = useState<MetodoPago | "">("");
+  const [idEmpleadoSeleccionado, setIdEmpleadoSeleccionado] = useState(
+    empleadosDelServicio.length === 1 ? empleadosDelServicio[0].id : "",
+  );
   const [fecha, setFecha] = useState(hoyISO());
   const [hora, setHora] = useState("");
   const [horariosOcupados, setHorariosOcupados] = useState<RangoOcupado[]>([]);
@@ -58,7 +65,10 @@ export function ModalReserva({
   const [validandoPromo, setValidandoPromo] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [seccionConError, setSeccionConError] = useState<"hora" | "metodoPago" | null>(null);
+  const [seccionConError, setSeccionConError] = useState<
+    "profesional" | "hora" | "metodoPago" | null
+  >(null);
+  const refProfesional = useRef<HTMLDivElement>(null);
   const refHorario = useRef<HTMLDivElement>(null);
   const refMetodoPago = useRef<HTMLDivElement>(null);
   const [resultado, setResultado] = useState<{
@@ -77,7 +87,7 @@ export function ModalReserva({
       .rpc("horarios_ocupados", {
         p_id_negocio: idNegocio,
         p_fecha: fecha,
-        p_id_empleado: servicio.id_empleado,
+        p_id_empleado: idEmpleadoSeleccionado || null,
       })
       .then(({ data }) => {
         if (cancelado) return;
@@ -87,7 +97,7 @@ export function ModalReserva({
     return () => {
       cancelado = true;
     };
-  }, [fecha, idNegocio, servicio.id_empleado]);
+  }, [fecha, idNegocio, idEmpleadoSeleccionado]);
 
   useEffect(() => {
     const codigo = codigoPromocional.trim();
@@ -136,16 +146,22 @@ export function ModalReserva({
     return Math.max(0, servicio.precio - Math.min(descuento, servicio.precio));
   })();
 
-  function irAError(seccion: "hora" | "metodoPago", mensaje: string) {
+  function irAError(seccion: "profesional" | "hora" | "metodoPago", mensaje: string) {
     setError(mensaje);
     setSeccionConError(seccion);
-    const ref = seccion === "hora" ? refHorario : refMetodoPago;
+    const ref =
+      seccion === "profesional" ? refProfesional : seccion === "hora" ? refHorario : refMetodoPago;
     ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   async function alEnviar(evento: React.FormEvent) {
     evento.preventDefault();
     setError(null);
+
+    if (requiereElegirProfesional && !idEmpleadoSeleccionado) {
+      irAError("profesional", "Te faltó elegir quién te va a atender — mirá arriba ↑");
+      return;
+    }
 
     if (!esPorEncargo && !hora) {
       irAError("hora", "Te faltó elegir un horario — mirá arriba ↑");
@@ -173,6 +189,7 @@ export function ModalReserva({
         p_codigo_promocional: codigoPromocional.trim() || null,
         p_metodo_pago: metodoPago,
         p_notas_clienta: notasClienta.trim() || null,
+        p_id_empleado: idEmpleadoSeleccionado || null,
       })
       .single();
 
@@ -195,6 +212,10 @@ export function ModalReserva({
       }),
     }).catch(() => {});
   }
+
+  const numPasoFecha = requiereElegirProfesional ? 3 : 2;
+  const numPasoHorario = numPasoFecha + 1;
+  const numPasoMetodoPago = esPorEncargo ? numPasoFecha + 1 : numPasoHorario + 1;
 
   const esEfectivo = metodoPago === "efectivo";
   const requiereComprobante = resultado != null && resultado.monto_seña > 0 && !esEfectivo;
@@ -334,11 +355,48 @@ export function ModalReserva({
                 </div>
               </div>
 
+              {requiereElegirProfesional && (
+                <div
+                  ref={refProfesional}
+                  className={`rounded-xl transition-shadow ${
+                    seccionConError === "profesional"
+                      ? "animar-aparecer ring-2 ring-alerta ring-offset-2"
+                      : ""
+                  }`}
+                >
+                  <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
+                      2
+                    </span>
+                    <User className="h-3.5 w-3.5 text-texto-secundario" /> ¿Quién te va a atender?
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2 pl-7">
+                    {empleadosDelServicio.map((empleada) => (
+                      <button
+                        key={empleada.id}
+                        type="button"
+                        onClick={() => {
+                          setIdEmpleadoSeleccionado(empleada.id);
+                          setSeccionConError(null);
+                        }}
+                        className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+                          idEmpleadoSeleccionado === empleada.id
+                            ? "border-rosado bg-rosado text-white"
+                            : "border-borde bg-fondo text-texto-primario hover:border-rosado"
+                        }`}
+                      >
+                        {empleada.nombre}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {esPorEncargo ? (
                 <div>
                   <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
-                      2
+                      {numPasoFecha}
                     </span>
                     <Package className="h-3.5 w-3.5 text-texto-secundario" /> ¿Para cuándo lo
                     necesitás?
@@ -363,14 +421,14 @@ export function ModalReserva({
                   <div>
                     <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
-                        2
+                        {numPasoFecha}
                       </span>
                       Elegí el día
                     </p>
                     <div className="mt-2 rounded-xl border border-borde bg-fondo p-3 pl-3">
                       <CalendarioDisponibilidad
                         idNegocio={idNegocio}
-                        idEmpleado={servicio.id_empleado}
+                        idEmpleado={idEmpleadoSeleccionado || null}
                         duracionMinutos={servicio.duracion_minutos}
                         fechaSeleccionada={fecha}
                         onSeleccionar={setFecha}
@@ -386,7 +444,7 @@ export function ModalReserva({
                   >
                     <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
-                        3
+                        {numPasoHorario}
                       </span>
                       <Clock className="h-3.5 w-3.5 text-texto-secundario" /> Elegí el horario
                     </p>
@@ -433,7 +491,7 @@ export function ModalReserva({
               >
                 <p className="flex items-center gap-2 text-sm font-semibold text-texto-primario">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rosado text-[11px] font-bold text-white">
-                    {esPorEncargo ? 3 : 4}
+                    {numPasoMetodoPago}
                   </span>
                   <Wallet className="h-3.5 w-3.5 text-texto-secundario" /> ¿Cómo vas a pagar?
                 </p>

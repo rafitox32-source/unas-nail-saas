@@ -83,6 +83,7 @@ export interface Servicio {
   monto_seña: number;
   categoria: CategoriaServicio;
   id_empleado: string | null;
+  ids_empleados: string[];
   url_foto: string | null;
   dias_para_retoque: number | null;
   es_por_encargo: boolean;
@@ -124,6 +125,8 @@ export interface CitaAgenda {
   id_empleado: string | null;
   metodo_pago: MetodoPago | null;
   notas_clienta: string | null;
+  cargo_extra_monto: number | null;
+  cargo_extra_descripcion: string | null;
   clientas: { nombre_completo: string; telefono: string | null } | null;
   servicios: { nombre: string } | null;
   personal: { nombre: string } | null;
@@ -152,7 +155,9 @@ export interface CitaHistorial {
 export interface CitaReporte {
   monto_total: number;
   fecha_hora_inicio: string;
+  id_empleado: string | null;
   servicios: { nombre: string } | null;
+  personal: { nombre: string } | null;
 }
 
 export interface ResenaAdmin {
@@ -199,6 +204,8 @@ export interface ReciboDatos {
   monto_total: number;
   monto_seña_pagado: number;
   metodo_pago: MetodoPago | null;
+  cargo_extra_monto: number | null;
+  cargo_extra_descripcion: string | null;
   clientas: { nombre_completo: string; telefono: string | null } | null;
   servicios: { nombre: string } | null;
   usuarios_negocios: { nombre_negocio: string; telefono: string | null } | null;

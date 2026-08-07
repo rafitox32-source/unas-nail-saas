@@ -19,8 +19,9 @@ async function obtenerNegocio(slug: string) {
 
   // generarSlug() es la misma normalización que ya se aplica al guardar el
   // slug (minúsculas, sin acentos, sin caracteres raros) — un link
-  // compartido con mayúsculas no puede dar 404 si el slug real existe,
-  // porque Postgres compara texto con distinción de mayúsculas por default.
+  // compartido con mayúsculas o un typo de acento no puede dar 404 si el
+  // slug real existe, porque Postgres compara texto con distinción de
+  // mayúsculas por default.
   const { data: negocio } = await supabase
     .from("usuarios_negocios")
     .select(
@@ -33,7 +34,7 @@ async function obtenerNegocio(slug: string) {
 
   const { data: servicios } = await supabase
     .from("servicios")
-    .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, url_foto, dias_para_retoque, es_por_encargo")
+    .select("id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, ids_empleados, url_foto, dias_para_retoque, es_por_encargo")
     .eq("id_negocio", negocio.id)
     .eq("activo", true)
     .order("precio", { ascending: true })

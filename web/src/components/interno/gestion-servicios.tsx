@@ -13,7 +13,7 @@ interface ValoresFormulario {
   duracion_minutos: string;
   monto_seña: string;
   categoria: CategoriaServicio;
-  id_empleado: string;
+  ids_empleados: string[];
   url_foto: string;
   dias_para_retoque: string;
   es_por_encargo: boolean;
@@ -49,7 +49,7 @@ function categoriaSugerida(tipoNegocio: TipoNegocio): CategoriaServicio {
 }
 
 const columnas =
-  "id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, url_foto, dias_para_retoque, es_por_encargo, activo";
+  "id, nombre, descripcion, precio, duracion_minutos, monto_seña, categoria, id_empleado, ids_empleados, url_foto, dias_para_retoque, es_por_encargo, activo";
 
 export function GestionServicios({
   idNegocio,
@@ -69,7 +69,7 @@ export function GestionServicios({
     duracion_minutos: "",
     monto_seña: "",
     categoria: categoriaSugerida(tipoNegocio),
-    id_empleado: "",
+    ids_empleados: [],
     url_foto: "",
     dias_para_retoque: "",
     es_por_encargo: false,
@@ -99,7 +99,7 @@ export function GestionServicios({
       duracion_minutos: String(servicio.duracion_minutos),
       monto_seña: String(servicio.monto_seña),
       categoria: servicio.categoria,
-      id_empleado: servicio.id_empleado ?? "",
+      ids_empleados: servicio.ids_empleados ?? [],
       url_foto: servicio.url_foto ?? "",
       dias_para_retoque: servicio.dias_para_retoque ? String(servicio.dias_para_retoque) : "",
       es_por_encargo: servicio.es_por_encargo,
@@ -142,7 +142,7 @@ export function GestionServicios({
       duracion_minutos: Number(valores.duracion_minutos),
       monto_seña: Number(valores.monto_seña || 0),
       categoria: valores.categoria,
-      id_empleado: valores.id_empleado || null,
+      ids_empleados: valores.ids_empleados,
       url_foto: valores.url_foto || null,
       dias_para_retoque: valores.dias_para_retoque ? Number(valores.dias_para_retoque) : null,
       es_por_encargo: valores.es_por_encargo,
@@ -201,6 +201,23 @@ export function GestionServicios({
     if (!errorBorrar) {
       setServicios((actual) => actual.filter((s) => s.id !== servicio.id));
     }
+  }
+
+  function alternarEmpleado(idEmpleado: string) {
+    setValores((actual) => ({
+      ...actual,
+      ids_empleados: actual.ids_empleados.includes(idEmpleado)
+        ? actual.ids_empleados.filter((id) => id !== idEmpleado)
+        : [...actual.ids_empleados, idEmpleado],
+    }));
+  }
+
+  function nombresEmpleados(servicio: ServicioAdmin) {
+    if (servicio.ids_empleados.length === 0) return "Sin asignar";
+    if (servicio.ids_empleados.length === 1) {
+      return personal.find((p) => p.id === servicio.ids_empleados[0])?.nombre ?? "Sin asignar";
+    }
+    return `${servicio.ids_empleados.length} profesionales — la clienta elige`;
   }
 
   return (
@@ -333,24 +350,37 @@ export function GestionServicios({
                 ))}
               </select>
             </label>
-            {personal.length > 0 && (
-              <label className="flex-1 text-sm text-texto-secundario">
-                Profesional (opcional)
-                <select
-                  value={valores.id_empleado}
-                  onChange={(e) => setValores({ ...valores, id_empleado: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-borde bg-fondo px-4 py-2.5 text-texto-primario transition-colors focus:border-rosado focus:outline-none"
-                >
-                  <option value="">Sin asignar</option>
-                  {personal.map((persona) => (
-                    <option key={persona.id} value={persona.id}>
-                      {persona.nombre}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
           </div>
+
+          {personal.length > 0 && (
+            <div className="text-sm text-texto-secundario">
+              Profesionales que ofrecen este servicio (opcional)
+              <div className="mt-1.5 flex flex-wrap gap-2">
+                {personal.map((persona) => {
+                  const seleccionada = valores.ids_empleados.includes(persona.id);
+                  return (
+                    <button
+                      key={persona.id}
+                      type="button"
+                      onClick={() => alternarEmpleado(persona.id)}
+                      className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                        seleccionada
+                          ? "border-rosado bg-rosado text-white"
+                          : "border-borde bg-fondo text-texto-primario hover:border-rosado"
+                      }`}
+                    >
+                      {persona.nombre}
+                    </button>
+                  );
+                })}
+              </div>
+              {valores.ids_empleados.length > 1 && (
+                <p className="mt-1.5 text-xs text-texto-secundario">
+                  Con más de una elegida, la clienta va a poder elegir quién la atienda al reservar.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="flex flex-col gap-3 rounded-xl border border-borde bg-fondo p-4">
             <label className="flex items-start gap-2 text-sm text-texto-secundario">
@@ -449,10 +479,7 @@ export function GestionServicios({
                   {!servicio.es_por_encargo && ` · ${servicio.duracion_minutos} min`}
                   {servicio.monto_seña > 0 && ` · Abono ${formateadorPrecio.format(servicio.monto_seña)}`}
                   {servicio.dias_para_retoque && ` · Retoque a los ${servicio.dias_para_retoque}d`}
-                  {personal.length > 0 &&
-                    ` · ${
-                      personal.find((p) => p.id === servicio.id_empleado)?.nombre ?? "Sin asignar"
-                    }`}
+                  {personal.length > 0 && ` · ${nombresEmpleados(servicio)}`}
                 </p>
               </div>
             </div>

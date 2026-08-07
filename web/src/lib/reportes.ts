@@ -48,3 +48,22 @@ export function topServiciosPorIngreso(citas: CitaReporte[], top = 5): ServicioI
   }
   return [...mapa.values()].sort((a, b) => b.total - a.total).slice(0, top);
 }
+
+export interface ActividadEmpleado {
+  nombre: string;
+  total: number;
+  citas: number;
+}
+
+export function actividadPorEmpleado(citas: CitaReporte[]): ActividadEmpleado[] {
+  const mapa = new Map<string, ActividadEmpleado>();
+  for (const cita of citas) {
+    if (!cita.id_empleado) continue;
+    const nombre = cita.personal?.nombre ?? "Sin nombre";
+    const actual = mapa.get(cita.id_empleado) ?? { nombre, total: 0, citas: 0 };
+    actual.total += cita.monto_total;
+    actual.citas += 1;
+    mapa.set(cita.id_empleado, actual);
+  }
+  return [...mapa.values()].sort((a, b) => b.total - a.total);
+}

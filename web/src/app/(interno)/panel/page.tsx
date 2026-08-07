@@ -6,7 +6,7 @@ import { ReportesIngresos } from "@/components/interno/reportes-ingresos";
 import { TourBienvenida } from "@/components/interno/tour-bienvenida";
 import { BotonInstalarApp } from "@/components/interno/boton-instalar-app";
 import { EnlacePublico } from "@/components/interno/enlace-publico";
-import type { Negocio, CitaReporte } from "@/lib/tipos";
+import type { Negocio, CitaReporte, Personal } from "@/lib/tipos";
 
 export default async function PaginaPanel() {
   const supabase = await crearClienteServidor();
@@ -39,6 +39,7 @@ export default async function PaginaPanel() {
     { count: proximasCitas },
     { data: insumos },
     { data: citasCompletadas },
+    { data: personal },
   ] = await Promise.all([
     supabase.from("clientas").select("id", { count: "exact", head: true }),
     supabase
@@ -48,10 +49,14 @@ export default async function PaginaPanel() {
     supabase.from("inventario").select("cantidad_actual, cantidad_minima_alerta"),
     supabase
       .from("citas_apartados")
-      .select("monto_total, fecha_hora_inicio, servicios(nombre)")
+      .select("monto_total, fecha_hora_inicio, id_empleado, servicios(nombre), personal(nombre)")
       .eq("estado_cita", "completada")
       .gte("fecha_hora_inicio", seisMesesAtras.toISOString())
       .returns<CitaReporte[]>(),
+    supabase
+      .from("personal")
+      .select("id, nombre, categoria, url_foto, activo")
+      .returns<Personal[]>(),
   ]);
 
   const insumosBajos =
@@ -110,7 +115,7 @@ export default async function PaginaPanel() {
           })}
         </div>
 
-        <ReportesIngresos citas={citasCompletadas ?? []} />
+        <ReportesIngresos citas={citasCompletadas ?? []} personal={personal ?? []} />
 
         {negocio?.es_admin && (
           <Link

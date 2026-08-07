@@ -58,9 +58,9 @@ export function SeccionServicios({
 }) {
   const [servicioSeleccionado, setServicioSeleccionado] = useState<Servicio | null>(null);
 
-  function nombreDe(idEmpleado: string | null) {
-    if (!idEmpleado) return null;
-    return personal.find((p) => p.id === idEmpleado)?.nombre ?? null;
+  function nombreDe(idsEmpleados: string[]) {
+    if (idsEmpleados.length !== 1) return null;
+    return personal.find((p) => p.id === idsEmpleados[0])?.nombre ?? null;
   }
 
   const categoriasPresentes = ORDEN_CATEGORIAS.filter((cat) =>
@@ -77,7 +77,7 @@ export function SeccionServicios({
           <TarjetaServicio
             key={servicio.id}
             servicio={servicio}
-            nombreEmpleado={nombreDe(servicio.id_empleado)}
+            nombreEmpleado={nombreDe(servicio.ids_empleados)}
             onReservar={() => setServicioSeleccionado(servicio)}
           />
         ))}
@@ -116,6 +116,7 @@ export function SeccionServicios({
       {servicioSeleccionado && (
         <ModalReserva
           servicio={servicioSeleccionado}
+          personal={personal}
           idNegocio={idNegocio}
           nombreNegocio={nombreNegocio}
           urlWhatsapp={urlWhatsapp}

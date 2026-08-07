@@ -1532,6 +1532,37 @@ Este archivo es el checkpoint del proyecto. Antes de tocar algo, leer la secció
     patrón de overlay pero su contenido es corto y fijo (5 pasos, un
     ícono y dos líneas de texto cada uno), así que no corre el mismo
     riesgo y se dejó sin tocar.
+35. **Tres políticas RLS de "lectura pública" (`usuarios_negocios`,
+    `servicios`, `fotos_galeria`) estaban otorgadas solo al rol `anon`,
+    sin incluir `authenticated`** — un bug real en producción, no
+    cosmético: cualquier persona con sesión activa en la plataforma
+    (la dueña de cualquier negocio, incluida la suya propia en el mismo
+    navegador donde ya estaba logueada, o un admin) que visitara una
+    carta pública se quedaba sin ver el negocio, sus servicios o sus
+    fotos — porque Postgres evalúa el rol real de la conexión, y
+    `authenticated` no coincidía con ninguna política de esas tres.
+    Un visitante sin cuenta (rol `anon`) nunca lo notaba, lo cual hizo
+    que pasara inadvertido durante toda la sesión: cada verificación de
+    "carta pública" de este proyecto se hizo con Playwright en un
+    contexto de navegador limpio (sin sesión), el equivalente exacto al
+    caso que sí funcionaba. `personal` y `resenas` sí tenían el rol
+    `authenticated` incluido desde que se crearon — es decir, el patrón
+    correcto ya existía en el proyecto, solo que no se aplicó parejo a
+    las tres tablas más viejas. Reportado por el dueño como "a mí no me
+    carga desde el celular pero a otra persona sí" — la pista real
+    (que ese "otra persona" no tenía cuenta, y él sí estaba logueado)
+    tardó dos mensajes en aparecer. **Fix**: `alter policy <nombre> on
+    <tabla> to anon, authenticated;` — no hace falta recrear la
+    política, solo ampliar a qué roles aplica. **Cómo se verificó**:
+    no alcanza con probar en una pestaña anónima — hay que loguearse
+    con una cuenta real (Playwright, sesión completa) y, sin cerrarla,
+    visitar la carta pública de OTRO negocio; recién ahí se reproduce
+    el bug. **Lección**: toda política "público ve X" nueva tiene que
+    declararse `to anon, authenticated` desde el vamos (aun si hoy
+    nadie logueado visita esa carta pública, alguien lo va a hacer
+    tarde o temprano), y toda auditoría de cartas públicas de acá en
+    adelante debería incluir al menos una pasada con sesión activa, no
+    solo en modo anónimo.
 
 ## Pulido 1 — accesibilidad, mobile, contraste
 

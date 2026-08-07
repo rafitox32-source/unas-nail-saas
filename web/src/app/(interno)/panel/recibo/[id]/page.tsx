@@ -24,7 +24,7 @@ export default async function PaginaRecibo({
   const { data: cita } = await supabase
     .from("citas_apartados")
     .select(
-      "id, fecha_hora_inicio, monto_total, monto_seña_pagado, metodo_pago, clientas(nombre_completo, telefono), servicios(nombre), usuarios_negocios(nombre_negocio, telefono)",
+      "id, fecha_hora_inicio, monto_total, monto_seña_pagado, metodo_pago, cargo_extra_monto, cargo_extra_descripcion, clientas(nombre_completo, telefono), servicios(nombre), usuarios_negocios(nombre_negocio, telefono)",
     )
     .eq("id", id)
     .maybeSingle<ReciboDatos>();
@@ -69,9 +69,17 @@ export default async function PaginaRecibo({
           <div className="flex items-start justify-between gap-3 text-sm">
             <span className="text-texto-primario">{cita.servicios?.nombre}</span>
             <span className="shrink-0 text-texto-primario">
-              {formateadorPrecio.format(cita.monto_total)}
+              {formateadorPrecio.format(cita.monto_total - (cita.cargo_extra_monto ?? 0))}
             </span>
           </div>
+          {cita.cargo_extra_monto && cita.cargo_extra_monto > 0 && (
+            <div className="mt-2 flex items-start justify-between gap-3 text-sm">
+              <span className="text-texto-primario">{cita.cargo_extra_descripcion}</span>
+              <span className="shrink-0 text-texto-primario">
+                {formateadorPrecio.format(cita.cargo_extra_monto)}
+              </span>
+            </div>
+          )}
           <div className="mt-3 flex items-center justify-between gap-3 border-t border-borde pt-3 font-semibold">
             <span className="text-texto-primario">Total pagado</span>
             <span className="shrink-0 text-dorado">

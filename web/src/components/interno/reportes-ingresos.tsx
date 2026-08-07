@@ -1,9 +1,15 @@
-import { TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
+import { TrendingUp, TrendingDown, BarChart3, Users } from "lucide-react";
 import { formateadorPrecio } from "@/lib/formato";
-import { ingresosPorMes, topServiciosPorIngreso } from "@/lib/reportes";
-import type { CitaReporte } from "@/lib/tipos";
+import { ingresosPorMes, topServiciosPorIngreso, actividadPorEmpleado } from "@/lib/reportes";
+import type { CitaReporte, Personal } from "@/lib/tipos";
 
-export function ReportesIngresos({ citas }: { citas: CitaReporte[] }) {
+export function ReportesIngresos({
+  citas,
+  personal,
+}: {
+  citas: CitaReporte[];
+  personal: Personal[];
+}) {
   if (citas.length === 0) {
     return (
       <div className="mt-6 flex flex-col items-center gap-2 rounded-2xl border border-borde bg-superficie p-8 text-center shadow-sm">
@@ -18,8 +24,10 @@ export function ReportesIngresos({ citas }: { citas: CitaReporte[] }) {
 
   const meses = ingresosPorMes(citas);
   const servicios = topServiciosPorIngreso(citas);
+  const actividad = actividadPorEmpleado(citas);
   const maxMes = Math.max(1, ...meses.map((m) => m.total));
   const maxServicio = Math.max(1, ...servicios.map((s) => s.total));
+  const maxActividad = Math.max(1, ...actividad.map((a) => a.total));
 
   const totalEsteMes = meses[meses.length - 1]?.total ?? 0;
   const totalMesAnterior = meses[meses.length - 2]?.total ?? 0;
@@ -87,6 +95,32 @@ export function ReportesIngresos({ citas }: { citas: CitaReporte[] }) {
                 <div
                   className="h-full rounded-full bg-rosado"
                   style={{ width: `${(s.total / maxServicio) * 100}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {personal.length > 0 && actividad.length > 0 && (
+        <div className="mt-2 flex flex-col gap-2 border-t border-borde pt-4">
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-texto-secundario">
+            <Users className="h-3.5 w-3.5" /> Actividad por profesional
+          </p>
+          {actividad.map((a) => (
+            <div key={a.nombre} className="flex flex-col gap-1">
+              <div className="flex items-center justify-between gap-3 text-xs">
+                <span className="min-w-0 truncate text-texto-primario">
+                  {a.nombre} · {a.citas} cita{a.citas === 1 ? "" : "s"}
+                </span>
+                <span className="shrink-0 font-semibold text-texto-primario">
+                  {formateadorPrecio.format(a.total)}
+                </span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-dorado-suave">
+                <div
+                  className="h-full rounded-full bg-dorado"
+                  style={{ width: `${(a.total / maxActividad) * 100}%` }}
                 />
               </div>
             </div>
